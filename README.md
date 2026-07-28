@@ -106,26 +106,6 @@ All under `rawImageViewer.`: `defaultFormat`, `defaultWidth`, `defaultHeight`,
 `defaultOffset`, `defaultLittleEndian`, `defaultAlphaMode`, `background`,
 `tileSize`, `maxFileSizeMB` (default 64), `galleryIncludeGlob`.
 
-## Containers
-
-The **Container** dropdown unwraps compressed or wrapped payloads before the
-pixel decoder runs. Currently:
-
-- **raw buffer** — no unwrapping, what you want almost always.
-- **.imag RLE (experimental)** — the working hypothesis for the `.imag` sprite
-  format this repository is reverse-engineering: 24-byte header, `u16` LE
-  width/height, then a run-length stream of 16-bit pixels where a control byte
-  below `0x80` introduces `c + 1` literal pixels and anything else is a
-  transparent run of `(c & 0x7F) + 1`.
-
-  **This hypothesis does not reconstruct the sample sprites** — it produces
-  structured noise, so the real encoding differs. It is wired up as a starting
-  point for further work, not as a working decoder. Everything else in the
-  extension is independent of it.
-
-Adding a container is a single function in `src/common/decode.ts` returning
-`{ data, width?, height? }`, plus an `<option>` in the toolbar.
-
 ## Layout
 
 ```
