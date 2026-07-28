@@ -103,7 +103,7 @@
       },
       {
         "command": "rawImageViewer.openGallery",
-        "title": "Open Gallery (Raw Images)",
+        "title": "Open as Raw Image Gallery",
         "category": "Raw Image"
       },
       {
