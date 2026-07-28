@@ -74,7 +74,6 @@ const ui = {
   alpha: el<HTMLSelectElement>('alpha'),
   unpremul: el<HTMLInputElement>('unpremul'),
   flipy: el<HTMLInputElement>('flipy'),
-  container: el<HTMLSelectElement>('container'),
   header: el<HTMLSelectElement>('header'),
   background: el<HTMLSelectElement>('background'),
   zoomOut: el<HTMLButtonElement>('zoom-out'),
@@ -129,7 +128,7 @@ function formatBytes(n: number): string {
 
 /** Cache key for the container-unwrap step; only these fields affect it. */
 function preparedKeyFor(o: DecodeOptions): string {
-  return [o.container, o.headerPreset, o.format, o.width, o.height, o.offset, o.stride].join('|');
+  return [o.headerPreset, o.format, o.width, o.height, o.offset, o.stride].join('|');
 }
 
 function preparedFor(entry: Entry): Prepared | null {
@@ -187,7 +186,6 @@ function readOptionsFromUi(): DecodeOptions {
     alphaMode: ui.alpha.value === 'ignore' ? 'ignore' : 'use',
     unpremultiply: ui.unpremul.checked,
     flipY: ui.flipy.checked,
-    container: ui.container.value as DecodeOptions['container'],
     headerPreset: ui.header.value as DecodeOptions['headerPreset'],
   };
 }
@@ -203,7 +201,6 @@ function applyOptionsToUi(): void {
   ui.alpha.value = options.alphaMode;
   ui.unpremul.checked = options.unpremultiply;
   ui.flipy.checked = options.flipY;
-  ui.container.value = options.container;
   ui.header.value = options.headerPreset;
   ui.background.value = settings.background;
   ui.tileSize.value = String(settings.tileSize);
@@ -218,7 +215,8 @@ function updateControlAvailability(): void {
   ui.alpha.disabled = !format.hasAlpha;
 
   // A container that carries its own geometry makes the manual fields moot.
-  const geometryLocked = options.container !== 'none' || options.headerPreset !== 'none';
+  const geometryLocked = options.headerPreset !== 'none';
+
   ui.width.disabled = geometryLocked;
   ui.height.disabled = geometryLocked;
   ui.guess.disabled = geometryLocked;
@@ -588,7 +586,6 @@ for (const control of [
   ui.endian,
   ui.bitorder,
   ui.alpha,
-  ui.container,
   ui.header,
 ]) {
   control.addEventListener('change', () => {
