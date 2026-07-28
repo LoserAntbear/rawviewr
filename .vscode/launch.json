@@ -6,10 +6,10 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/extension",
-        "${workspaceFolder}/extension/samples"
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/samples"
       ],
-      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": "npm: build - extension"
     }
   ]

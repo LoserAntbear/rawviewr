@@ -4,7 +4,6 @@
     {
       "type": "npm",
       "script": "build",
-      "path": "extension",
       "group": "build",
       "problemMatcher": "$esbuild",
       "label": "npm: build - extension"
