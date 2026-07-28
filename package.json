@@ -1,0 +1,306 @@
+{
+  "name": "raw-image-viewer",
+  "displayName": "Raw Image Viewer",
+  "description": "View raw / headerless image buffers (framebuffer dumps, sprite blobs, byte arrays) with switchable pixel formats, manual geometry and a multi-image gallery.",
+  "version": "0.1.0",
+  "publisher": "romandyro",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "raw",
+    "framebuffer",
+    "rgba4444",
+    "rgb565",
+    "hex",
+    "binary",
+    "image"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "rawImageViewer.editor",
+        "displayName": "Raw Image Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.raw"
+          },
+          {
+            "filenamePattern": "*.imag"
+          },
+          {
+            "filenamePattern": "*.fb"
+          },
+          {
+            "filenamePattern": "*.rgb"
+          },
+          {
+            "filenamePattern": "*.rgba"
+          },
+          {
+            "filenamePattern": "*.bgra"
+          },
+          {
+            "filenamePattern": "*.argb"
+          },
+          {
+            "filenamePattern": "*.565"
+          },
+          {
+            "filenamePattern": "*.4444"
+          },
+          {
+            "filenamePattern": "*.gray"
+          },
+          {
+            "filenamePattern": "*.pix"
+          },
+          {
+            "filenamePattern": "*.tex"
+          }
+        ],
+        "priority": "default"
+      },
+      {
+        "viewType": "rawImageViewer.editor.optional",
+        "displayName": "Raw Image Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.bin"
+          },
+          {
+            "filenamePattern": "*.dat"
+          },
+          {
+            "filenamePattern": "*.data"
+          },
+          {
+            "filenamePattern": "*.dump"
+          },
+          {
+            "filenamePattern": "*.img"
+          },
+          {
+            "filenamePattern": "*"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "rawImageViewer.open",
+        "title": "Open in Raw Image Viewer",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.openGallery",
+        "title": "Open Gallery (Raw Images)",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.openFolderGallery",
+        "title": "Open Folder as Raw Image Gallery",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.exportPng",
+        "title": "Export Decoded Image as PNG",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.resetSettings",
+        "title": "Reset Remembered Decode Settings",
+        "category": "Raw Image"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "rawImageViewer.open",
+          "group": "3_rawimage@1",
+          "when": "!explorerResourceIsFolder"
+        },
+        {
+          "command": "rawImageViewer.openGallery",
+          "group": "3_rawimage@2",
+          "when": "!explorerResourceIsFolder"
+        },
+        {
+          "command": "rawImageViewer.openFolderGallery",
+          "group": "3_rawimage@2",
+          "when": "explorerResourceIsFolder"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "rawImageViewer.exportPng",
+          "when": "rawImageViewer.activeViewer"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Raw Image Viewer",
+      "properties": {
+        "rawImageViewer.defaultFormat": {
+          "type": "string",
+          "default": "rgba4444",
+          "enum": [
+            "rgba4444",
+            "argb4444",
+            "abgr4444",
+            "bgra4444",
+            "rgbx4444",
+            "xrgb4444",
+            "rgb565",
+            "bgr565",
+            "rgba5551",
+            "bgra5551",
+            "argb1555",
+            "abgr1555",
+            "xrgb1555",
+            "rgb332",
+            "bgr233",
+            "rgb888",
+            "bgr888",
+            "rgba8888",
+            "argb8888",
+            "abgr8888",
+            "bgra8888",
+            "rgbx8888",
+            "xrgb8888",
+            "bgrx8888",
+            "xbgr8888",
+            "gray8",
+            "alpha8",
+            "gray16",
+            "gray4",
+            "gray2",
+            "gray1"
+          ],
+          "description": "Pixel format used when a buffer is opened for the first time.",
+          "enumDescriptions": [
+            "RGBA4444",
+            "ARGB4444",
+            "ABGR4444",
+            "BGRA4444",
+            "RGBX4444 — alpha nibble ignored",
+            "XRGB4444 — alpha nibble ignored",
+            "RGB565",
+            "BGR565",
+            "RGBA5551",
+            "BGRA5551",
+            "ARGB1555",
+            "ABGR1555",
+            "XRGB1555 — top bit ignored",
+            "RGB332",
+            "BGR233",
+            "RGB888 — bytes R,G,B",
+            "BGR888 — bytes B,G,R",
+            "RGBA8888 — bytes R,G,B,A",
+            "ARGB8888 — bytes A,R,G,B",
+            "ABGR8888 — bytes A,B,G,R",
+            "BGRA8888 — bytes B,G,R,A",
+            "RGBX8888 — bytes R,G,B,pad",
+            "XRGB8888 — bytes pad,R,G,B",
+            "BGRX8888 — bytes B,G,R,pad",
+            "XBGR8888 — bytes pad,B,G,R",
+            "GRAY8 — 8-bit luminance",
+            "A8 — 8-bit alpha only",
+            "GRAY16 — 16-bit luminance (high byte shown)",
+            "GRAY4 — 4-bit, 2 px/byte",
+            "GRAY2 — 2-bit, 4 px/byte",
+            "GRAY1 — 1-bit mono, 8 px/byte"
+          ]
+        },
+        "rawImageViewer.defaultWidth": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Default width in pixels. 0 lets the viewer guess from the buffer size."
+        },
+        "rawImageViewer.defaultHeight": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Default height in pixels. 0 derives the height from the buffer size and width."
+        },
+        "rawImageViewer.defaultOffset": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Bytes skipped before the first pixel (header size)."
+        },
+        "rawImageViewer.defaultLittleEndian": {
+          "type": "boolean",
+          "default": true,
+          "description": "Byte order used to read packed 16/32-bit pixels."
+        },
+        "rawImageViewer.defaultAlphaMode": {
+          "type": "string",
+          "default": "use",
+          "enum": [
+            "use",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "Honour the alpha channel of the pixel format.",
+            "Force every pixel opaque (useful for buffers with garbage alpha)."
+          ],
+          "description": "How the alpha channel is treated on first open."
+        },
+        "rawImageViewer.background": {
+          "type": "string",
+          "default": "checker",
+          "enum": [
+            "checker",
+            "black",
+            "white",
+            "magenta",
+            "editor"
+          ],
+          "description": "Backdrop drawn behind transparent pixels."
+        },
+        "rawImageViewer.tileSize": {
+          "type": "number",
+          "default": 160,
+          "minimum": 48,
+          "maximum": 512,
+          "description": "Tile edge length (px) in the gallery view."
+        },
+        "rawImageViewer.maxFileSizeMB": {
+          "type": "number",
+          "default": 64,
+          "minimum": 1,
+          "description": "Refuse to load buffers larger than this, to keep the webview responsive."
+        },
+        "rawImageViewer.galleryIncludeGlob": {
+          "type": "string",
+          "default": "**/*.{raw,imag,bin,dat,data,dump,fb,rgb,rgba,bgra,argb,565,4444,gray,pix,tex,img}",
+          "description": "Glob used by \"Open Folder as Raw Image Gallery\" to collect files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "package": "npm run typecheck && npm run build -- --production",
+    "vsix": "npx --yes @vscode/vsce package --no-dependencies -o raw-image-viewer.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3"
+  }
+}
