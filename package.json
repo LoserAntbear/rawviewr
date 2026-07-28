@@ -298,7 +298,8 @@
     "watch": "npm-run-all -p watch:*",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "package": "npm run typecheck && npm run build -- --production",
-    "vsix": "npx --yes @vscode/vsce package --no-dependencies -o raw-image-viewer.vsix"
+    "vsix": "npx --yes @vscode/vsce package --no-dependencies -o raw-image-viewer.vsix",
+    "vsix:local": "npx --yes @vscode/vsce package --baseContentUrl https://none --baseImagesUrl https://none --no-dependencies -o raw-image-viewer-local.vsix"
   },
   "devDependencies": {
     "@types/node": "^22.7.5",
