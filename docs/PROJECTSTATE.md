@@ -45,5 +45,6 @@ Provided a simple viewer for raw binary files, with ability to provide a gallery
 
 Since the code here is merely POC, it is not well structured and needs a general refactor to improve maintainability and readability.
 
+- Rewrite webview DOM components structure from html injection to custom elements, with proper separation of concerns and encapsulation.
 - Rafactoring should start with `src/extension.ts` as an entry point, which will help to shape up code structure and flow of the extension.
 
