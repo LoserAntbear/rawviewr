@@ -33,6 +33,7 @@ const sharedConfig = {
   logLevel: 'info',
   minify: production,
   sourcemap: !production,
+  loader: { '.html': 'text', '.css': 'text' },
   plugins: [
     /* esbuildProblemMatcherPlugin should go to the end of plugins array */
     esbuildProblemMatcherPlugin
