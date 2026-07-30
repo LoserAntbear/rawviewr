@@ -13,9 +13,14 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
   public resolveCustomEditor(document: RawDocument, panel: vscode.WebviewPanel): void {
     register(
       panel,
-      new Viewer(this.context, panel.webview, 'single', document.uri.toString(), [
-        sourceFor(document.uri),
-      ]),
+      new Viewer(
+        this.context,
+        panel.webview,
+        'single',
+        document.uri.toString(),
+        [
+          sourceFor(document.uri),
+        ]),
     );
   }
 }
