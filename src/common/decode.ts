@@ -74,60 +74,6 @@ export interface ContainerResult {
   note?: string;
 }
 
-/**
- * Experimental decoder for the `.imag` sprite container that this repository
- * reverse-engineers: 24-byte header, u16 LE width/height, then a run-length
- * stream of 16-bit pixels. Control byte < 0x80 introduces a literal run of
- * (c + 1) pixels; otherwise it is a transparent run of ((c & 0x7F) + 1) pixels.
- * Rows are padded out to `width` and the stream restarts per row.
- */
-function decodeImagRle(src: Uint8Array): ContainerResult {
-  const HEADER = 24;
-  if (src.length < HEADER) {
-    return { data: src, headerBytes: 0, note: 'file shorter than the 24-byte header' };
-  }
-  const width = src[0] | (src[1] << 8);
-  const height = src[2] | (src[3] << 8);
-  if (width <= 0 || height <= 0 || width > 8192 || height > 8192) {
-    return { data: src, headerBytes: 0, note: 'header dimensions look implausible' };
-  }
-
-  const out = new Uint8Array(width * height * 2);
-  let i = HEADER;
-  let outPos = 0;
-
-  for (let row = 0; row < height; row++) {
-    let x = 0;
-    while (x < width && i < src.length) {
-      const control = src[i++];
-      if (control < 0x80) {
-        const count = control + 1;
-        for (let n = 0; n < count && x < width; n++, x++) {
-          if (i + 1 < src.length) {
-            out[outPos] = src[i];
-            out[outPos + 1] = src[i + 1];
-            i += 2;
-          }
-          outPos += 2;
-        }
-      } else {
-        const count = (control & 0x7f) + 1;
-        const clamped = Math.min(count, width - x);
-        outPos += clamped * 2;
-        x += clamped;
-      }
-    }
-    outPos += (width - x) * 2;
-  }
-
-  return {
-    data: out,
-    width,
-    height,
-    headerBytes: 0,
-    note: `RLE expanded to ${width}x${height} (experimental)`,
-  };
-}
 
 export function applyContainer(src: Uint8Array): ContainerResult {
   return { data: src, headerBytes: 0 }
