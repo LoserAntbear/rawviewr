@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Viewer, type ViewerSource } from './viewer.js';
+import { RawEditorProvider } from './features/editor/RawEditorProvider.js';
 
 const SINGLE_VIEW_TYPE = 'rawImageViewer.editor';
 const OPTIONAL_VIEW_TYPE = 'rawImageViewer.editor.optional';
@@ -21,41 +22,6 @@ function sourceFor(uri: vscode.Uri): ViewerSource {
     detail: vscode.workspace.asRelativePath(uri),
     uri,
   };
-}
-
-class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
-  constructor(private readonly context: vscode.ExtensionContext) {}
-
-  openCustomDocument(uri: vscode.Uri): RawDocument {
-    return new RawDocument(uri);
-  }
-
-  resolveCustomEditor(document: RawDocument, panel: vscode.WebviewPanel): void {
-    const viewer = new Viewer(
-      this.context,
-      panel.webview,
-      'single',
-      document.uri.toString(),
-      [sourceFor(document.uri)],
-    );
-
-    if (panel.active) {
-      setActive(viewer);
-    }
-    panel.onDidChangeViewState(() => {
-      if (panel.active) {
-        setActive(viewer);
-      } else if (activeViewer === viewer) {
-        setActive(undefined);
-      }
-    });
-    panel.onDidDispose(() => {
-      if (activeViewer === viewer) {
-        setActive(undefined);
-      }
-      viewer.dispose();
-    });
-  }
 }
 
 function openGallery(context: vscode.ExtensionContext, title: string, uris: vscode.Uri[]): void {
@@ -122,6 +88,7 @@ async function resolveTargets(
 
 export function activate(context: vscode.ExtensionContext): void {
   const provider = new RawEditorProvider(context);
+
   const editorOptions = {
     webviewOptions: { retainContextWhenHidden: true },
     supportsMultipleEditorsPerDocument: true,
