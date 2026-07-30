@@ -2,10 +2,7 @@ import * as vscode from 'vscode';
 import { Viewer, sourceFor } from './viewer';
 import { RawEditorProvider } from './features/editor/RawEditorProvider';
 import { activeViewer, register } from './viewerRegistry';
-
-const SINGLE_VIEW_TYPE = 'rawImageViewer.editor';
-const OPTIONAL_VIEW_TYPE = 'rawImageViewer.editor.optional';
-const GALLERY_VIEW_TYPE = 'rawImageViewer.gallery';
+import { ExtensionHost } from './extension/ExtensionHost';
 
 function openGallery(context: vscode.ExtensionContext, title: string, uris: vscode.Uri[]): void {
   if (uris.length === 0) {
@@ -40,13 +37,17 @@ async function resolveTargets(
   if (uris && uris.length > 0) {
     return uris;
   }
+
   if (uri) {
     return [uri];
   }
+
   const active = vscode.window.activeTextEditor?.document.uri;
+
   if (active && active.scheme === 'file') {
     return [active];
   }
+
   const picked = await vscode.window.showOpenDialog({
     canSelectMany: true,
     title: 'Select raw image buffers',
@@ -56,93 +57,9 @@ async function resolveTargets(
 
 export function activate(context: vscode.ExtensionContext): void {
   const provider = new RawEditorProvider(context);
+  const host = new ExtensionHost(context, provider);
 
-  const editorOptions = {
-    webviewOptions: { retainContextWhenHidden: true },
-    supportsMultipleEditorsPerDocument: true,
-  };
-
-  context.subscriptions.push(
-    vscode.window.registerCustomEditorProvider(SINGLE_VIEW_TYPE, provider, editorOptions),
-    vscode.window.registerCustomEditorProvider(OPTIONAL_VIEW_TYPE, provider, editorOptions),
-
-    vscode.commands.registerCommand(
-      'rawImageViewer.open',
-      async (uri?: vscode.Uri, uris?: vscode.Uri[]) => {
-        const targets = await resolveTargets(uri, uris);
-        for (const target of targets) {
-          await vscode.commands.executeCommand('vscode.openWith', target, OPTIONAL_VIEW_TYPE);
-        }
-      },
-    ),
-
-    vscode.commands.registerCommand(
-      'rawImageViewer.openGallery',
-      async (uri?: vscode.Uri, uris?: vscode.Uri[]) => {
-        const targets = await resolveTargets(uri, uris);
-        if (targets.length === 0) {
-          return;
-        }
-        const folder = targets[0].path.split('/').slice(-2, -1)[0] ?? 'selection';
-        openGallery(context, `${folder} (${targets.length})`, targets);
-      },
-    ),
-
-    vscode.commands.registerCommand(
-      'rawImageViewer.openFolderGallery',
-      async (uri?: vscode.Uri) => {
-        const folder =
-          uri ??
-          (
-            await vscode.window.showOpenDialog({
-              canSelectFolders: true,
-              canSelectFiles: false,
-              title: 'Select a folder of raw buffers',
-            })
-          )?.[0];
-        if (!folder) {
-          return;
-        }
-        const glob = vscode.workspace
-          .getConfiguration('rawImageViewer')
-          .get<string>(
-            'galleryIncludeGlob',
-            '**/*.{raw,imag,bin,dat,data,dump,fb,rgb,rgba,bgra,argb,565,4444,gray,pix,tex,img}',
-          );
-        const found = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(folder, glob),
-          '**/node_modules/**',
-          2000,
-        );
-        found.sort((a, b) => a.path.localeCompare(b.path));
-        const name = folder.path.split('/').pop() || 'folder';
-        openGallery(context, `${name} (${found.length})`, found);
-      },
-    ),
-
-    vscode.commands.registerCommand('rawImageViewer.exportPng', () => {
-      const viewer = activeViewer();
-      if (!viewer) {
-        void vscode.window.showInformationMessage(
-          'Raw Image Viewer: focus a raw image view first.',
-        );
-        return;
-      }
-      viewer.requestExport();
-    }),
-
-    vscode.commands.registerCommand('rawImageViewer.resetSettings', async () => {
-      const keys = context.workspaceState
-        .keys()
-        .filter((key) => key.startsWith('rawImageViewer.options:'));
-      for (const key of keys) {
-        await context.workspaceState.update(key, undefined);
-      }
-      void vscode.window.showInformationMessage(
-        `Raw Image Viewer: cleared decode settings for ${keys.length} buffer(s). Reopen any view to pick up the defaults.`,
-      );
-    }),
-  );
+  host.register();
 }
 
 export function deactivate(): void {
