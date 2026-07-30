@@ -23,13 +23,6 @@ function sourceFor(uri: vscode.Uri): ViewerSource {
   };
 }
 
-class RawDocument implements vscode.CustomDocument {
-  constructor(readonly uri: vscode.Uri) {}
-  dispose(): void {
-    /* nothing to release: buffers live in the webview */
-  }
-}
-
 class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
