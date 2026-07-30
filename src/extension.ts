@@ -1,28 +1,11 @@
 import * as vscode from 'vscode';
-import { Viewer, type ViewerSource } from './viewer.js';
-import { RawEditorProvider } from './features/editor/RawEditorProvider.js';
+import { Viewer, sourceFor } from './viewer';
+import { RawEditorProvider } from './features/editor/RawEditorProvider';
+import { activeViewer, register } from './viewerRegistry';
 
 const SINGLE_VIEW_TYPE = 'rawImageViewer.editor';
 const OPTIONAL_VIEW_TYPE = 'rawImageViewer.editor.optional';
 const GALLERY_VIEW_TYPE = 'rawImageViewer.gallery';
-const ACTIVE_CONTEXT = 'rawImageViewer.activeViewer';
-
-/** The viewer belonging to the webview that currently has focus, if any. */
-let activeViewer: Viewer | undefined;
-
-function setActive(viewer: Viewer | undefined): void {
-  activeViewer = viewer;
-  void vscode.commands.executeCommand('setContext', ACTIVE_CONTEXT, !!viewer);
-}
-
-function sourceFor(uri: vscode.Uri): ViewerSource {
-  return {
-    id: uri.toString(),
-    name: uri.path.split('/').pop() || uri.toString(),
-    detail: vscode.workspace.asRelativePath(uri),
-    uri,
-  };
-}
 
 function openGallery(context: vscode.ExtensionContext, title: string, uris: vscode.Uri[]): void {
   if (uris.length === 0) {
@@ -46,22 +29,7 @@ function openGallery(context: vscode.ExtensionContext, title: string, uris: vsco
     (uri) => void vscode.commands.executeCommand('vscode.openWith', uri, OPTIONAL_VIEW_TYPE),
   );
 
-  if (panel.active) {
-    setActive(viewer);
-  }
-  panel.onDidChangeViewState(() => {
-    if (panel.active) {
-      setActive(viewer);
-    } else if (activeViewer === viewer) {
-      setActive(undefined);
-    }
-  });
-  panel.onDidDispose(() => {
-    if (activeViewer === viewer) {
-      setActive(undefined);
-    }
-    viewer.dispose();
-  });
+  register(panel, viewer);
 }
 
 /** Explorer context commands hand over (clicked, selection); the palette hands over nothing. */
@@ -153,13 +121,14 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
 
     vscode.commands.registerCommand('rawImageViewer.exportPng', () => {
-      if (!activeViewer) {
+      const viewer = activeViewer();
+      if (!viewer) {
         void vscode.window.showInformationMessage(
           'Raw Image Viewer: focus a raw image view first.',
         );
         return;
       }
-      activeViewer.requestExport();
+      viewer.requestExport();
     }),
 
     vscode.commands.registerCommand('rawImageViewer.resetSettings', async () => {
@@ -177,7 +146,5 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 export function deactivate(): void {
-  // Deliberately not touching the context key here: command execution during
-  // shutdown is not guaranteed to succeed.
-  activeViewer = undefined;
+  // Nothing to tear down: viewers are disposed by their own panels.
 }
