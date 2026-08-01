@@ -52,6 +52,14 @@ export class ExtensionHost {
   }
 
   private registerCommands(commands: CommandDescriptor[]): vscode.Disposable[] {
-    return commands.map(({ name, action }) => vscode.commands.registerCommand(name, action));
+    return commands.map(({ name, action }) => {
+      try {
+        return vscode.commands.registerCommand(name, action);
+      } catch (error) {
+        console.error(`Failed to register command ${name}:`, error);
+
+        return { dispose: () => {} } as vscode.Disposable;
+      }
+    });
   }
 }
