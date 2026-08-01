@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { nullishCoalesce } from '../../utils/coalesce';
+import { ViewerSource } from '../../viewer';
 
 function resolveActiveDocumentUri(): vscode.Uri | null {
   const active = vscode.window.activeTextEditor?.document.uri;
@@ -49,4 +50,13 @@ export async function resolveUriTargets(
     resolveTargetsFromUri(uri),
     await resolveTargetsFromSelectionDialog(),
   ) ?? [];
+}
+
+export function viewerSourceFor(uri: vscode.Uri): ViewerSource {
+  return {
+    uri,
+    id: uri.toString(),
+    detail: vscode.workspace.asRelativePath(uri),
+    name: uri.path.split('/').pop() || uri.toString(),
+  };
 }

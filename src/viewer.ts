@@ -18,15 +18,6 @@ export interface ViewerSource {
 
 const OPTIONS_MEMENTO_PREFIX = 'rawImageViewer.options:';
 
-export function sourceFor(uri: vscode.Uri): ViewerSource {
-  return {
-    id: uri.toString(),
-    name: uri.path.split('/').pop() || uri.toString(),
-    detail: vscode.workspace.asRelativePath(uri),
-    uri,
-  };
-}
-
 export function readSettings(): ViewerSettings {
   const config = vscode.workspace.getConfiguration('rawImageViewer');
   return {
