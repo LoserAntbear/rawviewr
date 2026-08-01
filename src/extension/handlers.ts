@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 
 import { ViewType } from '../definitions/viewTypes';
+import { resolveUriTargets } from '../features/vscode/uri';
 
 export async function handleOpen(uri?: vscode.Uri, uris?: vscode.Uri[]): Promise<void> {
   try {
-    const targets = await resolveTargets(uri, uris);
+    const targets = await resolveUriTargets(uri, uris);
 
     for (const target of targets) {
       return await vscode.commands.executeCommand('vscode.openWith', target, ViewType.Optional);
@@ -16,7 +17,7 @@ export async function handleOpen(uri?: vscode.Uri, uris?: vscode.Uri[]): Promise
 
 export async function handleOpenGallery(uri?: vscode.Uri, uris?: vscode.Uri[]): Promise<void> {
   try {
-    const targets = await resolveTargets(uri, uris);
+    const targets = await resolveUriTargets(uri, uris);
 
     if (targets.length === 0) {
       return;
