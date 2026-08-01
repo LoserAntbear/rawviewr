@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { RawEditorProvider } from '../features/editor/RawEditorProvider';
-import { ViewType } from '../definitions/viewTypes';
 import { CommandDescriptor } from './types';
 import * as COMMAND_HANDLERS from './handlers';
-import { CommandNames } from '../definitions/commands';
+import { CommandNames } from '../../definitions/commands';
+import type { RawEditorProvider } from '../editor/RawEditorProvider.js';
+import { ViewType } from '../../definitions/viewTypes';
 
 const EDITOR_OPTIONS = {
   webviewOptions: { retainContextWhenHidden: true },
