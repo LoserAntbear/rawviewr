@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { RawDocument } from '../document/RawDocument';
 import { Viewer } from '../../viewer';
 import type { ViewerRegistry } from '../viewer/registry/viewerRegistry';
-import { viewerSourceFor } from '../vscode/uri';
+import { viewerSourceForUri } from '../vscode/utils/uri';
 
 export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(
@@ -21,7 +21,7 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
       'single',
       document.uri.toString(),
       [
-        viewerSourceFor(document.uri),
+        viewerSourceForUri(document.uri),
       ],
     );
 
