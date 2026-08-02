@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-import { ViewType } from '../definitions/viewTypes';
-import { resolveUriTargets } from '../features/vscode/uri';
+import { ViewType } from '../../../../definitions/viewTypes';
+import { resolveUriTargets } from '../../../../features/vscode/uri';
 
 export async function handleOpen(uri?: vscode.Uri, uris?: vscode.Uri[]): Promise<void> {
   try {
@@ -25,7 +25,7 @@ export async function handleOpenGallery(uri?: vscode.Uri, uris?: vscode.Uri[]): 
 
     const folder = targets[0].path.split('/').slice(-2, -1)[0] ?? 'selection';
 
-    openGallery(this.context, `${folder} (${targets.length})`, targets);
+    openGallery(context, `${folder} (${targets.length})`, targets);
   } catch (err) {
     vscode.window.showErrorMessage(`Failed to open raw image gallery: ${err}`);
   }
