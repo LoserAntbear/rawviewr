@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
-import type { IntentResolverMap } from '../intent/types';
-import { findGalleryTargets, folderTitle, selectionTitle } from './gallery/galleryTargets';
-import type { ViewerRegistry } from './registry/viewerRegistry';
-import type { ViewerWindowController } from './windowController/ViewerWindowController';
-import { IntentKind } from '../../definitions/intent';
-import { resolveUriTargets, resolveFolder } from '../vscode/utils/uri';
+import type { IntentResolverMap } from '@features/intent/types';
+import { findGalleryTargets, folderTitle, selectionTitle } from '@features/viewer/gallery/galleryTargets';
+import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
+import { IntentKind } from '@definitions/intent';
+import { resolveUriTargets, resolveFolder } from '@features/vscode/utils/uri';
 
 type ViewerIntentKind =
   | IntentKind.viewerOpenSingle

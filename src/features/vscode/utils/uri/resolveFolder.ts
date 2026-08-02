@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { nullishCoalesce } from '../../../../utils/coalesce';
+import { nullishCoalesce } from '@utils/coalesce';
 
 async function resolvePickedUrisWithDialog():  Promise<vscode.Uri | null> {
   try {

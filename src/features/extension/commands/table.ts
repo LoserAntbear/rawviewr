@@ -1,4 +1,4 @@
-import { CommandNames } from '../../../definitions/commands';
+import { CommandNames } from '@definitions/commands';
 import {
   parseExport,
   parseOpen,

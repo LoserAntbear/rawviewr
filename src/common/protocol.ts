@@ -1,4 +1,4 @@
-import type { DecodeOptions } from './decode.js';
+import type { DecodeOptions } from './decode';
 
 export type ViewerMode = 'single' | 'gallery';
 

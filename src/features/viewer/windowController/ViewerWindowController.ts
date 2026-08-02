@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 
-import { ViewType } from '../../../definitions/viewTypes';
-import { Viewer } from '../../../viewer';
-import { viewerSourceForUri } from '../../vscode/utils/uri';
-import type { ViewerRegistry } from '../registry/viewerRegistry';
+import { ViewType } from '@definitions/viewTypes';
+import { Viewer } from '@root/viewer';
+import { viewerSourceForUri } from '@features/vscode/utils/uri';
+import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 
 export class ViewerWindowController {
   constructor(

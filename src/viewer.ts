@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
-import { DEFAULT_OPTIONS, type DecodeOptions } from './common/decode.js';
-import { ExportFormat } from './definitions/exportFormats.js';
-import { FORMATS, formatsByGroup } from './common/formats.js';
+import { DEFAULT_OPTIONS, type DecodeOptions } from '@common/decode';
+import { ExportFormat } from '@definitions/exportFormats';
+import { FORMATS, formatsByGroup } from '@common/formats';
 import type {
   BufferItem,
   HostMessage,
   ViewerMode,
   ViewerSettings,
   WebviewMessage,
-} from './common/protocol.js';
+} from '@common/protocol';
 
 export interface ViewerSource {
   id: string;

@@ -1,7 +1,7 @@
 import type * as vscode from 'vscode';
 
-import type { IntentKind } from '../../definitions/intent';
-import type { ExportFormat } from '../../definitions/exportFormats';
+import type { IntentKind } from '@definitions/intent';
+import type { ExportFormat } from '@definitions/exportFormats';
 
 export type IntentResolver<K extends IntentKind = IntentKind> = (
   intent: Extract<Intent, { kind: K }>,

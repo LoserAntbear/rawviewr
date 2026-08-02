@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 
-import { RawEditorProvider } from './features/editor/RawEditorProvider';
-import { ExtensionHost } from './features/extension/ExtensionHost';
-import { IntentDispatcher } from './features/intent/IntentDispatcher';
-import { settingsResolvers } from './features/settings/resolvers';
-import { ViewerRegistry } from './features/viewer/registry/viewerRegistry';
-import { VIEWER_INTENT_RESOLVERS } from './features/viewer/resolvers';
-import { ViewerWindowController } from './features/viewer/windowController/ViewerWindowController';
+import { RawEditorProvider } from '@features/editor/RawEditorProvider';
+import { ExtensionHost } from '@features/extension/ExtensionHost';
+import { IntentDispatcher } from '@features/intent/IntentDispatcher';
+import { settingsResolvers } from '@features/settings/resolvers';
+import { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import { VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
+import { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
 
 export function activate(context: vscode.ExtensionContext): void {
   const registry = new ViewerRegistry();

@@ -1,4 +1,4 @@
-import { getFormat } from './formats.js';
+import { getFormat } from './formats';
 
 export type HeaderPreset = 'none' | 'u16le' | 'u16be' | 'u32le' | 'u32be';
 export type AlphaMode = 'use' | 'ignore';

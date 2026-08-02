@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { UriLike } from '../../types';
-import { nullishCoalesce } from '../../../../utils/coalesce';
+import { UriLike } from '@features/vscode/types';
+import { nullishCoalesce } from '@utils/coalesce';
 
 function isUriLike(value: unknown): value is UriLike {
   if (typeof value !== 'object' || value === null) {

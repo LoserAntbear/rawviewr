@@ -7,15 +7,15 @@ import {
   type DecodeOptions,
   type DecodedImage,
   type Prepared,
-} from '../common/decode.js';
-import { getFormat } from '../common/formats.js';
+} from '@common/decode';
+import { getFormat } from '@common/formats';
 import type {
   BufferItem,
   HostMessage,
   ViewerMode,
   ViewerSettings,
   WebviewMessage,
-} from '../common/protocol.js';
+} from '@common/protocol';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: WebviewMessage): void;

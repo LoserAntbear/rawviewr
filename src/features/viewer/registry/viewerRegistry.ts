@@ -1,5 +1,5 @@
-import type { Viewer } from '../../../viewer.js';
-import { ViewerRegistryEntry } from './types.js';
+import type { Viewer } from '@root/viewer';
+import { ViewerRegistryEntry } from './types';
 
 export class ViewerRegistry {
   public get activeViewer(): Viewer | undefined {

@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
-import type { IntentParserResult } from '../intent/types';
-import { ViewType } from '../../definitions/viewTypes';
-import type { RawEditorProvider } from '../editor/RawEditorProvider';
-import type { IntentDispatcher } from '../intent/IntentDispatcher';
-import { COMMANDS } from './commands/table';
-import type { IntentCommand } from './commands/types';
+import type { IntentParserResult } from '@features/intent/types';
+import { ViewType } from '@definitions/viewTypes';
+import type { RawEditorProvider } from '@features/editor/RawEditorProvider';
+import type { IntentDispatcher } from '@features/intent/IntentDispatcher';
+import { COMMANDS } from '@features/extension/commands/table';
+import type { IntentCommand } from '@features/extension/commands/types';
 
 const EDITOR_OPTIONS = {
   webviewOptions: { retainContextWhenHidden: true },

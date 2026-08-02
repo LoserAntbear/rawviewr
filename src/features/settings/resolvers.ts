@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-import { OPTIONS_MEMENTO_PREFIX } from '../../viewer';
-import type { IntentResolverMap } from '../intent/types';
+import { OPTIONS_MEMENTO_PREFIX } from '@root/viewer';
+import type { IntentResolverMap } from '@features/intent/types';
 
 export const settingsResolvers = (
   workspaceState: vscode.Memento,

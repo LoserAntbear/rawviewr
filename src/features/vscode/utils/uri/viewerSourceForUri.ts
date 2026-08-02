@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { ViewerSource } from '../../../../viewer';
+import { ViewerSource } from '@root/viewer';
 
 export function viewerSourceForUri(uri: vscode.Uri): ViewerSource {
   return {

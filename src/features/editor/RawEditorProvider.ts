@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { RawDocument } from '../document/RawDocument';
-import { Viewer } from '../../viewer';
-import type { ViewerRegistry } from '../viewer/registry/viewerRegistry';
-import { viewerSourceForUri } from '../vscode/utils/uri';
+import { RawDocument } from '@features/document/RawDocument';
+import { Viewer } from '@root/viewer';
+import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import { viewerSourceForUri } from '@features/vscode/utils/uri';
 
 export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(

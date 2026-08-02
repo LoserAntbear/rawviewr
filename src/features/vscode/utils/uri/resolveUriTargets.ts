@@ -1,7 +1,7 @@
 
 import * as vscode from 'vscode';
-import { asLocalAllowedUri } from '../../guards/uri/asLocalAllowedUri';
-import { nullishCoalesce } from '../../../../utils/coalesce';
+import { asLocalAllowedUri } from '@features/vscode/guards/uri/asLocalAllowedUri';
+import { nullishCoalesce } from '@utils/coalesce';
 
 function activeDocumentUri(): vscode.Uri | null {
   return asLocalAllowedUri(vscode.window.activeTextEditor?.document.uri);

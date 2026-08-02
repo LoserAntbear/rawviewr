@@ -1,5 +1,5 @@
-import type { CommandNames } from '../../../definitions/commands';
-import { IntentParser } from '../../intent/types';
+import type { CommandNames } from '@definitions/commands';
+import { IntentParser } from '@features/intent/types';
 
 export type IntentCommand = {
   readonly name: CommandNames;
