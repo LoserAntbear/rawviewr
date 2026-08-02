@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { CommandDescriptor } from './types';
-import * as COMMAND_HANDLERS from './handlers';
+import * as COMMAND_HANDLERS from './commands/handlers/handlers';
 import { CommandNames } from '../../definitions/commands';
 import type { RawEditorProvider } from '../editor/RawEditorProvider.js';
 import { ViewType } from '../../definitions/viewTypes';
+import { ViewerWindowController } from '../viewer/windowController/ViewerWindowController';
 
 const EDITOR_OPTIONS = {
   webviewOptions: { retainContextWhenHidden: true },
@@ -14,6 +15,7 @@ export class ExtensionHost {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly provider: RawEditorProvider,
+    public readonly viewerWindowController: ViewerWindowController,
   ) {}
 
   public register(): void {
