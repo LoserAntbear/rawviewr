@@ -2,15 +2,21 @@ import * as vscode from 'vscode';
 
 import { RawEditorProvider } from './features/editor/RawEditorProvider';
 import { ExtensionHost } from './features/extension/ExtensionHost';
-import { VIEWER_REGISTRY } from './runtime/viewerRegistry';
+import { ViewerWindowController } from './features/viewer/windowController/ViewerWindowController';
+import { ViewerRegistry } from './features/viewer/registry/viewerRegistry';
 
 
 export function activate(context: vscode.ExtensionContext): void {
+  const registry = new ViewerRegistry();
   const provider = new RawEditorProvider(
     context,
-    VIEWER_REGISTRY,
+    registry,
   );
-  const host = new ExtensionHost(context, provider);
+  const host = new ExtensionHost(
+    context,
+    provider,
+    new ViewerWindowController(context, registry),
+  );
 
   host.register();
 }
