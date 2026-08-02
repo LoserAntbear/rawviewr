@@ -7,7 +7,6 @@ import { IntentKind } from '@definitions/intent';
 type SettingsIntentKind =
   | IntentKind.settingsReset;
 
-
 export const SETTINGS_INTENT_RESOLVERS = (
   workspaceState: vscode.Memento,
 ): Pick<IntentResolverMap, SettingsIntentKind> => ({
