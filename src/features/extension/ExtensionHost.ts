@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { CommandDescriptor } from './types';
-import * as COMMAND_HANDLERS from './commands/handlers/handlers';
-import { CommandNames } from '../../definitions/commands';
-import type { RawEditorProvider } from '../editor/RawEditorProvider.js';
+
 import { ViewType } from '../../definitions/viewTypes';
-import { ViewerWindowController } from '../viewer/windowController/ViewerWindowController';
+import type { RawEditorProvider } from '../editor/RawEditorProvider';
+import type { IntentDispatcher } from '../intent/IntentDispatcher';
+import { COMMANDS } from './commands/table';
+import type { IntentCommand } from './commands/types';
 
 const EDITOR_OPTIONS = {
   webviewOptions: { retainContextWhenHidden: true },
@@ -15,34 +15,13 @@ export class ExtensionHost {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly provider: RawEditorProvider,
-    public readonly viewerWindowController: ViewerWindowController,
+    private readonly dispatcher: IntentDispatcher,
   ) {}
 
   public register(): void {
     this.context.subscriptions.push(
       ...this.registerCustomEditorProviders(),
-      ...this.registerCommands([
-        {
-          name: CommandNames.open,
-          action: COMMAND_HANDLERS.handleOpen,
-        },
-        {
-          name: CommandNames.openGallery,
-          action: COMMAND_HANDLERS.handleOpenGallery,
-        },
-        {
-          name: CommandNames.openFolderGallery,
-          action: COMMAND_HANDLERS.handleOpenFolderGallery,
-        },
-        {
-          name: CommandNames.exportFile,
-          action: COMMAND_HANDLERS.handleExport,
-        },
-        {
-          name: CommandNames.resetSettings,
-          action: () => COMMAND_HANDLERS.handleResetSettings(this.context.workspaceState),
-        },
-      ]),
+      ...this.registerCommands(COMMANDS),
     );
   }
 
@@ -53,15 +32,40 @@ export class ExtensionHost {
     ];
   }
 
-  private registerCommands(commands: CommandDescriptor[]): vscode.Disposable[] {
-    return commands.map(({ name, action }) => {
+  private registerCommands(commands: readonly IntentCommand[]): vscode.Disposable[] {
+    return commands.map(({ name, parse: parseToIntent }) => {
       try {
-        return vscode.commands.registerCommand(name, action);
+        /**
+         * On command regisstration we wrap the actual command to propagate intent parser.
+         * Since VScode commands can be envoked from multiple sources (command palette, keybindings, context menus, etc.)
+         * The actual arguments passed to command callback can differ.
+         *
+         * We expect intentParser to handle the arguments and return a valid intent object or undefined if the arguments are invalid.
+         */
+        return vscode.commands.registerCommand(name, (...args: unknown[]) =>
+          this.tryDispatchIntent(name, parseToIntent(...args)),
+        );
       } catch (error) {
         console.error(`Failed to register command ${name}:`, error);
 
         return { dispose: () => {} } as vscode.Disposable;
       }
     });
+  }
+
+  private async tryDispatchIntent(name: string, intent: ReturnType<IntentCommand['parse']>): Promise<void> {
+    if (!intent) {
+      console.warn(`[rawImageViewer] ${name}: ignored malformed invocation. Wrong or missing extension intent.`);
+
+      return;
+    }
+
+    try {
+      await this.dispatcher.dispatch(intent);
+    } catch (error) {
+      void vscode.window.showErrorMessage(`Raw Image Viewer: Command ${name} failed — ${error}`);
+
+      throw error;
+    }
   }
 }
