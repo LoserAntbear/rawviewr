@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DEFAULT_OPTIONS, type DecodeOptions } from './common/decode.js';
+import { ExportFormat } from './definitions/exportFormats.js';
 import { FORMATS, formatsByGroup } from './common/formats.js';
 import type {
   BufferItem,
@@ -16,7 +17,12 @@ export interface ViewerSource {
   uri: vscode.Uri;
 }
 
-const OPTIONS_MEMENTO_PREFIX = 'rawImageViewer.options:';
+export const OPTIONS_MEMENTO_PREFIX = 'rawImageViewer.options:';
+
+/** Exhaustive by construction: a new ExportFormat member breaks the build here. */
+const EXPORT_MESSAGES: Record<ExportFormat, HostMessage> = {
+  [ExportFormat.Png]: { type: 'exportPng' },
+};
 
 export function readSettings(): ViewerSettings {
   const config = vscode.workspace.getConfiguration('rawImageViewer');
@@ -90,8 +96,8 @@ export class Viewer {
     this.post({ type: 'options', options: patch });
   }
 
-  requestExport(): void {
-    this.post({ type: 'exportPng' });
+  requestExport(format: ExportFormat): void {
+    this.post(EXPORT_MESSAGES[format]);
   }
 
   private get mementoKey(): string {
