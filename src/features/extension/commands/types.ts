@@ -3,5 +3,5 @@ import { IntentParser } from '../../intent/types';
 
 export type IntentCommand = {
   readonly name: CommandNames;
-  readonly parse: IntentParser;
+  readonly parseToIntent: IntentParser;
 };
