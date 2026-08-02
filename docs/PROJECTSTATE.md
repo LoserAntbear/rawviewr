@@ -46,5 +46,20 @@ Provided a simple viewer for raw binary files, with ability to provide a gallery
 Since the code here is merely POC, it is not well structured and needs a general refactor to improve maintainability and readability.
 
 - Rewrite webview DOM components structure from html injection to custom elements, with proper separation of concerns and encapsulation.
-- Rafactoring should start with `src/extension.ts` as an entry point, which will help to shape up code structure and flow of the extension.
 
+#### Current refactor state
+
+- decomposed extension entry point.
+- introduced extension host responsible for main extension functionality provision (e.g. registering commands, cleanup)
+- introduced intent-based architecture for command handling and communication between vscode-registered commands and extension functionality
+  - introduced intent dispatcher responsible for dispatching intents to appropriate resolvers
+  - introduced intent resolvers responsible for resolving intents to appropriate extension functionality
+  - introduced command intent parsers responsible for parsing command arguments to intents and commad map for intent registration
+
+- implemented basic defined viewer structure and functionality
+  - provided viewer window controller for managing viewer window lifecycle and communication with webview
+  - provided viewer registry for managing viewer instances and their lifecycle
+  - introduced viewer-related intents and their resolvers as a seam b/w vscode commands and viewer functionality
+
+- introduced strong vscode API integration with vscode API types, guards and utilities
+- provided raw document class as a basic integration layer of `vscode.CustomDocument`
