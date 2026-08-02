@@ -1,9 +1,9 @@
-export function nullishCoalesce<T>(...values: (T | null | undefined)[]): T | undefined {
+export function nullishCoalesce<T>(...values: (T | null | undefined)[]): T | null {
   for (const value of values) {
     if (value !== null) {
-      return value;
+      return value || null;
     }
   }
 
-  return undefined;
+  return null;
 }
