@@ -5,7 +5,7 @@ import { ExtensionHost } from './features/extension/ExtensionHost';
 import { IntentDispatcher } from './features/intent/IntentDispatcher';
 import { settingsResolvers } from './features/settings/resolvers';
 import { ViewerRegistry } from './features/viewer/registry/viewerRegistry';
-import { viewerIntentResolvers } from './features/viewer/resolvers';
+import { VIEWER_INTENT_RESOLVERS } from './features/viewer/resolvers';
 import { ViewerWindowController } from './features/viewer/windowController/ViewerWindowController';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const windowController = new ViewerWindowController(context, registry);
 
   const dispatcher = new IntentDispatcher({
-    ...viewerIntentResolvers(windowController, registry),
+    ...VIEWER_INTENT_RESOLVERS(windowController, registry),
     ...settingsResolvers(context.workspaceState),
   });
   const host = new ExtensionHost(context, new RawEditorProvider(context, registry), dispatcher);
