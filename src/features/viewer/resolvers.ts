@@ -18,7 +18,7 @@ type ViewerIntentKind =
  * parser could not know — a prompt, a workspace scan, the active panel — and
  * then delegates. Anything longer than a few lines belongs in a service.
  */
-export const viewerIntentResolvers = (
+export const VIEWER_INTENT_RESOLVERS = (
   windowController: ViewerWindowController,
   viewerRegistry: ViewerRegistry,
 ): Pick<IntentResolverMap, ViewerIntentKind> => ({
