@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import type { IntentParserResult } from '../intent/types';
 import { ViewType } from '../../definitions/viewTypes';
 import type { RawEditorProvider } from '../editor/RawEditorProvider';
 import type { IntentDispatcher } from '../intent/IntentDispatcher';
@@ -33,7 +34,7 @@ export class ExtensionHost {
   }
 
   private registerCommands(commands: readonly IntentCommand[]): vscode.Disposable[] {
-    return commands.map(({ name, parse: parseToIntent }) => {
+    return commands.map(({ name, parseToIntent }) => {
       try {
         /**
          * On command regisstration we wrap the actual command to propagate intent parser.
@@ -53,7 +54,7 @@ export class ExtensionHost {
     });
   }
 
-  private async tryDispatchIntent(name: string, intent: ReturnType<IntentCommand['parse']>): Promise<void> {
+  private async tryDispatchIntent(name: string, intent: IntentParserResult): Promise<void> {
     if (!intent) {
       console.warn(`[rawImageViewer] ${name}: ignored malformed invocation. Wrong or missing extension intent.`);
 
