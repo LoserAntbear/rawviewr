@@ -7,14 +7,16 @@ import { SETTINGS_INTENT_RESOLVERS } from '@features/settings/resolvers';
 import { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
 import { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
+import { SettingsController } from '@features/settings/SettingsController';
 
 export function activate(context: vscode.ExtensionContext): void {
   const registry = new ViewerRegistry();
   const windowController = new ViewerWindowController(context, registry);
+  const settingsController = new SettingsController(context.workspaceState);
 
   const dispatcher = new IntentDispatcher({
     ...VIEWER_INTENT_RESOLVERS(windowController, registry),
-    ...SETTINGS_INTENT_RESOLVERS(context.workspaceState),
+    ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
   const host = new ExtensionHost(context, new RawEditorProvider(context, registry), dispatcher);
 
