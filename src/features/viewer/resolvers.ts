@@ -39,6 +39,10 @@ export const VIEWER_INTENT_RESOLVERS = (
     await windowController.openGallery(folderTitle(resolved, targets), targets);
   },
 
+  /**
+   * FIXME: Extract this resolver to the owbn export-related namespace
+   * For now it'll just live there, please, be polite.
+   */
   [IntentKind.viewerRequestExport]: async ({ format }) => {
     const viewer = viewerRegistry.activeViewer;
 
