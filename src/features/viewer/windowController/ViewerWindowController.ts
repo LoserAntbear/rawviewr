@@ -4,6 +4,7 @@ import { ViewType } from '@definitions/viewTypes';
 import { Viewer } from '@root/viewer';
 import { viewerSourceForUri } from '@features/vscode/utils/uri';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import { VSCodeCommands } from '@definitions/vscode';
 
 export class ViewerWindowController {
   constructor(
@@ -14,7 +15,7 @@ export class ViewerWindowController {
   /** Opens every target in its own editor tab. */
   public async openSingle(targets: readonly vscode.Uri[]): Promise<void> {
     for (const target of targets) {
-      await vscode.commands.executeCommand('vscode.openWith', target, ViewType.Optional);
+      await vscode.commands.executeCommand(VSCodeCommands.OpenWith, target, ViewType.Optional);
     }
   }
 
@@ -38,7 +39,7 @@ export class ViewerWindowController {
       'gallery',
       `gallery:${title}`,
       targets.map(viewerSourceForUri),
-      (uri) => void vscode.commands.executeCommand('vscode.openWith', uri, ViewType.Optional),
+      (uri) => void vscode.commands.executeCommand(VSCodeCommands.OpenWith, uri, ViewType.Optional),
     );
 
     this.viewerRegistry.register({ panel, viewer });

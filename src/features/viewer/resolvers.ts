@@ -13,11 +13,6 @@ type ViewerIntentKind =
   | IntentKind.viewerRequestExport
   | IntentKind.viewerOpenFolderGallery;
 
-/**
- * The viewer feature's slice of the resolver map. Each body gathers whatever the
- * parser could not know — a prompt, a workspace scan, the active panel — and
- * then delegates. Anything longer than a few lines belongs in a service.
- */
 export const VIEWER_INTENT_RESOLVERS = (
   windowController: ViewerWindowController,
   viewerRegistry: ViewerRegistry,
