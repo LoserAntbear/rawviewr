@@ -9,7 +9,6 @@ type SettingsIntentKind =
 export const SETTINGS_INTENT_RESOLVERS = (
   settingsController: SettingsController,
 ): Pick<IntentResolverMap, SettingsIntentKind> => ({
-  // TODO: Introdudce a proper state management wrapper for settings
   [IntentKind.settingsReset]: async () => {
     settingsController.resetSettings();
   },
