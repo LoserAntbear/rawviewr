@@ -1,4 +1,4 @@
-import type { Viewer } from '@root/viewer';
+import type { Viewer } from '@features/viewer/viewer';
 import type * as vscode from 'vscode';
 
 export interface ViewerRegistryEntry {

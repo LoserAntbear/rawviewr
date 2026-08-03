@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ViewType } from '@definitions/viewTypes';
-import { Viewer } from '@root/viewer';
+import { Viewer } from '@features/viewer/viewer';
 import { viewerSourceForUri } from '@features/vscode/utils/uri';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';

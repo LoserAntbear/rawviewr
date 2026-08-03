@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { RawDocument } from '@features/document/RawDocument';
-import { Viewer } from '@root/viewer';
+import { Viewer } from '@features/viewer/viewer';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { viewerSourceForUri } from '@features/vscode/utils/uri';
 
