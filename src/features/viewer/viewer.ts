@@ -10,15 +10,6 @@ import type {
   WebviewMessage,
 } from '@common/protocol';
 
-export interface ViewerSource {
-  id: string;
-  name: string;
-  detail: string;
-  uri: vscode.Uri;
-}
-
-export const OPTIONS_MEMENTO_PREFIX = 'rawImageViewer.options:';
-
 /** Exhaustive by construction: a new ExportFormat member breaks the build here. */
 const EXPORT_MESSAGES: Record<ExportFormat, HostMessage> = {
   [ExportFormat.Png]: { type: 'exportPng' },
@@ -50,10 +41,6 @@ function maxFileSizeBytes(): number {
   return Math.max(1, vscode.workspace.getConfiguration('rawImageViewer').get<number>('maxFileSizeMB', 64)) * 1024 * 1024;
 }
 
-/**
- * Drives one webview: streams buffers in, keeps decode options in sync and
- * remembers them per buffer so reopening a file lands on the same view.
- */
 export class Viewer {
   private readonly disposables: vscode.Disposable[] = [];
   private options: DecodeOptions;
@@ -82,10 +69,11 @@ export class Viewer {
     );
   }
 
-  dispose(): void {
+  public dispose(): void {
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
+
     this.disposables.length = 0;
   }
 
@@ -98,19 +86,6 @@ export class Viewer {
 
   requestExport(format: ExportFormat): void {
     this.post(EXPORT_MESSAGES[format]);
-  }
-
-  private get mementoKey(): string {
-    const key = this.mode === 'gallery' ? this.title : this.sources[0]?.uri.toString() ?? this.title;
-    return `${OPTIONS_MEMENTO_PREFIX}${key}`;
-  }
-
-  private loadOptions(): Partial<DecodeOptions> {
-    return this.context.workspaceState.get<Partial<DecodeOptions>>(this.mementoKey) ?? {};
-  }
-
-  private saveOptions(): void {
-    void this.context.workspaceState.update(this.mementoKey, this.options);
   }
 
   private post(message: HostMessage): void {
