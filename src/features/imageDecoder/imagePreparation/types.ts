@@ -11,22 +11,16 @@ export type HeaderLayout = {
   fieldBytes: number; /** --- Bytes per dimension field; the header holds two. */
 };
 
-export type HeaderDimensions = {
-  width: number;
-  height: number;
+export type HeaderDimensions = Dimension & {
   headerBytes: number;
 };
 
-export type DimensionSource = {
-  width: number;
-  height: number;
+export type DimensionSource = Dimension & {
   headerBytes: number;
   lockedByHeader: boolean;
 };
 
-export type Geometry = {
-  width: number;
-  height: number;
+export type Geometry = Dimension & {
   frameCount: number;
   baseOffset: number; /** --- Offset of frame 0's first pixel within the container-decoded buffer. */
   bytesPerRow: number;
@@ -35,10 +29,7 @@ export type Geometry = {
   lockedByHeader: boolean; /** --- Set when the header preset dictated the geometry. */
 };
 
-export interface DimensionGuess {
-  score: number;
+export type Dimension = {
   width: number;
   height: number;
-  reason: string;
-  exactSizeMatch: boolean;   /** True when width * height consumes the buffer exactly. */
-}
+};
