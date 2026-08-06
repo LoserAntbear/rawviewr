@@ -57,6 +57,7 @@ export class GeometryResolver {
       height,
       frameCount,
       bytesPerRow,
+      source: data,
       bytesPerFrame,
       availableBytes,
       baseOffset: offset,

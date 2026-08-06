@@ -21,6 +21,7 @@ export type DimensionSource = Dimension & {
 };
 
 export type Geometry = Dimension & {
+  source: Uint8Array;
   frameCount: number;
   baseOffset: number; /** --- Offset of frame 0's first pixel within the container-decoded buffer. */
   bytesPerRow: number;

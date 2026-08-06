@@ -6,9 +6,9 @@ export type DecodeOptions = {
   height: number; /** --- Rows per frame. 0 means "all remaining rows". */
   offset: number;
   format: string;
-  stride: number; /** --- Bytes per row including padding. 0 = tightly packed. */
   flipY: boolean;
-  endian: Endian; // FIXME: Remove the flag, convert to endiann-ess of the host machine if needed
+  endian: Endian;
+  bytesPerRow: number; /** --- Bytes per row including padding. 0 = tightly packed. */
   bitOrderMsb: boolean;
   alphaMode: AlphaMode;
   unpremultiply: boolean;
