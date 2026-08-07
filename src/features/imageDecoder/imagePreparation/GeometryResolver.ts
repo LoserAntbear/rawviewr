@@ -1,7 +1,7 @@
 import { HeaderPreset, MAX_DIMENSION } from '../definitions';
 import { DecodeOptions } from '../types';
 import { DimensionSource, Geometry, Dimension } from './types';
-import type { FormatRegistry } from '@features/format';
+import type { FormatRegistry } from '@features/format/FormatRegistry';
 import { resolveHeaderDimensions } from './header/headerResolution';
 import { guessDimensions } from './dimension/guessDimensions';
 import { clamp } from '@utils/math';
