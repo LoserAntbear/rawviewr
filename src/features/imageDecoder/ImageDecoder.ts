@@ -2,6 +2,7 @@ import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import { DecodedImage, DecodeOptions } from './types';
 import { type RowOptions } from '@features/format/types';
 import { type FormatRegistry } from '@features/format/FormatRegistry';
+import { shiftRowIndices } from '@utils/array';
 import { Geometry } from './imagePreparation/types';
 
 export class ImageDecoder {
@@ -75,8 +76,4 @@ export class ImageDecoder {
 
     return result;
   }
-}
-
-function shiftRowIndices(i: number, shift: number = 3): number[] {
-  return Array.from({ length: shift }, (_, index) => i + index);
 }
