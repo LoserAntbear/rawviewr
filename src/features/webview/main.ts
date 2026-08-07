@@ -8,7 +8,6 @@ import {
   type DecodedImage,
   type Prepared,
 } from '@common/decode';
-import { getFormat } from '@common/formats';
 import type {
   BufferItem,
   HostMessage,
@@ -208,7 +207,7 @@ function applyOptionsToUi(): void {
 }
 
 function updateControlAvailability(): void {
-  const format = getFormat(options.format);
+  const format = formatRegistry.get(options.format);
   ui.endian.disabled = !format.endianSensitive;
   ui.bitorderGroup.classList.toggle('hidden', !format.bitOrderSensitive);
   ui.unpremul.disabled = !format.hasAlpha || options.alphaMode === 'ignore';
@@ -403,7 +402,7 @@ function renderGallery(): void {
   }
 
   ui.frameGroup.classList.add('hidden');
-  ui.statusGeometry.textContent = `${decoded} / ${order.length} buffers · ${getFormat(
+  ui.statusGeometry.textContent = `${decoded} / ${order.length} buffers · ${formatRegistry.get(
     options.format,
   ).label}`;
   ui.statusNote.textContent = 'double-click a tile to open it on its own';
@@ -474,7 +473,7 @@ function updateFrameControls(frameCount: number): void {
 
 function updateStatus(entry: Entry, prepared: Prepared): void {
   const { geometry } = prepared;
-  const format = getFormat(options.format);
+  const format = formatRegistry.get(options.format);
   const used = geometry.bytesPerFrame * geometry.frameCount;
   const leftover = geometry.availableBytes - used;
 
