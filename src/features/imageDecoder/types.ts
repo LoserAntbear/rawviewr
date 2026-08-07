@@ -1,5 +1,7 @@
 import type { Endian } from '@definitions/bits';
+
 import type { HeaderPreset, AlphaMode } from './definitions';
+import { Geometry } from './imagePreparation/types';
 
 export type DecodeOptions = {
   frame: number; /** --- Which frame of a multi-frame buffer to decode. */
@@ -17,11 +19,22 @@ export type DecodeOptions = {
 };
 
 /**
- * Initially decoded to RGBA8888, row-major, top-left origin.
+ * Decoded to RGBA8888, row-major, top-left origin — and self-contained, so
+ * anything that only wants pixels needs nothing else to use them.
  * The caller can then convert to whatever format they want.
  */
 export type DecodedImage = {
   width: number;
   height: number;
   data: Uint8ClampedArray;
+};
+
+/**
+ * Pixel probing needs all three to relate a pixel back to its bytes;
+ * canvas needs only `image`.
+ */
+export type DecodeResult = {
+  source: Uint8Array;
+  geometry: Geometry;
+  image: DecodedImage;
 };

@@ -1,4 +1,5 @@
-import { FormatGroup, FormatGroupEntry, PixelFormat } from './types';
+import { FormatGroup } from './definitions';
+import { FormatGroupEntry, PixelFormat } from './types';
 
 export class FormatRegistry {
   public get defaultFormat(): PixelFormat {
