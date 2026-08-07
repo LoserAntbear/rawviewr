@@ -1,8 +1,8 @@
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
-import { PixelLocator } from './imagePreparation/PixelLocator';
+import { PixelLocator } from '../pixelLocator/PixelLocator';
 import { DecodeOptions, DecodeResult } from './types';
-import { type PixelFormat } from '@features/format/types';
-import { type FormatRegistry } from '@features/format/FormatRegistry';
+import { type PixelFormat } from '@features/image/format/types';
+import { type FormatRegistry } from '@features/image/format/FormatRegistry';
 import { shiftRowIndices } from '@utils/array';
 import { Geometry } from './imagePreparation/types';
 

@@ -1,4 +1,5 @@
 import { Endian } from '@definitions/bits';
+import { Bits } from '@features/image/format/types';
 import { HeaderPreset } from '../definitions';
 
 /**
@@ -22,7 +23,6 @@ export type DimensionSource = Dimension & {
 };
 
 export type Geometry = Dimension & {
-  source: Uint8Array;
   frameCount: number;
   baseOffset: number; /** --- Offset of frame 0's first pixel within the container-decoded buffer. */
   bytesPerRow: number;
