@@ -12,7 +12,7 @@
       "@definitions/*": ["src/definitions/*"],
       "@features/*": ["src/features/*"],
       "@utils/*": ["src/utils/*"],
-      "@webview/*": ["src/webview/*"],
+      "@webview/*": ["src/features/webview/*"],
       "@root/*": ["src/*"]
     },
     "strict": true,
