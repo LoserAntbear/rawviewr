@@ -1,5 +1,4 @@
-import { buildFormat } from './formatBuilders/builders';
-import { FormatDefinition, FormatKind, PackedWordBits, PixelFormat} from './types';
+import { FormatDefinition, FormatKind, PackedWordBits } from './types';
 
 export enum FormatGroup {
   SubByte = 'sub-byte',
@@ -253,9 +252,6 @@ export const FORMAT_DEFINITIONS: readonly FormatDefinition[] = [
     spec: { kind: FormatKind.SubByteGray, bits: 1 },
   },
 ];
-
-/** The definitions above, built. This is what the registry stores. */
-export const FORMAT_PRESETS: readonly PixelFormat[] = FORMAT_DEFINITIONS.map(buildFormat);
 
 /** Used when a buffer has no remembered format, and when a remembered id is unknown. */
 export const DEFAULT_FORMAT_ID = 'rgba4444';
