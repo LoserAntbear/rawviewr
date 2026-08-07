@@ -1,6 +1,7 @@
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
-import { DecodedImage, DecodeOptions } from './types';
-import { type RowOptions } from '@features/format/types';
+import { PixelLocator } from './imagePreparation/PixelLocator';
+import { DecodeOptions, DecodeResult } from './types';
+import { type PixelFormat } from '@features/format/types';
 import { type FormatRegistry } from '@features/format/FormatRegistry';
 import { shiftRowIndices } from '@utils/array';
 import { Geometry } from './imagePreparation/types';
@@ -11,43 +12,35 @@ export class ImageDecoder {
     private readonly geometryResolver: GeometryResolver = new GeometryResolver(formatRegistry),
   ) {}
 
-  public decode(source: Uint8Array, options: DecodeOptions): DecodedImage {
-    const geometry = this.geometryResolver.resolveGeometry(source, options);;
+  public decode(source: Uint8Array, options: DecodeOptions): DecodeResult {
+    const geometry = this.geometryResolver.resolveGeometry(source, options);
+    const format = this.formatRegistry.get(options.format);
 
-    const { width, height } = geometry;
-    const result = this.applyAlphaMode(
-      this.decodeSource(source, geometry, options),
+    const data = this.applyAlphaMode(
+      this.decodeSource(source, geometry, options, format),
       options,
     );
 
-    return { width, height, data: result };
+    return {
+      source,
+      geometry,
+      image: { data, width: geometry.width, height: geometry.height },
+    };
   }
 
   private decodeSource(
     source: Uint8Array,
     geometry: Geometry,
     options: DecodeOptions,
+    format: PixelFormat,
   ): Uint8ClampedArray<ArrayBuffer> {
-    const format = this.formatRegistry.get(options.format);
-    const { width, height, bytesPerRow, bytesPerFrame, baseOffset } = geometry;
+    const locator = new PixelLocator(geometry, options, format.bpp);
+    const result = new Uint8ClampedArray(geometry.width * geometry.height * 4);
 
-    const result = new Uint8ClampedArray(width * height * 4);
-    const rowOptions: RowOptions = { endian: options.endian, bitOrderMsb: options.bitOrderMsb };
-    const base = baseOffset
-      + Math.max(0, Math.min(options.frame, geometry.frameCount - 1))
-      * bytesPerFrame;
+    for (let y = 0; y < geometry.height; y++) {
+      const row = format.decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions);
 
-    for (let y = 0; y < height; y++) {
-      const sourceRow = options.flipY ? height - 1 - y : y;
-
-      const row = format.decodeRow(
-        source,
-        base + sourceRow * bytesPerRow,
-        width,
-        rowOptions,
-      );
-
-      result.set(row, y * width * 4);
+      result.set(row, y * geometry.width * 4);
     }
 
     return result;
