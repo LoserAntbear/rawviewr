@@ -61,18 +61,22 @@ export class ImageDecoder {
       }
     } else if (options.unpremultiply) {
       for (let i = 0; i < result.length; i += 4) {
-        const a = result[i + 3];
+        const alpha = result[i + 3];
 
-        if (a > 0 && a < 255) {
-          const scale = 255 / a;
+        if (alpha > 0 && alpha < 255) {
+          const scale = 255 / alpha;
 
-          result[i] = result[i] * scale;
-          result[i + 1] = result[i + 1] * scale;
-          result[i + 2] = result[i + 2] * scale;
+          for (const j of shiftRowIndices(i)) {
+            result[j] = result[j] * scale;
+          }
         }
       }
     }
 
     return result;
   }
+}
+
+function shiftRowIndices(i: number, shift: number = 3): number[] {
+  return Array.from({ length: shift }, (_, index) => i + index);
 }
