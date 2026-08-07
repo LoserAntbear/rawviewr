@@ -1,4 +1,5 @@
-import { Endian, HeaderPreset } from '../definitions';
+import { Endian } from '@definitions/bits';
+import { HeaderPreset } from '../definitions';
 
 /**
  * The presets that actually describe a header. `None` is excluded because it

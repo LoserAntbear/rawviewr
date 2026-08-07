@@ -1,15 +1,17 @@
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import { DecodedImage, DecodeOptions } from './types';
-import { getFormat } from '@features/format/formatRegistry';
+import { type RowOptions } from '@features/format/types';
+import { type FormatRegistry } from '@features/format/FormatRegistry';
 
 export class ImageDecoder {
   constructor(
-    private readonly geometryResolver: GeometryResolver = new GeometryResolver(),
+    private readonly formatRegistry: FormatRegistry,
+    private readonly geometryResolver: GeometryResolver = new GeometryResolver(formatRegistry),
   ) {}
 
   public decode(source: Uint8Array, options: DecodeOptions): DecodedImage {
     const geometry = this.geometryResolver.resolveGeometry(source, options);
-    const format = getFormat(options.format);
+    const format = this.formatRegistry.get(options.format);
 
     const base =
       geometry.baseOffset +
@@ -17,11 +19,18 @@ export class ImageDecoder {
 
     const { width, height, bytesPerRow } = geometry;
     const out = new Uint8ClampedArray(width * height * 4);
-    const rowOpts = { littleEndian: options.endian, bitOrderMsb: options.bitOrderMsb };
+    const rowOptions: RowOptions = { endian: options.endian, bitOrderMsb: options.bitOrderMsb };
 
     for (let y = 0; y < height; y++) {
       const sourceRow = options.flipY ? height - 1 - y : y;
-      format.decodeRow(geometry.source, base + sourceRow * bytesPerRow, out, y * width * 4, width, rowOpts);
+      const row = format.decodeRow(
+        source,
+        base + sourceRow * bytesPerRow,
+        width,
+        rowOptions,
+      );
+
+      out.set(row, y * width * 4);
     }
 
     if (options.alphaMode === 'ignore') {

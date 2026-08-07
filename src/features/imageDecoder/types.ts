@@ -1,4 +1,5 @@
-import type { HeaderPreset, AlphaMode, Endian } from './definitions';
+import type { Endian } from '@definitions/bits';
+import type { HeaderPreset, AlphaMode } from './definitions';
 
 export type DecodeOptions = {
   frame: number; /** --- Which frame of a multi-frame buffer to decode. */

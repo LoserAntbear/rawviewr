@@ -1,13 +1,8 @@
-import { Endian, HeaderPreset, MAX_DIMENSION } from '../../definitions';
+import { Endian } from '@definitions/bits';
+import { readWord } from '@utils/bits';
+import { HeaderPreset, MAX_DIMENSION } from '../../definitions';
 import { HeaderImplausibleError, HeaderTruncatedError } from './headerErrors';
 import type { HeaderDimensions, HeaderLayout, DefinedHeaderedPreset } from '../types';
-
-type OrderDescriptor = { msbAt: (fieldBytes: number) => number; step: number };
-
-const BYTE_ORDER_DESCRIPTORS: Record<Endian, OrderDescriptor> = {
-  [Endian.Big]: { msbAt: () => 0, step: 1 },
-  [Endian.Little]: { msbAt: (fieldBytes) => fieldBytes - 1, step: -1 },
-};
 
 /** 1 Width + 1 height = 2 fields per header. Quick math. */
 const FIELDS_PER_HEADER = 2;
@@ -23,24 +18,6 @@ function isPlausibleDimension(value: number): boolean {
   return value > 0 && value <= MAX_DIMENSION;
 }
 
-function readFieldBytes(
-  src: Uint8Array,
-  offset: number,
-  fieldBytes: number,
-  endian: Endian,
-): number {
-  const { msbAt, step } = BYTE_ORDER_DESCRIPTORS[endian];
-  const msb = msbAt(fieldBytes);
-
-  let value = 0;
-
-  for (let i = 0; i < fieldBytes; i++) {
-    value = value * 256 + src[offset + msb + i * step];
-  }
-
-  return value;
-}
-
 function prepareDimensionValue(
   src: Uint8Array,
   offset: number,
@@ -48,7 +25,7 @@ function prepareDimensionValue(
   endian: Endian,
   fieldName: 'width' | 'height',
 ): number {
-  const value = readFieldBytes(src, offset, fieldBytes, endian);
+  const value = readWord(src, offset, fieldBytes, endian);
 
   if (!isPlausibleDimension(value)) {
     throw new HeaderImplausibleError(value, fieldName);
