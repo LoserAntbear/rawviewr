@@ -11,3 +11,5 @@ export type ViewerSettings = {
   tileSize: number;
   background: 'checker' | 'black' | 'white' | 'magenta' | 'editor'; // FIXME: Should this be an enum?
 };
+
+export type ViewerMode = 'single' | 'gallery';
