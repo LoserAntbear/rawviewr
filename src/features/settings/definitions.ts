@@ -11,22 +11,30 @@ export const TILE_SIZE_LIMITS_PX = { min: 48, max: 512 } as const;
 /** --- Just a sanity check rather than a strict limit. 4GB is an image huge enough */
 export const FILE_SIZE_LIMITS_MB = { min: 1, max: 4096 } as const;
 
-export const VIEWER_CONFIG_KEYS = ['background', 'tileSize'] as const;
 export const VIEWER_CONFIG_DEFAULT_KEYS = [
   'defaultFormat',
   'defaultWidth',
   'defaultHeight',
   'defaultOffset',
-  'defaultLittleEndian',
   'defaultAlphaMode',
+  'defaultLittleEndian',
 ] as const;
-
-/** Consulted while opening; a change cannot affect a buffer that is already loaded. */
+/**
+ * The keys we watch for changes that may affect an opened viewer.
+ * There's also a set of keys that are consulted at open time ONLY.
+ */
+export const VIEWER_CONFIG_WATCHED_KEYS = ['background', 'tileSize'] as const;
+/**
+ * The keys we watch for changes ONLY while opening;
+ * There's also a set of keys that we subscribe to for changes affecting an opened viewer and watch for.
+ */
 export const OPEN_TIME_KEYS = ['maxFileSizeMB', 'galleryIncludeGlob'] as const;
 
-/** Runtime counterpart of `ConfigKey` — the type is erased, `affectsConfiguration` is not. */
+/**
+ * Barrel export of all keys, so consumers can iterate over them without having to know which are watched and which are open-time-only.
+ */
 export const CONFIG_KEYS = [
-  ...VIEWER_CONFIG_KEYS,
-  ...VIEWER_CONFIG_DEFAULT_KEYS,
   ...OPEN_TIME_KEYS,
+  ...VIEWER_CONFIG_WATCHED_KEYS,
+  ...VIEWER_CONFIG_DEFAULT_KEYS,
 ] as const;
