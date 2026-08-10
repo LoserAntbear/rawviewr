@@ -13,7 +13,9 @@
       "@features/*": ["src/features/*"],
       "@utils/*": ["src/utils/*"],
       "@webview/*": ["src/features/webview/*"],
-      "@root/*": ["src/*"]
+      "@root/*": ["src/*"],
+      "@packageRoot/*": ["./*"],
+      "@app-types/*": ["src/types/*.d.ts"],
     },
     "strict": true,
     "noUnusedLocals": true,
@@ -21,7 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": false,
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "resolveJsonModule": true,
   },
-  "include": ["src"]
 }
