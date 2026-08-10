@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { ViewerBackground } from './definitions';
 
 export type ViewerSource = {
   id: string;
@@ -7,9 +8,9 @@ export type ViewerSource = {
   uri: vscode.Uri;
 };
 
-export type ViewerSettings = {
+export type ViewerConfiguration = {
   tileSize: number;
-  background: 'checker' | 'black' | 'white' | 'magenta' | 'editor'; // FIXME: Should this be an enum?
+  background: ViewerBackground; // FIXME: Should this be an enum?
 };
 
 export type ViewerMode = 'single' | 'gallery';
