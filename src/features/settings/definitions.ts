@@ -28,13 +28,13 @@ export const VIEWER_CONFIG_WATCHED_KEYS = ['background', 'tileSize'] as const;
  * The keys we watch for changes ONLY while opening;
  * There's also a set of keys that we subscribe to for changes affecting an opened viewer and watch for.
  */
-export const OPEN_TIME_KEYS = ['maxFileSizeMB', 'galleryIncludeGlob'] as const;
+export const VIEWER_CONFIG_OPEN_TIME_KEYS = ['maxFileSizeMB', 'galleryIncludeGlob'] as const;
 
 /**
  * Barrel export of all keys, so consumers can iterate over them without having to know which are watched and which are open-time-only.
  */
-export const CONFIG_KEYS = [
-  ...OPEN_TIME_KEYS,
+export const VIEWER_CONFIG_KEYS = [
+  ...VIEWER_CONFIG_OPEN_TIME_KEYS,
   ...VIEWER_CONFIG_WATCHED_KEYS,
   ...VIEWER_CONFIG_DEFAULT_KEYS,
 ] as const;
