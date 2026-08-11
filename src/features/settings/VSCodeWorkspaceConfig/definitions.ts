@@ -1,4 +1,5 @@
 import { MAX_DIMENSION } from '@features/image/imageDecoder/definitions';
+import { ViewerConfigKeySet } from './types';
 
 export const EXTENSION_CONFIGURATION_KEY = 'rawImageViewer';
 
@@ -23,18 +24,25 @@ export const VIEWER_CONFIG_DEFAULT_KEYS = [
  * The keys we watch for changes that may affect an opened viewer.
  * There's also a set of keys that are consulted at open time ONLY.
  */
-export const VIEWER_CONFIG_WATCHED_KEYS = ['background', 'tileSize'] as const;
+const VIEWER_CONFIG_WATCHED_KEYS = ['background', 'tileSize'] as const;
 /**
  * The keys we watch for changes ONLY while opening;
  * There's also a set of keys that we subscribe to for changes affecting an opened viewer and watch for.
  */
-export const VIEWER_CONFIG_OPEN_TIME_KEYS = ['maxFileSizeMB', 'galleryIncludeGlob'] as const;
+const VIEWER_CONFIG_ON_OPEN_KEYS = ['maxFileSizeMB', 'galleryIncludeGlob'] as const;
 
-/**
- * Barrel export of all keys, so consumers can iterate over them without having to know which are watched and which are open-time-only.
- */
-export const VIEWER_CONFIG_KEYS = [
-  ...VIEWER_CONFIG_OPEN_TIME_KEYS,
-  ...VIEWER_CONFIG_WATCHED_KEYS,
-  ...VIEWER_CONFIG_DEFAULT_KEYS,
-] as const;
+export enum ConfigChangeKind {
+  ViewerOnOpen = 'viewer:onOpen',
+  ViewerWatched = 'viewer:watched',
+  ViewerDefaults = 'viewer:defaults',
+}
+export const VIEWER_CONFIG_KEYS: ViewerConfigKeySet = {
+  all: [
+    ...VIEWER_CONFIG_ON_OPEN_KEYS,
+    ...VIEWER_CONFIG_WATCHED_KEYS,
+    ...VIEWER_CONFIG_DEFAULT_KEYS,
+  ],
+  [ConfigChangeKind.ViewerOnOpen]: [...VIEWER_CONFIG_ON_OPEN_KEYS],
+  [ConfigChangeKind.ViewerWatched]: [...VIEWER_CONFIG_WATCHED_KEYS],
+  [ConfigChangeKind.ViewerDefaults]: [...VIEWER_CONFIG_DEFAULT_KEYS],
+};
