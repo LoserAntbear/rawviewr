@@ -298,14 +298,18 @@
     "watch": "npm-run-all -p watch:*",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "package": "npm run typecheck && npm run build -- --production",
+    "lint": "eslint --ext .ts,.tsx src",
     "vsix": "npx --yes @vscode/vsce package --no-dependencies -o raw-image-viewer.vsix",
     "vsix:local": "npx --yes @vscode/vsce package --baseContentUrl https://none --baseImagesUrl https://none --no-dependencies -o raw-image-viewer-local.vsix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22.7.5",
     "@types/vscode": "^1.85.0",
     "esbuild": "^0.28.1",
+    "eslint": "^9.39.5",
     "npm-run-all": "^1.1.3",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.67.0"
   }
 }
