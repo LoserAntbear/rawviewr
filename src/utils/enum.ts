@@ -1,4 +1,8 @@
-export function asEnumMember<T extends Record<string, string>>(
+export function asEnumMember<
+  Keys extends string = string,
+  Values extends string = string,
+  T extends Record<Keys, Values> = Record<Keys, Values>
+>(
   enumeration: T,
   value: unknown,
 ): T[keyof T] | null {
