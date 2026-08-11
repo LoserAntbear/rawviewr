@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { DisposableRegistry } from '@features/disposable/DisposableRegistry';
+import { DisposableStore } from '@features/disposable/DisposableStore';
 import { RawEditorProvider } from '@features/editor/RawEditorProvider';
 import { ExtensionHost } from '@features/extension/ExtensionHost';
 import { IntentDispatcher } from '@features/intent/IntentDispatcher';
@@ -10,19 +12,27 @@ import { ViewerWindowController } from '@features/viewer/windowController/Viewer
 import { SettingsController } from '@features/settings/SettingsController';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const registry = new ViewerRegistry();
-  const windowController = new ViewerWindowController(context, registry);
+  // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
+  const disposableRegistry = new DisposableRegistry();
+
+  DisposableStore.assignRegistry(disposableRegistry);
+  context.subscriptions.push(disposableRegistry);
+
+  const viewerRegistry = new ViewerRegistry();
+  const windowController = new ViewerWindowController(context, viewerRegistry);
   const settingsController = new SettingsController(context.workspaceState);
 
   const dispatcher = new IntentDispatcher({
-    ...VIEWER_INTENT_RESOLVERS(windowController, registry),
+    ...VIEWER_INTENT_RESOLVERS(windowController, viewerRegistry),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
-  const host = new ExtensionHost(context, new RawEditorProvider(context, registry), dispatcher);
+  const host = new ExtensionHost(context, new RawEditorProvider(context, viewerRegistry), dispatcher);
 
-  host.register();
+  host.registerSelf();
 }
 
 export function deactivate(): void {
-  // Nothing to tear down: viewers are disposed by their own panels.
+  // Everything disposable self-registered into the DisposableRegistry, which VS Code
+  // tears down through context.subscriptions. Nothing to do here.
+  DisposableStore.assignRegistry(null);
 }
