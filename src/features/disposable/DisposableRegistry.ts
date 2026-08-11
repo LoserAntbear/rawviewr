@@ -32,12 +32,6 @@ export class DisposableRegistry implements vscode.Disposable {
   }
 
   public unregister(disposable: vscode.Disposable): void {
-    if (!this.registered.has(disposable)) {
-      throw new Error('Attempted to unregister a disposable that was never registered.');
-    }
-
-    disposable.dispose();
-
     this.registered.delete(disposable);
   }
 
