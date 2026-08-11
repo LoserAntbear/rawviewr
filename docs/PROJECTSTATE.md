@@ -41,6 +41,7 @@ Provided a simple viewer for raw binary files, with ability to provide a gallery
 - Add RMB action on gallery item to show the selected image in explorer view.
 - Add memo of the selected toolbar options, so that user does not have to reselect them every time.
 - Add custom header presets support with related config/parser
+- Add script builders in a webview worker gated on Workspace Trust
 
 ### General refactor
 
