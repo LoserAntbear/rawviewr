@@ -19,7 +19,7 @@ export class ExtensionHost {
     private readonly dispatcher: IntentDispatcher,
   ) {}
 
-  public register(): void {
+  public registerSelf(): void {
     this.context.subscriptions.push(
       ...this.registerCustomEditorProviders(),
       ...this.registerCommands(COMMANDS),
