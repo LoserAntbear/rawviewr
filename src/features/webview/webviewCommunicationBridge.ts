@@ -8,6 +8,9 @@ type WebviewCommunicationBridge = {
   onMessage: (handler: (message: HostMessage) => void) => void;
 };
 
+/**
+ * There's vbirtually no reason to have more than one instance of this bridge, so let's make it a singleton.
+ */
 export const WEBVIEW_COMM_BRIDGE: WebviewCommunicationBridge = {
   postMessage: (message: WebviewMessage) => {
     VSCODE_API.postMessage(message);
