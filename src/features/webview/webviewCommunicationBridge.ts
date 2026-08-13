@@ -3,7 +3,7 @@ import { HostMessage, WebviewMessage } from './types';
 // Can be called ONLY ONCE, thus safer to make as a global singleton
 const VSCODE_API = acquireVsCodeApi<unknown, WebviewMessage>();
 
-type WebviewCommunicationBridge = {
+export type WebviewCommunicationBridge = {
   postToWebviewHost: (message: WebviewMessage) => void;
   handleFromWebviewHost: (handler: (message: HostMessage) => void) => void;
 };
