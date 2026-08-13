@@ -1,8 +1,8 @@
-import type { Viewer } from '@features/viewer/viewer';
+import { WebviewHost } from '@features/webview/WebviewHost';
 import { ViewerRegistryEntry } from './types';
 
 export class ViewerRegistry {
-  public get activeViewer(): Viewer | undefined {
+  public get activeViewer(): WebviewHost | undefined {
     for (const entry of this._registry) {
       if (entry.panel.active) {
         return entry.viewer;
