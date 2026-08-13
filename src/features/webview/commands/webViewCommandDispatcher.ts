@@ -8,6 +8,7 @@ export class WebViewCommandDispatcher {
 
     if (!resolver) {
       console.warn(`No resolver found for command: ${command.kind}`);
+      return;
     }
 
     resolver(command);
