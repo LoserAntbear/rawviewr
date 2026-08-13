@@ -3,7 +3,7 @@ import type { WebviewCommand, WebviewCommandResolversMap } from './types';
 export class WebViewCommandDispatcher {
   constructor(private readonly resolvers: WebviewCommandResolversMap) {}
 
-  public dispatch(command: WebviewCommand): void {
+  public dispatch(command: WebviewCommand, payload: unknown): void {
     const resolver = this.resolvers[command.kind];
 
     if (!resolver) {
@@ -11,6 +11,6 @@ export class WebViewCommandDispatcher {
       return;
     }
 
-    resolver(command);
+    resolver(command, payload);
   }
 }

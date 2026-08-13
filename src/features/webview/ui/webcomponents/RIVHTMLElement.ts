@@ -5,7 +5,9 @@ const RIV_COMMAND_EVENT_ID = 'riv:command';
 export abstract class RIVHTMLElement extends HTMLElement {
   public static readonly tagName: string;
 
-  protected emitCommand(command: WebviewCommand): void {
+  protected emitCommand<Payload = unknown>(
+    command: WebviewCommand<Payload>,
+  ): void {
     this.dispatchEvent(
       new CustomEvent<WebviewCommand>(RIV_COMMAND_EVENT_ID, {
         bubbles: true,
