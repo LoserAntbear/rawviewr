@@ -22,8 +22,14 @@ export class StringTemplate<const Tokens extends readonly string[]> {
     private readonly tokens: Tokens,
     private readonly replacePattern: RegExp = TOKEN_PATTERN,
   ) {
-    this.assertDelimitersWellFormed();
-    this.assertTokensMatchSource();
+    try {
+      this.assertDelimitersWellFormed();
+      this.assertTokensMatchSource();
+    } catch (error) {
+      console.error('StringTemplate initialization error:', error);
+
+      return this;
+    }
   }
 
   public render(values: TemplateValues<Tokens>): string {
