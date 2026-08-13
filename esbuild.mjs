@@ -85,7 +85,7 @@ const buildConfigs = [
     target: 'es2020',
     platform: 'browser',
     outfile: 'dist/webview/main.js',
-    entryPoints: ['src/webview/main.ts'],
+    entryPoints: ['src/features/webview/main.ts'],
   },
 ];
 
