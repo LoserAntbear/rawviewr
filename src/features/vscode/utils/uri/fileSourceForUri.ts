@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
-import { ViewerSource } from '@features/viewer/viewer';
+import { FileSource } from '@features/webview/types';
 
-export function viewerSourceForUri(uri: vscode.Uri): ViewerSource {
+export function fileSourceForUri(uri: vscode.Uri): FileSource {
   return {
     uri,
     id: uri.toString(),
