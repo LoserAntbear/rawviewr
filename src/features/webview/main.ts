@@ -1,7 +1,7 @@
 import { WebViewCommandDispatcher } from './commands/webViewCommandDispatcher';
 import { RIVAppComponent } from './ui/webcomponents/riv-app-component';
 import { WebviewSession } from './session/WebviewSession';
-import { WEBVIEW_SESSION_COMM_BRIDGE } from './session/WebviewSessionCommunicationBridge';
+import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
 
 const CUSTOM_COMPONENTS = [
@@ -25,13 +25,14 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const bridge = WEBVIEW_SESSION_COMM_BRIDGE;
+  const bridge = new WebviewSessionCommunicationBridge();
   const commandDispatcher = new WebViewCommandDispatcher(
     WEBVIEW_COMMAND_RESOLVERS(bridge),
   );
 
   new WebviewSession(
     commandDispatcher,
+    bridge,
     document
   );
 }
