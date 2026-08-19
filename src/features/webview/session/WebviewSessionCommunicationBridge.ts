@@ -1,25 +1,34 @@
-import { HostMessage, WebviewMessage } from '../types';
+import type { HostMessage, WebviewMessage } from '../types';
+import { listenTo } from '../disposable/listenTo';
+import type { WebviewDisposable } from '../disposable/types';
 
-// Can be called ONLY ONCE, thus safer to make as a global singleton
-const VSCODE_API = acquireVsCodeApi<unknown, WebviewMessage>();
-
-export type WebviewSessionCommunicationBridge = {
-  postToWebviewHost: (message: WebviewMessage) => void;
-  handleFromWebviewHost: (handler: (message: HostMessage) => void) => void;
-};
+type VSCodeWebviewApi = ReturnType<typeof acquireVsCodeApi<unknown, WebviewMessage>>;
+type WebviewHostMessageHandler = (message: HostMessage) => void;
+let acquiredApi: VSCodeWebviewApi | null = null;
 
 /**
- * There's virtually no reason to have more than one instance of this bridge, so let's make it a singleton.
+ * `acquireVsCodeApi` throws if called more than once per webview, so the call is memoised.
+ * Abstaining from global const import on purpose to avoid import-level calls.
  */
-export const WEBVIEW_SESSION_COMM_BRIDGE: WebviewSessionCommunicationBridge = {
-  postToWebviewHost: (message: WebviewMessage) => {
-    console.log('WebviewSessionCommunicationBridge: Posting message to webview host:', message);
-    VSCODE_API.postMessage(message);
-  },
-  handleFromWebviewHost: (handler: (message: HostMessage) => void) => {
-    window.addEventListener('message', (event: MessageEvent<HostMessage>) => {
-      console.log('WebviewSessionCommunicationBridge: Received message from webview host:', event.data);
-      handler(event.data);
+function acquireApiOnce(): VSCodeWebviewApi {
+  acquiredApi ??= acquireVsCodeApi<unknown, WebviewMessage>();
+
+  return acquiredApi;
+}
+
+export class WebviewSessionCommunicationBridge {
+  constructor(private readonly api: VSCodeWebviewApi = acquireApiOnce()) {}
+
+  public postToWebviewHost(message: WebviewMessage): void {
+    this.api.postMessage(message);
+  }
+
+  public handleFromWebviewHost(
+    handler: WebviewHostMessageHandler,
+    target: EventTarget = window,
+  ): WebviewDisposable {
+    return listenTo(target, 'message', (event: Event) => {
+      handler((event as MessageEvent<HostMessage>).data);
     });
-  },
-};
+  }
+}
