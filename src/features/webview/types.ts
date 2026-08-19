@@ -8,18 +8,6 @@ export type FileSource = {
   detail?: string;
 };
 
-export interface BufferItem {
-  id: string;
-  /** Display name (file basename). */
-  name: string;
-  /** Human-readable location, shown in tooltips. */
-  detail: string;
-  byteLength: number;
-  /** Base64 payload. Absent until the host streams it in. */
-  base64?: string;
-  error?: string;
-}
-
 export type HostMessage = {};
 
 export type WebviewMessage =
