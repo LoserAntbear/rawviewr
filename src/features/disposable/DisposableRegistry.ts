@@ -42,8 +42,13 @@ export class DisposableRegistry implements vscode.Disposable {
   public dispose(): void {
     this.disposed = true;
 
-    for (const disposable of [...this.registered]) {
-      disposable.dispose();
+    // LIFO to dispose on the same order as they were registered, so that dependencies are torn down after their dependents.
+    for (const disposable of [...this.registered].reverse()) {
+      try {
+        disposable.dispose();
+      } catch (error) {
+        console.error('Failed to dispose:', error);
+      }
     }
 
     this.registered.clear();
