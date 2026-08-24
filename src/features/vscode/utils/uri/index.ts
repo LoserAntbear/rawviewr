@@ -1,3 +1,3 @@
 export * from './resolveFolder';
 export * from './resolveUriTargets';
-export * from './viewerSourceForUri';
+export * from './fileSourceForUri';
