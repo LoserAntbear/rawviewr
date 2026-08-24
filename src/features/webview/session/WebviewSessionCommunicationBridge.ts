@@ -1,9 +1,9 @@
-import type { HostMessage, WebviewMessage } from '../types';
+import type { WebviewHostMessage, WebviewMessage } from '../types';
 import { listenTo } from '../disposable/listenTo';
 import type { WebviewDisposable } from '../disposable/types';
 
 type VSCodeWebviewApi = ReturnType<typeof acquireVsCodeApi<unknown, WebviewMessage>>;
-type WebviewHostMessageHandler = (message: HostMessage) => void;
+type WebviewHostMessageHandler = (message: WebviewHostMessage) => void;
 let acquiredApi: VSCodeWebviewApi | null = null;
 
 /**
@@ -23,12 +23,12 @@ export class WebviewSessionCommunicationBridge {
     this.api.postMessage(message);
   }
 
-  public handleFromWebviewHost(
+  public listenToWebviewHost(
     handler: WebviewHostMessageHandler,
     target: EventTarget = window,
   ): WebviewDisposable {
     return listenTo(target, 'message', (event: Event) => {
-      handler((event as MessageEvent<HostMessage>).data);
+      handler((event as MessageEvent<WebviewHostMessage>).data);
     });
   }
 }
