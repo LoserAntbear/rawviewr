@@ -15,6 +15,7 @@ export abstract class DisposableStore implements vscode.Disposable {
   private static set registry(registry: DisposableRegistry | null) {
     if (DisposableStore._registry && registry) {
       console.error(new Error('Registry already assigned. Call DisposableStore.assignRegistry(null) before assigning a new one.'));
+      return;
     }
 
     this._registry = registry;
