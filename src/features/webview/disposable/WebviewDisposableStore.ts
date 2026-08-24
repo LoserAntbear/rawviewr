@@ -7,10 +7,12 @@ export class WebviewDisposableStore implements WebviewDisposable {
 
   private readonly disposables: WebviewDisposable[] = [];
 
-  public add<T extends WebviewDisposable>(disposable: T): T {
-    this.disposables.push(disposable);
-
-    return disposable;
+  public add<T extends WebviewDisposable>(disposable: T): T;
+  public add<T extends WebviewDisposable>(disposable: T[]): T[];
+  public add<T extends WebviewDisposable>(disposable: T | T[]): T | T[] {
+    return (Array.isArray(disposable))
+      ? this.handleAddAsArray(disposable)
+      : this.handleAddSingle(disposable);
   }
 
   public dispose(): void {
@@ -19,5 +21,19 @@ export class WebviewDisposableStore implements WebviewDisposable {
     }
 
     this.disposables.length = 0;
+  }
+
+  private handleAddAsArray<T extends WebviewDisposable>(disposables: T[]): T[] {
+    for (const disposable of disposables) {
+      this.disposables.push(disposable);
+    }
+
+    return disposables;
+  }
+
+  private handleAddSingle<T extends WebviewDisposable>(disposable: T): T {
+    this.disposables.push(disposable);
+
+    return disposable;
   }
 }
