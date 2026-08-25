@@ -1,2 +1,2 @@
-export * from './buildBufferItem';
+export * from './BufferItem';
 export * from './types';
