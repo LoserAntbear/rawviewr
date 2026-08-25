@@ -106,7 +106,7 @@ export class WebviewHost extends DisposableStore {
       try {
         const item = await BufferItem.fromFileSource(source);
 
-        if (!FileValidator.isValidFileSize(item.byteLength)) {
+        if (!FileValidator.isValidFileSize(item.data.byteLength)) {
           throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
         }
 
