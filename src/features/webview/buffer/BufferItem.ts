@@ -6,10 +6,10 @@ import { BufferBuildPayload } from './types';
 export class BufferItem {
   public static stubFromFileSource(source: FileSource): BufferItem {
     return new BufferItem({
-      byteLength: 0,
       id: source.id,
       name: source.name,
       detail: source.detail,
+      data: new ArrayBuffer(0), // Empty data for stub
     });
   }
 
@@ -21,8 +21,7 @@ export class BufferItem {
         id: source.id,
         name: source.name,
         detail: source.detail,
-        byteLength: bytes.byteLength,
-        base64: Buffer.from(bytes).toString('base64'),
+        data: Buffer.from(bytes).buffer,
       });
     } catch (error) {
       console.error(`Failed to read file for BufferItem (id: ${source.id}, name: ${source.name}):`, error);
@@ -33,7 +32,7 @@ export class BufferItem {
 
   public readonly id: string;
   public readonly name: string;
-  public readonly byteLength: number;
+  public readonly data: ArrayBuffer;
 
   public readonly error?: string;
   public readonly detail?: string;
@@ -42,8 +41,8 @@ export class BufferItem {
   constructor(payload: BufferBuildPayload) {
     this.id = payload.id;
     this.name = payload.name;
+    this.data = payload.data;
     this.detail = payload.detail;
     this.base64 = payload.base64;
-    this.byteLength = payload.byteLength ?? 0;
   }
 }
