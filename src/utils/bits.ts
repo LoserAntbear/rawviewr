@@ -53,3 +53,28 @@ export function readWord(
 
   return value;
 }
+
+const step = 1024;
+const gradeNames = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] as const;
+type Grade = typeof gradeNames[number];
+
+export const ByteConverter = {
+  to: (grade: Grade, bytes: number): number => {
+    const index = gradeNames.indexOf(grade);
+
+    if (index === -1) {
+      throw new Error(`Invalid grade: ${grade}`);
+    }
+
+    return bytes / Math.pow(step, index);
+  },
+  from: (grade: Grade, value: number): number => {
+    const index = gradeNames.indexOf(grade);
+
+    if (index === -1) {
+      throw new Error(`Invalid grade: ${grade}`);
+    }
+
+    return value * Math.pow(step, index);
+  },
+};
