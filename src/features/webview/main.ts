@@ -1,10 +1,13 @@
 import { WebViewCommandDispatcher } from './commands/webViewCommandDispatcher';
-import { RIVAppComponent } from './ui/webcomponents/riv-app-component';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
+import { RIVImage, RIVMainView, RIVToolbar, RIVAppComponent } from './ui/webcomponents';
 
 const CUSTOM_COMPONENTS = [
+  RIVImage,
+  RIVToolbar,
+  RIVMainView,
   RIVAppComponent,
 ];
 
