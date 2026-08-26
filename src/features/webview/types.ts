@@ -10,7 +10,7 @@ export type FileSource = {
 };
 
 export type WebviewHostMessage =
-  | { type: 'items';  items: BufferItem[]; }
+  | { type: 'items'; items: BufferItem[]; }
   | { type: 'error'; message: string; };
 
 export type WebviewHostMessageType = WebviewHostMessage['type'];
