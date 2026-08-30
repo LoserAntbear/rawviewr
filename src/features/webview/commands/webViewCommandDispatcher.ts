@@ -9,7 +9,7 @@ export class WebViewCommandDispatcher {
   ) {}
 
   public dispatch(command: WebviewCommand): void {
-    const resolver = this.resolvers[command.kind] as WebviewCommandResolver;
+    const resolver = this.resolvers[command.type] as WebviewCommandResolver;
 
     resolver(command);
   }
