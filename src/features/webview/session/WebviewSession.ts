@@ -1,10 +1,7 @@
-import { WebviewCommandDispatcher } from '../commands/webviewCommandDispatcher';
+import { WebviewCommandDispatcher } from '../commands/webViewCommandDispatcher';
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../disposable/types';
-import type { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
-import type { WebviewHostMessage } from '../webviewHost';
-import type { BufferItem } from '../buffer';
-import { BufferItemRegistry } from '../buffer/BufferItemRegistry';
+import type { WebviewHostMessageDispatcher } from '../webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
 
 
 export class WebviewSession implements WebviewDisposable {
@@ -12,42 +9,18 @@ export class WebviewSession implements WebviewDisposable {
 
   constructor(
     private readonly commandDispatcher: WebviewCommandDispatcher,
-    private readonly bridge: WebviewSessionCommunicationBridge,
+    private readonly hostMessageDispatcher: WebviewHostMessageDispatcher,
     private readonly listenTarget: EventTarget = document,
-    private readonly itemRegistry = new BufferItemRegistry(),
   ) {
     this.disposableStore.add(
       [
         this.commandDispatcher.listen(this.listenTarget),
-        this.bridge.listenToWebviewHost(this.handleWebviewHostMessage.bind(this)),
+        this.hostMessageDispatcher.listen(window), // Probably should try `listenTarget` instead of `window`
       ],
     );
   }
 
   public dispose(): void {
     this.disposableStore.dispose();
-  }
-
-  private handleWebviewHostMessage(message: WebviewHostMessage): void {
-    console.log('WebviewSession: Received message from webview host:', message);
-    switch (message.type) {
-      case 'items':
-        this.handleWebviewItemsMessage(message.items);
-        break;
-      case 'error':
-        this.handleWebviewErrorMessage(message.message);
-        break;
-      default:
-        console.warn('WebviewSession: Unknown message type from webview host:', message);
-    }
-  }
-
-  private handleWebviewItemsMessage(items: BufferItem[]): void {
-    console.log('WebviewSession: Received items from webview:', items);
-    this.itemRegistry.upsert(items);
-  }
-
-  private handleWebviewErrorMessage(message: string): void {
-    console.error('WebviewSession: Error message from webview host:', message);
   }
 }

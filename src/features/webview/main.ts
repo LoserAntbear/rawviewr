@@ -3,6 +3,8 @@ import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
 import { RIVImage, RIVMainView, RIVToolbar, RIVAppComponent } from './ui/webcomponents';
+import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
+import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
 
 const CUSTOM_COMPONENTS = [
   RIVImage,
@@ -27,10 +29,14 @@ function launchSession(): void {
   const commandDispatcher = new WebviewCommandDispatcher(
     WEBVIEW_COMMAND_RESOLVERS(bridge),
   );
+  const hostMessageDispatcher = new WebviewHostMessageDispatcher(
+    WEBVIEW_HOST_MESSAGE_RESOLVERS(),
+    bridge,
+  );
 
   new WebviewSession(
     commandDispatcher,
-    bridge,
+    hostMessageDispatcher,
     document
   );
 }
