@@ -1,4 +1,4 @@
-import type { WebviewHostMessage, WebviewMessage } from '../types';
+import type { WebviewHostMessage, WebviewMessage } from '../webviewHost';
 import { listenTo } from '../disposable/listenTo';
 import type { WebviewDisposable } from '../disposable/types';
 

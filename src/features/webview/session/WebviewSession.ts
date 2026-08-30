@@ -2,7 +2,7 @@ import { WebViewCommandDispatcher } from '../commands/webViewCommandDispatcher';
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../disposable/types';
 import type { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
-import type { WebviewHostMessage } from '../types';
+import type { WebviewHostMessage } from '../webviewHost';
 import type { BufferItem } from '../buffer';
 import { BufferItemRegistry } from '../buffer/BufferItemRegistry';
 
