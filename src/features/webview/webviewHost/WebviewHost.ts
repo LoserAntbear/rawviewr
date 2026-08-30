@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 
-import type { FileSource, WebviewHostMessage, WebviewMessage } from './types';
+import type { WebviewHostMessage } from './types';
+import type { FileSource, WebviewMessage } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import appShellHtml from './app-shell.html';
 import { StringTemplate } from '@utils/string/StringTemplate';
-import { getNonce } from './utils';
+import { getNonce } from '../utils';
 import { BufferItem } from '@features/webview/buffer';
 import { FileValidator } from '@features/file/FileValidator';
 
