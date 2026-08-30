@@ -1,4 +1,4 @@
-import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
+import { WebviewCommandDispatcher } from './commands/webViewCommandDispatcher';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
