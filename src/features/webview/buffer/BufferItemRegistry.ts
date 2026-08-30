@@ -15,8 +15,8 @@ export class BufferItemRegistry {
 
   private readonly items = new Map<string, BufferItem>();
 
-  public upsert(items: BufferItem[]): void;
   public upsert(item: BufferItem): void;
+  public upsert(items: BufferItem[]): void;
   public upsert(item: BufferItem | BufferItem[]): void {
     const items = Array.isArray(item) ? item : [item];
 

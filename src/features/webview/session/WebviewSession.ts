@@ -44,7 +44,7 @@ export class WebviewSession implements WebviewDisposable {
 
   private handleWebviewItemsMessage(items: BufferItem[]): void {
     console.log('WebviewSession: Received items from webview:', items);
-    this.itemRegistry.add(items);
+    this.itemRegistry.upsert(items);
   }
 
   private handleWebviewErrorMessage(message: string): void {
