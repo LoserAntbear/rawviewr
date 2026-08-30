@@ -14,6 +14,7 @@ export abstract class RIVHTMLElement extends HTMLElement {
     this.dispatchEvent(
       new CustomEvent<WebviewCommand>(RIV_COMMAND_EVENT_ID, {
         bubbles: true,
+        composed: true, // To allow the event to cross shadow DOM boundaries
         detail: command,
       }),
     );
