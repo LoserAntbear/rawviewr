@@ -1,4 +1,4 @@
-import { WebviewHost } from '@features/webview/WebviewHost';
+import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 import { ViewerRegistryEntry } from './types';
 
 export class ViewerRegistry {
