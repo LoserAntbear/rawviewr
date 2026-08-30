@@ -3,7 +3,7 @@ import type { WebviewCommandResolversMap } from './types';
 
 export const RIV_COMMAND_EVENT_ID = 'riv:command' as const;
 
-export enum WebviewCommandKind {
+export enum WebviewCommandType {
   Ready = 'ready',
   Connected = 'connected',
 }
@@ -11,7 +11,7 @@ export enum WebviewCommandKind {
 export const WEBVIEW_COMMAND_RESOLVERS = (
   bridge: WebviewSessionCommunicationBridge,
 ): WebviewCommandResolversMap => ({
-  [WebviewCommandKind.Connected]: (command) => {
+  [WebviewCommandType.Connected]: (command) => {
     console.log('WEBVIEW_COMMAND_RESOLVERS: Handling connected command:', command);
     if (command.payload === 'riv-app-component') {
       bridge.postToWebviewHost({
@@ -19,7 +19,7 @@ export const WEBVIEW_COMMAND_RESOLVERS = (
       });
     }
   },
-  [WebviewCommandKind.Ready]: (command) => {
+  [WebviewCommandType.Ready]: (command) => {
     console.log('WEBVIEW_COMMAND_RESOLVERS: Handling ready command:', command);
     // Handle the 'ready' command from the webview if needed
   }

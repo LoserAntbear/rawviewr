@@ -1,4 +1,4 @@
-import { WebviewCommandKind } from '@features/webview/commands/definitions';
+import { WebviewCommandType } from '@features/webview/commands/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -8,7 +8,7 @@ export class RIVToolbar extends RIVHTMLElement {
 
   public connectedCallback(): void {
     this.emitCommand({
-      kind: WebviewCommandKind.Connected,
+      type: WebviewCommandType.Connected,
       payload: RIVToolbar.tagName,
     });
   }

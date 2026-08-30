@@ -1,14 +1,14 @@
-import type { WebviewCommandKind } from './definitions';
+import type { WebviewCommandType } from './definitions';
 
 export type WebviewCommand =
   {
-    kind: WebviewCommandKind.Connected;
+    type: WebviewCommandType.Connected;
     payload: string;
   }
-  | { kind: WebviewCommandKind.Ready; };
+  | { type: WebviewCommandType.Ready; };
 
 
-export type WebviewCommandResolver<K extends WebviewCommandKind = WebviewCommandKind> = (
-  command: Extract<WebviewCommand, { kind: K }>,
+export type WebviewCommandResolver<K extends WebviewCommandType = WebviewCommandType> = (
+  command: Extract<WebviewCommand, { type: K }>,
 ) => void;
-export type WebviewCommandResolversMap = { readonly [K in WebviewCommandKind]: WebviewCommandResolver<K> };
+export type WebviewCommandResolversMap = { readonly [K in WebviewCommandType]: WebviewCommandResolver<K> };
