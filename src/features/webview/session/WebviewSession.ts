@@ -1,4 +1,4 @@
-import { WebViewCommandDispatcher } from '../commands/webViewCommandDispatcher';
+import { WebviewCommandDispatcher } from '../commands/webviewCommandDispatcher';
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../disposable/types';
 import type { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
@@ -11,7 +11,7 @@ export class WebviewSession implements WebviewDisposable {
   private readonly disposableStore = new WebviewDisposableStore();
 
   constructor(
-    private readonly commandDispatcher: WebViewCommandDispatcher,
+    private readonly commandDispatcher: WebviewCommandDispatcher,
     private readonly bridge: WebviewSessionCommunicationBridge,
     private readonly listenTarget: EventTarget = document,
     private readonly itemRegistry = new BufferItemRegistry(),
