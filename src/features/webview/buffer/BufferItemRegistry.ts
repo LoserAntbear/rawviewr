@@ -1,41 +1,43 @@
 import { BufferItem } from './BufferItem';
 
-/**
- * Intentionally non-mutable array to store the order of items
- * To prevent items from being re-ordered in view when they are updated
- */
 export class BufferItemRegistry {
-  public readonly entries: BufferItem[] = [];
+  public get entries(): readonly BufferItem[] {
+    return [...this.items.values()];
+  }
 
-  public add(item: BufferItem[]): void;
-  public add(item: BufferItem): void;
-  public add(item: BufferItem | BufferItem[]): void {
+  public get ids(): readonly string[] {
+    return [...this.items.keys()];
+  }
+
+  public get size(): number {
+    return this.items.size;
+  }
+
+  private readonly items = new Map<string, BufferItem>();
+
+  public upsert(items: BufferItem[]): void;
+  public upsert(item: BufferItem): void;
+  public upsert(item: BufferItem | BufferItem[]): void {
     const items = Array.isArray(item) ? item : [item];
 
-    for (const i of items) {
-      if (!this.has(i.id)) {
-        this.entries.push(i);
-      }
+    for (const entry of items) {
+      this.items.set(entry.id, entry);
     }
   }
 
   public get(id: string): BufferItem | undefined {
-    return this.entries.find(entry => entry.id === id);
+    return this.items.get(id);
   }
 
   public has(id: string): boolean {
-    return this.findIndex(id) !== -1;
+    return this.items.has(id);
   }
 
-  public remove(id: string): void {
-    const index = this.findIndex(id);
-
-    if (index !== -1) {
-      this.entries.splice(index, 1);
-    }
+  public remove(id: string): boolean {
+    return this.items.delete(id);
   }
 
-  private findIndex(id: string): number {
-    return this.entries.findIndex(entry => entry.id === id);
+  public clear(): void {
+    this.items.clear();
   }
 }
