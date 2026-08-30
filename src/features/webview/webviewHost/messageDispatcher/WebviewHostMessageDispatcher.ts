@@ -17,7 +17,7 @@ export class WebviewHostMessageDispatcher {
         throw new Error(`No resolver found for message type ${message.type}`);
       }
 
-      return resolver(message);
+      return Promise.resolve(resolver(message));
     } catch (error) {
       console.error(`Failed to dispatch message ${message.type}:`, error);
 
