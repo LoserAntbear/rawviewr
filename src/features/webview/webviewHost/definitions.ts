@@ -1,8 +1,18 @@
+import { ReactiveStore } from '../store/ReactiveStore';
 import type { WebviewHostMessageResolverMap } from './messageDispatcher';
 
-export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (): WebviewHostMessageResolverMap => ({
+export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
+  store: ReactiveStore,
+): WebviewHostMessageResolverMap => ({
   items: (message) => {
+    if (message.type !== 'items') {
+      return;
+    }
+
     console.log('WEBVIEW_HOST_MESSAGE_RESOLVERS: Handling items message:', message);
+
+    store.addItems(message.items);
+    // store
   },
   error: (message) => {
     console.log('WEBVIEW_HOST_MESSAGE_RESOLVERS: Handling error message:', message);
