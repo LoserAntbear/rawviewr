@@ -1,4 +1,4 @@
-import { WebviewCommandDispatcher } from './commands/webViewCommandDispatcher';
+import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
@@ -7,6 +7,7 @@ import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/We
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
 import { ReactiveStore } from './store/ReactiveStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
+import { BufferItemRegistry } from '../buffer';
 
 const CUSTOM_COMPONENTS = [
   RIVImage,
@@ -27,7 +28,7 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const store = new ReactiveStore();
+  const store = new ReactiveStore(new BufferItemRegistry());
 
   WebviewContextProvider.create({ store });
 
@@ -36,7 +37,7 @@ function launchSession(): void {
     WEBVIEW_COMMAND_RESOLVERS(bridge),
   );
   const hostMessageDispatcher = new WebviewHostMessageDispatcher(
-    WEBVIEW_HOST_MESSAGE_RESOLVERS(),
+    WEBVIEW_HOST_MESSAGE_RESOLVERS(store),
     bridge,
   );
 
