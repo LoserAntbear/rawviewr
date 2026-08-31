@@ -1,3 +1,12 @@
+export type BufferItemData = {
+  readonly id: string;
+  readonly name: string;
+  readonly data: ArrayBuffer;
+
+  readonly detail?: string;
+  readonly error?: string;
+};
+
 export type BufferBuildPayload = {
   id: string;
   name: string;

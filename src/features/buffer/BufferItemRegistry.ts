@@ -1,7 +1,7 @@
-import { BufferItem } from './BufferItem';
+import type { BufferItemData } from './types';
 
 export class BufferItemRegistry {
-  public get entries(): readonly BufferItem[] {
+  public get entries(): readonly BufferItemData[] {
     return [...this.items.values()];
   }
 
@@ -13,11 +13,11 @@ export class BufferItemRegistry {
     return this.items.size;
   }
 
-  private readonly items = new Map<string, BufferItem>();
+  private readonly items = new Map<string, BufferItemData>();
 
-  public upsert(item: BufferItem): void;
-  public upsert(items: BufferItem[]): void;
-  public upsert(item: BufferItem | BufferItem[]): void {
+  public upsert(item: BufferItemData): void;
+  public upsert(items: BufferItemData[]): void;
+  public upsert(item: BufferItemData | BufferItemData[]): void {
     const items = Array.isArray(item) ? item : [item];
 
     for (const entry of items) {
@@ -25,7 +25,7 @@ export class BufferItemRegistry {
     }
   }
 
-  public get(id: string): BufferItem | undefined {
+  public get(id: string): BufferItemData | undefined {
     return this.items.get(id);
   }
 

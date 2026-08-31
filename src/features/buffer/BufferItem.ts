@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 
-import { FileSource } from '../types';
-import { BufferBuildPayload } from './types';
+import { FileSource } from '../webview/types';
+import type { BufferBuildPayload, BufferItemData } from './types';
 
-export class BufferItem {
+export class BufferItem implements BufferItemData {
   public static stubFromFileSource(source: FileSource): BufferItem {
     return new BufferItem({
       id: source.id,
@@ -21,7 +21,7 @@ export class BufferItem {
         id: source.id,
         name: source.name,
         detail: source.detail,
-        data: Buffer.from(bytes).buffer,
+        data: bytes.slice().buffer,
       });
     } catch (error) {
       console.error(`Failed to read file for BufferItem (id: ${source.id}, name: ${source.name}):`, error);
