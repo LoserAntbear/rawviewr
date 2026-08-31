@@ -1,8 +1,8 @@
-import { BufferItem } from '../buffer';
+import type { BufferItemData } from '../../buffer';
 
 export type WebviewHostMessageType = WebviewHostMessage['type'];
 export type WebviewHostMessage =
-  | { type: 'items'; items: BufferItem[]; }
+  | { type: 'items'; items: BufferItemData[]; }
   | { type: 'error'; message: string; };
 
 export type WebviewMessageType = WebviewMessage['type'];
