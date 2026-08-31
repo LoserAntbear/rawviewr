@@ -1,4 +1,4 @@
-import { WebviewCommandDispatcher } from '../commands/webViewCommandDispatcher';
+import { WebviewCommandDispatcher } from '../commands/webviewCommandDispatcher';
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../disposable/types';
 import type { WebviewHostMessageDispatcher } from '../webviewHost/messageDispatcher/WebviewHostMessageDispatcher';

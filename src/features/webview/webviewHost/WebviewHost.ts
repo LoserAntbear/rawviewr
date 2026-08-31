@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 
-import type { WebviewHostMessage } from './types';
-import type { FileSource, WebviewMessage } from '../types';
+import type { WebviewHostMessage, WebviewMessage } from './types';
+import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import appShellHtml from './app-shell.html';
 import { StringTemplate } from '@utils/string/StringTemplate';
 import { getNonce } from '../utils';
-import { BufferItem } from '@features/webview/buffer';
+import { BufferItem } from '@features/buffer/BufferItem';
 import { FileValidator } from '@features/file/FileValidator';
 
 export class WebviewHost extends DisposableStore {
@@ -38,11 +38,12 @@ export class WebviewHost extends DisposableStore {
     ).toString();
     // const style = this.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'viewer.css'));
     const nonce = getNonce();
-    const appHostTemplate = new StringTemplate(appShellHtml, ['script', 'nonce']);
+    const appHostTemplate = new StringTemplate(appShellHtml, ['script', 'nonce', 'cspSource']);
 
     this.webview.html = appHostTemplate.render({
       nonce,
       script,
+      cspSource: this.webview.cspSource,
     });
   }
 
