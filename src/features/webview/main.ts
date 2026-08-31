@@ -5,6 +5,8 @@ import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
 import { RIVImage, RIVMainView, RIVToolbar, RIVAppComponent } from './ui/webcomponents';
 import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
+import { ReactiveStore } from './store/ReactiveStore';
+import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 
 const CUSTOM_COMPONENTS = [
   RIVImage,
@@ -25,6 +27,10 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
+  const store = new ReactiveStore();
+
+  WebviewContextProvider.create({ store });
+
   const bridge = new WebviewSessionCommunicationBridge();
   const commandDispatcher = new WebviewCommandDispatcher(
     WEBVIEW_COMMAND_RESOLVERS(bridge),
