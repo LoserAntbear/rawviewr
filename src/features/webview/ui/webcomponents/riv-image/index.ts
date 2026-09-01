@@ -9,6 +9,15 @@ import type { BufferItemData } from '@features/buffer';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
+  public static readonly observedAttributes = ['item-id'];
+
+  public get itemId(): string {
+    return this.getAttribute('item-id') ?? '';
+  }
+
+  public set itemId(value: string) {
+    this.setAttribute('item-id', value);
+  }
 
   constructor() {
     super();
@@ -29,7 +38,7 @@ export class RIVImage extends RIVHTMLElement {
     this.disposableStore.add(
       WebviewDisposableUtils.listenTo(
         WebviewContextProvider.context.store,
-        'items',
+        `update::item::${this.itemId}`,
         this.handleItemsChange.bind(this) as any
       )
     );
@@ -57,6 +66,10 @@ export class RIVImage extends RIVHTMLElement {
     }
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!ctx) {
+      return;
+    }
 
     const width = 200;
     const height = Math.floor(item.data.byteLength / 4 / width);
