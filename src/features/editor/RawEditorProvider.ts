@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { RawDocument } from '@features/document/RawDocument';
-import { Viewer } from '@features/viewer/viewer';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
-import { viewerSourceForUri } from '@features/vscode/utils/uri';
+import { fileSourceForUri } from '@features/vscode/utils/uri';
+import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(
@@ -15,14 +15,14 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
   }
 
   public resolveCustomEditor(document: RawDocument, panel: vscode.WebviewPanel): void {
-    const viewer = new Viewer(
+    const viewer = new WebviewHost(
       this.context,
       panel.webview,
-      'single',
-      document.uri.toString(),
       [
-        viewerSourceForUri(document.uri),
+        fileSourceForUri(document.uri),
       ],
+      'single',
+      // document.uri.toString(),
     );
 
     this.viewerRegistry.register({ panel, viewer });

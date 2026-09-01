@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-
 import { ViewType } from '@definitions/viewTypes';
-import { Viewer } from '@features/viewer/viewer';
-import { viewerSourceForUri } from '@features/vscode/utils/uri';
+import { fileSourceForUri } from '@features/vscode/utils/uri';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
+import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 export class ViewerWindowController {
   constructor(
@@ -33,13 +32,13 @@ export class ViewerWindowController {
       { enableScripts: true, retainContextWhenHidden: true },
     );
 
-    const viewer = new Viewer(
+    const viewer = new WebviewHost(
       this.context,
       panel.webview,
+      targets.map(fileSourceForUri),
       'gallery',
-      `gallery:${title}`,
-      targets.map(viewerSourceForUri),
-      (uri) => void vscode.commands.executeCommand(VSCodeCommands.OpenWith, uri, ViewType.Optional),
+      // `gallery:${title}`,
+      // (uri) => void vscode.commands.executeCommand(VSCodeCommands.OpenWith, uri, ViewType.Optional),
     );
 
     this.viewerRegistry.register({ panel, viewer });
