@@ -1,12 +1,4 @@
-import * as vscode from 'vscode';
 import type { ViewerBackground } from './definitions';
-
-export type ViewerSource = {
-  id: string;
-  name: string;
-  detail: string;
-  uri: vscode.Uri;
-};
 
 export type ViewerConfiguration = {
   tileSize: number;
