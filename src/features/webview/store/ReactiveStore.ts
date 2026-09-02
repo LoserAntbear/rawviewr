@@ -1,34 +1,90 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BufferItemData, BufferItemRegistry } from '../../buffer';
-
-export type ReactiveStoreEvent<Type extends string = string> = Event & {
-  type: Type;
-  target: ReactiveStore;
-};
+import type { GalleryViewMode } from '../ui/webcomponents/types';
+import { StoreEventType, itemEventType } from './definitions';
 
 /**
- * Extends `EventTarget` so custom components can subscribe to the store
- * via existing native listeners.
+ * Single source of truth for the webview.
  *
- * General application example:
- * `listenTo(ReactiveStoreInstance, 'example-event', (event) => { ... })`
+ * Extends `EventTarget` so custom components can subscribe through the existing
+ * `listenTo` / `WebviewDisposableStore` plumbing:
+ * `this.observe(store, StoreEventType.Order, handler)`
+ *
+ * Events are signal-only for now
  */
-export class ReactiveStore<Type extends string = string> extends EventTarget {
+export class ReactiveStore extends EventTarget {
+  private viewMode: GalleryViewMode = 'single';
+  private selectedId: string | null = null;
+
   constructor(
     private readonly bufferItemRegistry: BufferItemRegistry,
   ) {
     super();
   }
 
-  public dispatchEvent(event: ReactiveStoreEvent<Type>): boolean {
-    return super.dispatchEvent(event);
+  public get mode(): GalleryViewMode {
+    return this.viewMode;
+  }
+
+  public get selected(): string | null {
+    return this.selectedId;
+  }
+
+  public get bufferItemIds(): readonly string[] {
+    return this.bufferItemRegistry.ids;
+  }
+
+  public get visibleIds(): readonly string[] {
+    if (this.viewMode === 'gallery') {
+      return this.bufferItemIds;
+    }
+
+    return this.selectedId === null ? this.bufferItemIds.slice(0, 1) : [this.selectedId];
+  }
+
+  public getItem(id: string): BufferItemData | undefined {
+    return this.bufferItemRegistry.get(id);
   }
 
   public addItems(items: BufferItemData[]): void {
+    const orderChanged = items.some((item) => !this.bufferItemRegistry.has(item.id));
+
     this.bufferItemRegistry.upsert(items);
 
-    console.log('ReactiveStore: Added items to registry:', items);
+    // Single mode opens blank without this: nothing else ever picks a first item.
+    if (this.selectedId === null && this.bufferItemIds.length > 0) {
+      this.selectedId = this.bufferItemIds[0];
+      this.emit(StoreEventType.Selection);
+    }
 
-    this.dispatchEvent(new CustomEvent('items', { detail: items }) as any);
+    // Order first, so a gallery has mounted its children before their items announce.
+    if (orderChanged) {
+      this.emit(StoreEventType.Order);
+    }
+
+    for (const item of items) {
+      this.emit(itemEventType(item.id));
+    }
+  }
+
+  public setViewMode(viewMode: GalleryViewMode): void {
+    if (this.viewMode === viewMode) {
+      return;
+    }
+
+    this.viewMode = viewMode;
+    this.emit(StoreEventType.ViewMode);
+  }
+
+  public select(id: string): void {
+    if (this.selectedId === id || !this.bufferItemRegistry.has(id)) {
+      return;
+    }
+
+    this.selectedId = id;
+    this.emit(StoreEventType.Selection);
+  }
+
+  private emit(type: string): void {
+    this.dispatchEvent(new Event(type));
   }
 }
