@@ -1,7 +1,9 @@
 import type { BufferItemData } from '../../buffer';
+import type { GalleryViewMode } from '../ui/webcomponents/types';
 
 export type WebviewHostMessageType = WebviewHostMessage['type'];
 export type WebviewHostMessage =
+  | { type: 'session'; viewMode: GalleryViewMode; }
   | { type: 'items'; items: BufferItemData[]; }
   | { type: 'error'; message: string; };
 
