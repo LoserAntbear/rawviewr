@@ -2,6 +2,7 @@ import type { WebviewCommand } from '../../commands/types';
 import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
 import { nullishCoalesce } from '@utils/coalesce';
+import { WebviewDisposableUtils } from '@features/webview/disposable';
 
 export abstract class RIVHTMLElement extends HTMLElement {
   public static readonly tagName: string;
@@ -21,6 +22,11 @@ export abstract class RIVHTMLElement extends HTMLElement {
         detail: command,
       }),
     );
+  }
+
+  // Just a convenience method to observe events and automatically manage their disposal.
+  protected observe(...args: Parameters<typeof WebviewDisposableUtils.listenTo>): void {
+    this.disposableStore.add(WebviewDisposableUtils.listenTo(...args));
   }
 
   protected mount(template: string): void {
