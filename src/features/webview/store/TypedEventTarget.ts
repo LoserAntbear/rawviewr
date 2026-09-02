@@ -1,4 +1,5 @@
-type EventMap = Record<string, Event>;
+
+export type EventMap = Record<string, unknown>;
 type Listener<T> = (event: CustomEvent<T>) => void;
 type UnsubscribeCallback = () => void;
 
