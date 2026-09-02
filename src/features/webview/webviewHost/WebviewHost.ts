@@ -8,12 +8,14 @@ import { StringTemplate } from '@utils/string/StringTemplate';
 import { getNonce } from '../utils';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { FileValidator } from '@features/file/FileValidator';
+import { GalleryViewMode } from '../ui/webcomponents/types';
 
 export class WebviewHost extends DisposableStore {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly webview: vscode.Webview,
     private readonly sources: FileSource[],
+    private readonly viewMode: GalleryViewMode,
   ) {
     super();
 
@@ -87,12 +89,21 @@ export class WebviewHost extends DisposableStore {
   }
 
   private async handleAppReady(): Promise<void> {
+    this.initializeSession(this.viewMode);
     this.postPreloaders();
     this.readAndPostSources();
   }
 
+  private initializeSession(viewMode: GalleryViewMode): void {
+    // Should it include the ID? No use for it as I see, but MAYBE?
+    this.post({
+      viewMode,
+      type: 'session',
+    });
+  }
+
   private postPreloaders(): void {
-       // I pre-build a payload of empty sources to trigger UI render
+    // I pre-build a payload of empty sources to trigger UI render
     // And add separate loading to each one
     // so that the UI can still be responsive and show progress for each file
     const itemPreloaders: BufferItem[] = this.sources.map(BufferItem.stubFromFileSource);
