@@ -1,11 +1,11 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
+import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+import { itemEventType } from '@features/webview/store/definitions';
+import type { BufferItemData } from '@features/buffer';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
-import { WebviewDisposableUtils } from '@features/webview/disposable';
-import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import template from './index.html';
-import type { BufferItemData } from '@features/buffer';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
@@ -23,38 +23,35 @@ export class RIVImage extends RIVHTMLElement {
     super();
 
     this.mount(template);
-    this.listenTo();
   }
 
   public connectedCallback(): void {
+    if (!this.itemId) {
+      throw new Error(`${this.localName}: mounted without an itemId`);
+    }
+
+    const { store } = WebviewContextProvider.context;
+
+    this.observe(store, itemEventType(this.itemId), this.handleItemUpdate.bind(this));
+
+    this.handleItemUpdate();
+
     this.emitCommand({
       type: WebviewCommandType.Connected,
       payload: RIVImage.tagName,
     });
   }
 
-  private listenTo(): void {
-    console.log('RIVImage: Setting up listener for items change events from ReactiveStore.', WebviewContextProvider.context.store);
-    this.disposableStore.add(
-      WebviewDisposableUtils.listenTo(
-        WebviewContextProvider.context.store,
-        `update::item::${this.itemId}`,
-        this.handleItemsChange.bind(this) as any
-      )
-    );
-  }
+  /** Store events are signal-only, so current state is pulled rather than read off a payload. */
+  private handleItemUpdate(): void {
+    const item = WebviewContextProvider.context.store.getItem(this.itemId);
 
-  private handleItemsChange(event: CustomEvent<BufferItemData[]>): void {
-    console.log('RIVImage: Received items change event:', event.detail);
-    const items = event.detail;
-
-    if (items.length > 0) {
-      const lastItem = items[items.length - 1];
-      this.updateImage(lastItem);
+    if (item) {
+      this.paint(item);
     }
   }
 
-  private updateImage(item: BufferItemData): void {
+  private paint(item: BufferItemData): void {
     if (item.data.byteLength === 0) {
       return;
     }
