@@ -26,7 +26,11 @@ export type DecodeOptions = {
 export type DecodedImage = {
   width: number;
   height: number;
-  data: Uint8ClampedArray;
+  /**
+   * Explicitly backed by an `ArrayBuffer`, which is what the decoder allocates.
+   * `ImageData`'s constructor rejects the buffer-agnostic `Uint8ClampedArray`.
+   */
+  data: Uint8ClampedArray<ArrayBuffer>;
 };
 
 /**
