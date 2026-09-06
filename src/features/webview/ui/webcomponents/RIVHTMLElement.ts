@@ -3,6 +3,7 @@ import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
 import { nullishCoalesce } from '@utils/coalesce';
 import { WebviewDisposableUtils } from '@features/webview/disposable';
+import { StyleSheets } from '../styleSheets';
 
 export abstract class RIVHTMLElement extends HTMLElement {
   public static readonly tagName: string;
@@ -29,13 +30,19 @@ export abstract class RIVHTMLElement extends HTMLElement {
     this.disposableStore.add(WebviewDisposableUtils.listenTo(...args));
   }
 
-  protected mount(template: string): void {
+  protected mount(template: string, styles?: string): void {
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+
+    // Adopted before the content lands, so the first paint is already styled.
+    if (styles) {
+      StyleSheets.adoptStyleSheet(shadowRoot, styles);
+    }
+
     const templateElement = document.createElement('template');
 
     templateElement.innerHTML = template;
 
-    this.attachShadow({ mode: 'open' })
-      .appendChild(document.importNode(templateElement.content, true));
+    shadowRoot.appendChild(document.importNode(templateElement.content, true));
   }
 
   protected ref<T extends HTMLElement>(id: string): T | null {
