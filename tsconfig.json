@@ -11,6 +11,7 @@
       "@common/*": ["src/common/*"],
       "@definitions/*": ["src/definitions/*"],
       "@features/*": ["src/features/*"],
+      "@guards/*": ["src/guards/*"],
       "@utils/*": ["src/utils/*"],
       "@webview/*": ["src/features/webview/*"],
       "@app-types/*": ["src/types/*.d.ts"],
