@@ -10,7 +10,7 @@ export class FileValidator {
     fileSize: number,
     maxFileSizeMb: number = FileValidator.maxFileSizeMB,
   ): boolean {
-    const maxFileSize = Math.max(1, ByteConverter.from('MB', maxFileSizeMb));
+    const maxFileSize = Math.max(1, ByteConverter.from('MiB', maxFileSizeMb));
 
     return fileSize <= maxFileSize;
   }
