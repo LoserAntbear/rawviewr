@@ -6,6 +6,7 @@ import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
 import type { RIVImage } from '../riv-image';
 import template from './index.html';
+import styles from './index.css';
 
 /**
  * TODO: Separate item handling (creation, rendering) from the main gallery component.
@@ -19,7 +20,7 @@ export class RIVGallery extends RIVHTMLElement {
   constructor() {
     super();
 
-    this.mount(template);
+    this.mount(template, styles);
   }
 
   public connectedCallback(): void {

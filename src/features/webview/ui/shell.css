@@ -1,0 +1,42 @@
+/**
+ * The document's own sheet.
+ *
+ * Two jobs only: give the shell a box to fill, and publish the design tokens. Custom
+ * properties inherit through shadow boundaries, so declaring them here is what lets every
+ * component read the theme without importing anything.
+ */
+:root {
+  color-scheme: light dark;
+
+  --riv-gap: 8px;
+  --riv-radius: 4px;
+  --riv-pad: 16px;
+
+  /* Gallery track size. Also the tile viewport height, so tiles come out square. */
+  --riv-tile: 220px;
+
+  --riv-border: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  --riv-muted: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.9));
+  --riv-accent: var(--vscode-focusBorder, #0078d4);
+  --riv-error: var(--vscode-errorForeground, #f14c4c);
+  --riv-surface: var(--vscode-editorWidget-background, transparent);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+  color: var(--vscode-foreground);
+  background: var(--vscode-editor-background);
+}
+
+riv-app-component {
+  display: block;
+  height: 100%;
+}

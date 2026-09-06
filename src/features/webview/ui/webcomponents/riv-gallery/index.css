@@ -1,0 +1,66 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+#gallery {
+  box-sizing: border-box;
+  min-height: 100%;
+  margin: 0;
+  padding: var(--riv-pad);
+  list-style: none;
+}
+
+/*
+ * The two modes differ in layout only. Everything a tile needs to look different is
+ * handed down as a custom property, because `riv-image-component` keeps its own shadow
+ * root and inherited properties are the only way in.
+ */
+
+/* --------------------------------------------------------------------- single */
+
+/*
+ * `safe center` centres while the image fits and falls back to start-aligned once it
+ * does not. Plain `center` would push the overflow past the scroll origin, making the
+ * top-left of a large image unreachable.
+ */
+#gallery[data-view-mode='single'] {
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+}
+
+/*
+ * No caption, no fixed viewport and no fit: one image at its intrinsic size, with the
+ * view scrolling around it. Downscaling here would destroy the per-pixel reading the
+ * whole viewer exists for.
+ */
+#gallery[data-view-mode='single'] > li {
+  --riv-image-caption: none;
+}
+
+/* -------------------------------------------------------------------- gallery */
+
+#gallery[data-view-mode='gallery'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--riv-tile), 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+#gallery[data-view-mode='gallery'] > li {
+  /* Square viewport, so a grid of mixed aspect ratios still reads as a grid, and a fit
+     rule so an oversized buffer becomes a thumbnail rather than blowing the tile out. */
+  --riv-image-viewport: var(--riv-tile);
+  --riv-image-fit: 100%;
+
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--riv-border);
+  border-radius: var(--riv-radius);
+  background: var(--riv-surface);
+}
+
+#gallery[data-view-mode='gallery'] > li:hover {
+  border-color: var(--riv-accent);
+}

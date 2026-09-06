@@ -1,0 +1,85 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+#frame {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  min-width: 0;
+}
+
+/*
+ * Three properties are the whole contract with whatever lays this component out.
+ * They are custom properties rather than attributes because inherited properties are
+ * the only styling that crosses a shadow boundary:
+ *
+ *   --riv-image-viewport  fixed viewport height   (default: sizes to the image)
+ *   --riv-image-fit       canvas max-width/height (default: intrinsic size, no scaling)
+ *   --riv-image-caption   caption display         (default: shown)
+ */
+#viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+  height: var(--riv-image-viewport, auto);
+
+  /* Checkerboard, so transparent pixels read as transparent rather than as the editor. */
+  background-color: #808080;
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+/* Nothing decoded yet: no checkerboard, just the message. */
+#viewport:has(#canvas[hidden]) {
+  background: none;
+}
+
+canvas {
+  display: block;
+  max-width: var(--riv-image-fit, none);
+  max-height: var(--riv-image-fit, none);
+  object-fit: contain;
+
+  /* The whole point of the viewer: never interpolate a pixel the user is inspecting. */
+  image-rendering: pixelated;
+}
+
+#status {
+  margin: 0;
+  padding: 8px;
+  color: var(--riv-muted);
+  text-align: center;
+}
+
+#status[data-level='error'] {
+  color: var(--riv-error);
+}
+
+#caption {
+  display: var(--riv-image-caption, flex);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#meta {
+  color: var(--riv-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}

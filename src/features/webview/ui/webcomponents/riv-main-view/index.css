@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The scroll container. Everything below it lays out against a fixed box. */
+#main-view {
+  height: 100%;
+  overflow: auto;
+}
