@@ -54,27 +54,50 @@ export function readWord(
   return value;
 }
 
-const step = 1024;
-const gradeNames = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] as const;
-type Grade = typeof gradeNames[number];
+export type ByteGrade = typeof BYTE_GRADES[number];
+export const BYTE_STEP = 1024;
+export const BYTE_GRADES = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'] as const;
+
+function gradeIndex(grade: ByteGrade): number {
+  const index = BYTE_GRADES.indexOf(grade);
+
+  if (index === -1) {
+    throw new Error(`Unknown byte grade "${grade}". Expected one of: ${BYTE_GRADES.join(', ')}.`);
+  }
+
+  return index;
+}
+
+function assertConvertible(value: number, label: string): void {
+  if (!Number.isFinite(value)) {
+    throw new Error(`${label} must be a finite number, received ${value}.`);
+  }
+}
 
 export const ByteConverter = {
-  to: (grade: Grade, bytes: number): number => {
-    const index = gradeNames.indexOf(grade);
+  to: (grade: ByteGrade, bytes: number): number => {
+    assertConvertible(bytes, 'bytes');
 
-    if (index === -1) {
-      throw new Error(`Invalid grade: ${grade}`);
-    }
-
-    return bytes / Math.pow(step, index);
+    return bytes / BYTE_STEP ** gradeIndex(grade);
   },
-  from: (grade: Grade, value: number): number => {
-    const index = gradeNames.indexOf(grade);
 
-    if (index === -1) {
-      throw new Error(`Invalid grade: ${grade}`);
+  from: (grade: ByteGrade, value: number): number => {
+    assertConvertible(value, 'value');
+
+    return value * BYTE_STEP ** gradeIndex(grade);
+  },
+
+  gradeFor: (bytes: number): ByteGrade => {
+    assertConvertible(bytes, 'bytes');
+
+    const magnitude = Math.abs(bytes);
+
+    let index = 0;
+
+    while (index < BYTE_GRADES.length - 1 && magnitude >= BYTE_STEP ** (index + 1)) {
+      index++;
     }
 
-    return value * Math.pow(step, index);
+    return BYTE_GRADES[index];
   },
 };
