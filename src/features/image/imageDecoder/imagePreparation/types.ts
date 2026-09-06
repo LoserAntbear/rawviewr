@@ -1,5 +1,4 @@
 import { Endian } from '@definitions/bits';
-import { Bits } from '@features/image/format/types';
 import { HeaderPreset } from '../definitions';
 
 /**
