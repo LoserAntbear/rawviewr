@@ -6,8 +6,11 @@ import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVAppComponent } from '
 import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
 import { ReactiveStore } from './store/ReactiveStore';
+import { WebviewImageDecoder } from './image/WebviewImageDecoder';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { BufferItemRegistry } from '../buffer';
+import { StyleSheets } from './ui/styleSheets';
+import shellStyles from './ui/shell.css';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.
@@ -31,7 +34,7 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const store = new ReactiveStore(new BufferItemRegistry());
+  const store = new ReactiveStore(new BufferItemRegistry(), new WebviewImageDecoder());
 
   WebviewContextProvider.create({ store });
 
@@ -50,6 +53,11 @@ function launchSession(): void {
     document
   );
 }
+
+// The document's own sheet: everything below `riv-app-component` styles itself inside
+// its shadow root, so this only has to give the shell a box to fill.
+// TODO: Find a better way to manage the shell's global styles, possibly moving them into the shadow root of the main component.
+StyleSheets.adoptStyleSheet(document, shellStyles);
 
 launchSession();
 registerCustomComponents();
