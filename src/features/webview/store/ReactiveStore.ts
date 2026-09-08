@@ -1,90 +1,82 @@
-import type { BufferItemData, BufferItemRegistry } from '../../buffer';
-import type { GalleryViewMode } from '../ui/webcomponents/types';
-import { StoreEventType, itemEventType } from './definitions';
+import { TypedEventTarget } from './TypedEventTarget';
+import type {
+  AppState,
+  BoundSelectors,
+  EventMap,
+  SelectorMap,
+  SliceLike,
+  SliceMap,
+} from './types';
 
-/**
- * Single source of truth for the webview.
- *
- * Extends `EventTarget` so custom components can subscribe through the existing
- * `listenTo` / `WebviewDisposableStore` plumbing:
- * `this.observe(store, StoreEventType.Order, handler)`
- *
- * Events are signal-only for now
- */
-export class ReactiveStore extends EventTarget {
-  private viewMode: GalleryViewMode = 'single';
-  private selectedId: string | null = null;
+export class ReactiveStore<
+  TSelectors extends SelectorMap<AppState<TSlices>>,
+  TSlices extends SliceMap,
+  TEvents extends EventMap,
+  TSliceIds extends keyof TSlices & string = keyof TSlices & string
+> {
+  // CAVEAT: Every time returns a new ref
+  public get state(): AppState<TSlices> {
+    return Object.fromEntries(
+      Array.from(this.slices.entries(), ([id, slice]) => [id, slice.get()]),
+    ) as AppState<TSlices>;
+  }
+
+  public readonly bus: TypedEventTarget<TEvents>;
+  public readonly selectors: BoundSelectors<AppState<TSlices>, TSelectors>;
+
+  private readonly slices = new Map<TSliceIds, TSlices[TSliceIds]>();
 
   constructor(
-    private readonly bufferItemRegistry: BufferItemRegistry,
+    slices: TSlices,
+    bus: TypedEventTarget<TEvents>,
+    selectors: TSelectors = {} as TSelectors,
   ) {
-    super();
-  }
+    this.bus = bus;
 
-  public get mode(): GalleryViewMode {
-    return this.viewMode;
-  }
+    const entries = Object.entries(slices) as [TSliceIds, TSlices[TSliceIds]][];
 
-  public get selected(): string | null {
-    return this.selectedId;
-  }
-
-  public get bufferItemIds(): readonly string[] {
-    return this.bufferItemRegistry.ids;
-  }
-
-  public get visibleIds(): readonly string[] {
-    if (this.viewMode === 'gallery') {
-      return this.bufferItemIds;
+    for (const [id, slice] of entries) {
+      this.add(id, slice);
     }
 
-    return this.selectedId === null ? this.bufferItemIds.slice(0, 1) : [this.selectedId];
+    this.selectors = this.bindSelectors(selectors);
   }
 
-  public getItem(id: string): BufferItemData | undefined {
-    return this.bufferItemRegistry.get(id);
+  public register<K extends TSliceIds>(slice: TSlices[K] & SliceLike<K>): TSlices[K] {
+    this.add(slice.name, slice);
+
+    return slice;
   }
 
-  public addItems(items: BufferItemData[]): void {
-    const orderChanged = items.some((item) => !this.bufferItemRegistry.has(item.id));
+  public get<K extends TSliceIds>(id: K): TSlices[K] {
+    const slice = this.slices.get(id);
 
-    this.bufferItemRegistry.upsert(items);
-
-    // Single mode opens blank without this: nothing else ever picks a first item.
-    if (this.selectedId === null && this.bufferItemIds.length > 0) {
-      this.selectedId = this.bufferItemIds[0];
-      this.emit(StoreEventType.Selection);
+    if (!slice) {
+      throw new Error(`Slice "${id.toString()}" is not registered.`);
     }
 
-    // Order first, so a gallery has mounted its children before their items announce.
-    if (orderChanged) {
-      this.emit(StoreEventType.Order);
-    }
-
-    for (const item of items) {
-      this.emit(itemEventType(item.id));
-    }
+    return slice as TSlices[K];
   }
 
-  public setViewMode(viewMode: GalleryViewMode): void {
-    if (this.viewMode === viewMode) {
-      return;
-    }
-
-    this.viewMode = viewMode;
-    this.emit(StoreEventType.ViewMode);
+  public has<K extends TSliceIds>(id: K): boolean {
+    return this.slices.has(id);
   }
 
-  public select(id: string): void {
-    if (this.selectedId === id || !this.bufferItemRegistry.has(id)) {
-      return;
-    }
+  private bindSelectors(selectors: TSelectors): BoundSelectors<AppState<TSlices>, TSelectors> {
+    const bound = Object.entries(selectors as SelectorMap<AppState<TSlices>>).map(
+      ([key, select]) => [key, (...args: never[]) => select(this.state, ...args)] as const,
+    );
 
-    this.selectedId = id;
-    this.emit(StoreEventType.Selection);
+    return Object.fromEntries(bound) as BoundSelectors<AppState<TSlices>, TSelectors>;
   }
 
-  private emit(type: string): void {
-    this.dispatchEvent(new Event(type));
+  private add(id: TSliceIds, slice: TSlices[TSliceIds]): void {
+    if (this.slices.has(id)) {
+      throw new Error(`Slice "${id.toString()}" is already registered.`);
+    }
+
+    this.slices.set(id, slice);
+
+    slice.attach(this.bus);
   }
 }
