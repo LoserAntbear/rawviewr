@@ -4,12 +4,14 @@ import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore'
 import { WebviewDisposableUtils } from '@features/webview/disposable';
 import { StyleSheets } from '../styleSheets';
 import { RIVView } from './RIVView';
+import type { ReadonlyViewState } from './RIVViewState';
 
 export abstract class RIVHTMLElement extends HTMLElement {
   public static readonly tagName: string;
 
   protected readonly disposableStore = new WebviewDisposableStore();
-  private view?: RIVView;
+  protected view?: RIVView;
+  protected viewState?: ReadonlyViewState;
 
   public disconnectedCallback(): void {
     this.disposableStore.dispose();
