@@ -1,15 +1,15 @@
 import type { WebviewCommand } from '../../commands/types';
 import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
-import { nullishCoalesce } from '@utils/coalesce';
 import { WebviewDisposableUtils } from '@features/webview/disposable';
 import { StyleSheets } from '../styleSheets';
+import { RIVView } from './RIVView';
 
 export abstract class RIVHTMLElement extends HTMLElement {
   public static readonly tagName: string;
-  protected readonly disposableStore = new WebviewDisposableStore();
 
-  protected readonly refs = new Map<string, HTMLElement>();
+  protected readonly disposableStore = new WebviewDisposableStore();
+  private view?: RIVView;
 
   public disconnectedCallback(): void {
     this.disposableStore.dispose();
@@ -30,35 +30,27 @@ export abstract class RIVHTMLElement extends HTMLElement {
     this.disposableStore.add(WebviewDisposableUtils.listenTo(...args));
   }
 
-  protected mount(template: string, styles?: string): void {
-    const shadowRoot = this.attachShadow({ mode: 'open' });
-
-    // Adopted before the content lands, so the first paint is already styled.
-    if (styles) {
-      StyleSheets.adoptStyleSheet(shadowRoot, styles);
-    }
-
+  // RIVView mount point
+  protected mount(template: string, styles?: string): ShadowRoot {
     const templateElement = document.createElement('template');
 
     templateElement.innerHTML = template;
 
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+
+    // Content, then style. So the first paint is already styled.
+    if (styles) {
+      StyleSheets.adoptStyleSheet(shadowRoot, styles);
+    }
+
     shadowRoot.appendChild(document.importNode(templateElement.content, true));
+
+    this.view = new RIVView(shadowRoot);
+
+    return shadowRoot;
   }
 
   protected ref<T extends HTMLElement>(id: string): T | null {
-    return nullishCoalesce(
-      this.refs.get(id) as T ?? null,
-      this.queryAndCacheRef<T>(id),
-    ) as T | null;
-  }
-
-  protected queryAndCacheRef<T extends HTMLElement>(id: string): T | null {
-    const refElement = this.shadowRoot?.getElementById(id) as T | null;
-
-    if (refElement) {
-      this.refs.set(id, refElement);
-    }
-
-    return refElement;
+    return this.view?.ref<T>(id) ?? null;
   }
 }
