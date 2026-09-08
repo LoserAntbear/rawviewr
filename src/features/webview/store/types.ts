@@ -5,6 +5,7 @@ import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
 import type { DecodeSlice, DecodeSliceEvents } from './slice/DecodeSlice';
 import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
+import type { StoreSelectors } from './selectors';
 
 export type SliceLike<TName extends string = string> = {
   readonly name: TName;
@@ -24,7 +25,7 @@ export type StoreEventMap = ItemsSliceEvents & ViewSliceEvents & DecodeSliceEven
 export type AppState<TSlices extends SliceMap> = {
   readonly [K in keyof TSlices]: ReturnType<TSlices[K]['get']>;
 };
-export type AppStore = ReactiveStore<StoreSlices, StoreEventMap>;
+export type AppStore = ReactiveStore<StoreSelectors, StoreSlices, StoreEventMap>;
 export type AppStoreState = AppState<StoreSlices>;
 export type AppBus = TypedEventTarget<StoreEventMap>;
 
