@@ -23,16 +23,16 @@ export abstract class StoreSlice<
   private _bus?: StoreSliceBus<TName, TState, TEvents>;
 
   constructor(
-    private readonly name: TName,
+    public readonly name: TName,
     private readonly initialState: TState,
-    bus?: StoreSliceBus<TName, TState, TEvents>,
+    bus?: TypedEventTarget<EventMap>,
   ) {
     this.state = initialState;
-    this._bus = bus;
+    this._bus = bus as StoreSliceBus<TName, TState, TEvents> | undefined;
   }
 
-  public attach(bus: StoreSliceBus<TName, TState, TEvents>): void {
-    this._bus = bus;
+  public attach(bus: TypedEventTarget<EventMap>): void {
+    this._bus = bus as StoreSliceBus<TName, TState, TEvents>;
   }
 
   public get(): TState {
@@ -56,6 +56,14 @@ export abstract class StoreSlice<
   }
 
   protected patch(partial: Partial<TState>): void {
+    const changed = Object.entries(partial).some(
+      ([key, value]) => !Object.is(this.state[key as keyof TState], value),
+    );
+
+    if (!changed) {
+      return;
+    }
+
     this.set({ ...this.state, ...partial });
   }
 
@@ -67,12 +75,7 @@ export abstract class StoreSlice<
   }
 
   /**
-   * The single point where the runtime name prefix is applied.
-   *
    * TypeScript cannot match `${TName}:${K}` against `StoreSliceEventMap`'s key remapping
-   * while `TEvents` is still a type parameter, so the bus is widened to its untyped shape
-   * here. Everything above is checked against `TEvents` / `StoreSliceChange<TState>`, and
-   * subscribers still see the fully namespaced map.
    */
   private dispatch(type: string, detail: unknown): void {
     (this.bus as TypedEventTarget<EventMap> | undefined)?.emit(`${this.name}:${type}`, detail);
