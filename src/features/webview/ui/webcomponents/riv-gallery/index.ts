@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEventType } from '@features/webview/store/definitions';
+import { StoreEvent } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -26,9 +26,10 @@ export class RIVGallery extends RIVHTMLElement {
   public connectedCallback(): void {
     const { store } = WebviewContextProvider.context;
 
-    this.observe(store, StoreEventType.Order, this.render.bind(this));
-    this.observe(store, StoreEventType.ViewMode, this.render.bind(this));
-    this.observe(store, StoreEventType.Selection, this.render.bind(this));
+    // Membership and order come from items; mode and selection from view. `visibleIds`
+    // is derived from both, so both have to re-render it.
+    this.observe(store.bus, StoreEvent.ItemsChange, this.render.bind(this));
+    this.observe(store.bus, StoreEvent.ViewChange, this.render.bind(this));
 
     // Items may already be in the store by now — paint from current state, don't just listen.
     this.render();
@@ -49,7 +50,7 @@ export class RIVGallery extends RIVHTMLElement {
     const { store } = WebviewContextProvider.context;
     const bufferItemIds = store.visibleIds;
 
-    list.dataset.viewMode = store.mode;
+    list.dataset.viewMode = store.view.mode;
 
     this.removeStaleEntries(bufferItemIds);
 
