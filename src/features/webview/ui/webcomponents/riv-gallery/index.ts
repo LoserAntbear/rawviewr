@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEvent } from '@features/webview/store/definitions';
+import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -48,9 +48,9 @@ export class RIVGallery extends RIVHTMLElement {
     }
 
     const { store } = WebviewContextProvider.context;
-    const bufferItemIds = store.visibleIds;
+    const bufferItemIds = store.selectors.visibleIds();
 
-    list.dataset.viewMode = store.view.mode;
+    list.dataset.viewMode = store.get(StoreSliceId.View).mode;
 
     this.removeStaleEntries(bufferItemIds);
 

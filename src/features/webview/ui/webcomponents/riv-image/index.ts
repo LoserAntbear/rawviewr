@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEvent } from '@features/webview/store/definitions';
+import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
 import type { StoreChangeEvent } from '@features/webview/store/types';
 import type { ItemsState } from '@features/webview/store/slice/ItemsSlice';
 import { isAbortError } from '@guards/errorGuards';
@@ -103,14 +103,14 @@ export class RIVImage extends RIVHTMLElement {
 
   private async runRender(signal: AbortSignal): Promise<void> {
     const { store } = WebviewContextProvider.context;
-    const item = store.getItem(this.itemId);
+    const item = store.get(StoreSliceId.Items).getItem(this.itemId);
 
     if (!item) {
       return;
     }
 
     try {
-      const bitmap = await store.decode.decode(item, signal);
+      const bitmap = await store.get(StoreSliceId.Decode).decode(item, signal);
 
       // A newer render started while this decode was finishing
       if (signal.aborted) {

@@ -1,8 +1,9 @@
-import { ReactiveStore } from '../store/ReactiveStore';
+import type { AppStore } from '../store/types';
+import { StoreSliceId } from '../store/definitions';
 import type { WebviewHostMessageResolverMap } from './messageDispatcher';
 
 export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
-  store: ReactiveStore,
+  store: AppStore,
 ): WebviewHostMessageResolverMap => ({
   items: (message) => {
     if (message.type !== 'items') {
@@ -11,7 +12,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
 
     console.log('WEBVIEW_HOST_MESSAGE_RESOLVERS: Handling items message:', message);
 
-    store.addItems(message.items);
+    store.get(StoreSliceId.Items).upsert(message.items);
     // store
   },
   error: (message) => {
@@ -23,7 +24,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
       return;
     }
 
-    store.setViewMode(message.viewMode);
+    store.get(StoreSliceId.View).setMode(message.viewMode);
 
     console.log('WEBVIEW_HOST_MESSAGE_RESOLVERS: Handling session message:', message);
     // Handle the 'session' message from the webview if needed

@@ -5,10 +5,8 @@ import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
 import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVAppComponent } from './ui/webcomponents';
 import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
-import { ReactiveStore } from './store/ReactiveStore';
-import { WebviewImageDecoder } from './image/WebviewImageDecoder';
+import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
-import { BufferItemRegistry } from '../buffer';
 import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
 
@@ -34,7 +32,7 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const store = new ReactiveStore(new BufferItemRegistry(), new WebviewImageDecoder());
+  const { store } = createWebviewStore();
 
   WebviewContextProvider.create({ store });
 
