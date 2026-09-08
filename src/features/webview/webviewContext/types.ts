@@ -1,5 +1,5 @@
-import { ReactiveStore } from '../store/ReactiveStore';
+import type { AppStore } from '../store/types';
 
 export interface WebviewContext {
-  readonly store: ReactiveStore;
+  readonly store: AppStore;
 }
