@@ -1,9 +1,13 @@
-export enum StoreEventType {
-  Item = 'update::item',
-  Order = 'update::order',
-  Options = 'update::options',
-  ViewMode = 'update::viewMode',
-  Selection = 'update::selection',
+import { StoreSliceEvent } from './slice/definitions';
+
+export enum StoreSliceId {
+  View = 'view',
+  Items = 'items',
+  Decode = 'decode',
 }
 
-export const itemEventType = (id: string): string => `${StoreEventType.Item}::${id}`;
+export const StoreEvent = {
+  ViewChange: `${StoreSliceId.View}:${StoreSliceEvent.Change}`,
+  ItemsChange: `${StoreSliceId.Items}:${StoreSliceEvent.Change}`,
+  DecodeChange: `${StoreSliceId.Decode}:${StoreSliceEvent.Change}`,
+} as const;
