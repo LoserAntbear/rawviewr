@@ -8,4 +8,5 @@ export enum RIVImageStateKind {
 export enum RIVImageStateTransition {
   Failed = 'failed',
   Resolved = 'resolved',
+  CloseBitmap = 'closeBitmap',
 }
