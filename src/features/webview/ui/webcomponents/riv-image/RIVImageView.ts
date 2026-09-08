@@ -24,6 +24,9 @@ export class RIVImageView extends RIVView {
       status.hidden = false;
       status.dataset.level = level;
     }
+
+    // FIXME: I need a better way to handle this without side-effects
+    this.handleCanvasVisibility(false);
   }
 
   public handleCanvasVisibility(visible: boolean): void {
@@ -39,18 +42,14 @@ export class RIVImageView extends RIVView {
     const ctx = canvas?.getContext('2d');
 
     if (!canvas || !ctx) {
-      bitmap.close();
-
       throw new Error('Failed to get canvas or its context');
     }
 
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
 
+    // The canvas keeps its own copy from here; retiring the bitmap is the state's job.
     ctx.drawImage(bitmap, 0, 0);
-
-    // Disposing since canvas now has its own copy of the image data.
-    bitmap.close();
 
     this.clearStatus();
     this.handleCanvasVisibility(true);
