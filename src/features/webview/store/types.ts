@@ -6,6 +6,7 @@ import type { DecodeSlice, DecodeSliceEvents } from './slice/DecodeSlice';
 import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
 import type { STORE_SELECTORS } from './selectors';
+import { WebviewDisposable } from '../disposable';
 
 export type SliceLike<TName extends string = string> = {
   readonly name: TName;
@@ -41,5 +42,7 @@ export type AppStoreState = AppState<StoreSlices>;
 export type AppBus = TypedEventTarget<StoreEventMap>;
 
 export type StoreChangeEvent<TState> = CustomEvent<StoreSliceChange<TState>>;
+
+export type StoreReaction = (store: AppStore) => WebviewDisposable;
 
 export type { EventMap };
