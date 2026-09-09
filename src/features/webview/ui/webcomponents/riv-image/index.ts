@@ -4,6 +4,7 @@ import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
 import type { StoreChangeEvent } from '@features/webview/store/types';
 import type { ItemsState } from '@features/webview/store/slice/ItemsSlice';
 import { isAbortError } from '@guards/errorGuards';
+import { withAbortSignalCheck } from '@utils/abort';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -110,14 +111,12 @@ export class RIVImage extends RIVHTMLElement {
     }
 
     try {
-      const bitmap = await store.get(StoreSliceId.Decode).decode(item, signal);
-
-      // A newer render started while this decode was finishing
-      if (signal.aborted) {
-        bitmap?.close();
-
-        return;
-      }
+      // A newer render can start while this decode is finishing
+      const bitmap = await withAbortSignalCheck(
+        signal,
+        () => store.get(StoreSliceId.Decode).decode(item, signal),
+        (stale) => stale?.close(),
+      );
 
       this.commitRender(RIVImageStateTransition.Resolved, { item, bitmap });
     } catch (error) {

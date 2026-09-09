@@ -3,6 +3,7 @@ import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { FORMAT_PRESETS } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { DecodeOptions, DecodedImage } from '@features/image/imageDecoder/types';
+import { withAbortSignalCheck } from '@utils/abort';
 
 export class WebviewImageDecoder {
   constructor(
@@ -11,10 +12,21 @@ export class WebviewImageDecoder {
     ),
   ) {}
 
-  public async decode(data: ArrayBuffer, options: DecodeOptions): Promise<ImageBitmap> {
+  public async decode(
+    data: ArrayBuffer,
+    options: DecodeOptions,
+    signal?: AbortSignal,
+  ): Promise<ImageBitmap> {
+    signal?.throwIfAborted();
+
     const { image } = this.decoder.decode(new Uint8Array(data), options);
 
-    return createImageBitmap(this.toImageData(image));
+    // Decoding can take long
+    return withAbortSignalCheck(
+      signal,
+      () => createImageBitmap(this.toImageData(image)),
+      (bitmap) => bitmap.close(),
+    );
   }
 
   private toImageData(image: DecodedImage): ImageData {
