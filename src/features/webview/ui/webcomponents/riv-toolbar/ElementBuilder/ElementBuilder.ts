@@ -13,6 +13,7 @@ import type {
   ElementBuilderMap,
   ElementBuilderFor,
 } from './types';
+import { ToolbarGroup } from '../definitions';
 
 export class ElementBuilder {
     private static readonly builders: ElementBuilderMap = {
@@ -35,6 +36,42 @@ export class ElementBuilder {
     element.dataset.controlId = control.id;
 
     return element;
+  }
+
+  public static buildControlsGroup(
+    groupId: ToolbarGroup,
+    controls: ToolbarControl[],
+  ): HTMLElement | null{
+    if (controls.length === 0) {
+      return null;
+    }
+
+    const fieldset = document.createElement('div');
+
+    fieldset.className = 'group';
+    fieldset.dataset.group = groupId;
+    fieldset.append(...controls.map((control) => ElementBuilder.buildField(control)));
+
+    return fieldset;
+  }
+
+  public static buildField(control: ToolbarControl): HTMLElement {
+    const field = document.createElement('label');
+    const element = ElementBuilder.build(control);
+    const text = document.createElement('span');
+
+    text.className = 'field-label';
+    text.textContent = control.label;
+
+    field.className = 'field';
+    field.dataset.field = control.id;
+    field.append(text, element);
+
+    if (control.tooltip) {
+      field.title = control.tooltip;
+    }
+
+    return field;
   }
 
   private static buildSelect(
