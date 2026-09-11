@@ -40,22 +40,16 @@ export class ElementBuilder {
 
   public static buildControlsGroup(
     groupId: ToolbarGroup,
-    controls: ToolbarControl[],
   ): HTMLElement | null{
-    if (controls.length === 0) {
-      return null;
-    }
-
     const fieldset = document.createElement('div');
 
     fieldset.className = 'group';
     fieldset.dataset.group = groupId;
-    fieldset.append(...controls.map((control) => ElementBuilder.buildField(control)));
 
     return fieldset;
   }
 
-  public static buildField(control: ToolbarControl): HTMLElement {
+  public static buildField(control: ToolbarControl): [HTMLLabelElement, ControlElement] {
     const field = document.createElement('label');
     const element = ElementBuilder.build(control);
     const text = document.createElement('span');
@@ -71,7 +65,7 @@ export class ElementBuilder {
       field.title = control.tooltip;
     }
 
-    return field;
+    return [field, element];
   }
 
   private static buildSelect(
