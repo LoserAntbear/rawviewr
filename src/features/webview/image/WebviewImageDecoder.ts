@@ -1,15 +1,12 @@
 import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
-import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { FORMAT_PRESETS } from '@features/image/format/presets';
-import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { DecodeOptions, DecodedImage } from '@features/image/imageDecoder/types';
+import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { withAbortSignalCheck } from '@utils/abort';
 
 export class WebviewImageDecoder {
   constructor(
-    private readonly decoder: ImageDecoder = new ImageDecoder(
-      new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format),
-    ),
+    formatRegistry: FormatRegistry,
+    private readonly decoder: ImageDecoder = new ImageDecoder(formatRegistry),
   ) {}
 
   public async decode(
