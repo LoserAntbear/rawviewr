@@ -9,16 +9,21 @@ import { ItemsSlice } from './slice/ItemsSlice';
 import { ViewSlice } from './slice/ViewSlice';
 import { DecodeSlice } from './slice/DecodeSlice';
 import { STORE_REACTIONS } from './reactions';
+import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
 
-const SLICES = {
-  [StoreSliceId.View]: new ViewSlice(),
-  [StoreSliceId.Items]: new ItemsSlice(),
-  [StoreSliceId.Decode]: new DecodeSlice(new WebviewImageDecoder()),
-};
+
+function createDefaultSlices(formatRegistry: FormatRegistry): StoreSlices {
+  return {
+    [StoreSliceId.View]: new ViewSlice(),
+    [StoreSliceId.Items]: new ItemsSlice(),
+    [StoreSliceId.Decode]: new DecodeSlice(new WebviewImageDecoder(formatRegistry)),
+  };
+}
 
 export function createWebviewStore(
-  slices: StoreSlices = SLICES,
+  formatRegistry: FormatRegistry,
+  slices: StoreSlices = createDefaultSlices(formatRegistry),
   reactions: readonly StoreReaction[] = STORE_REACTIONS,
 ): { store: AppStore; disposables: WebviewDisposableStore } {
   const disposables = new WebviewDisposableStore();
