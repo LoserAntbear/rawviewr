@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  border-bottom: 1px solid var(--riv-border);
+  background: var(--riv-surface);
+}
+
+#toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--riv-gap);
+  padding: 6px 10px;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: var(--riv-gap);
+  padding-right: var(--riv-gap);
+  border-right: 1px solid var(--riv-border);
+}
+
+.group:last-child {
+  border-right: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.field-label {
+  color: var(--riv-muted);
+  user-select: none;
+}
+
+/* A control that does not apply to the current format reads as inert, not broken. */
+.field:has(:disabled) .field-label {
+  opacity: 0.45;
+}
+
+select,
+input[type='number'] {
+  font: inherit;
+  color: var(--vscode-input-foreground, inherit);
+  background: var(--vscode-input-background, transparent);
+  border: 1px solid var(--vscode-input-border, var(--riv-border));
+  border-radius: var(--riv-radius);
+  padding: 2px 4px;
+  min-height: 24px;
+}
+
+input.narrow {
+  width: 68px;
+}
+
+select:focus-visible,
+input:focus-visible {
+  outline: 1px solid var(--riv-accent);
+  outline-offset: -1px;
+}
+
+:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
