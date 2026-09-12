@@ -1,4 +1,5 @@
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 
 import type { ToolbarGroup, ToolbarTransition } from './definitions';
 
@@ -33,10 +34,8 @@ export type ToolbarControl = {
 
   readonly tooltip?: string;
 
-  /** Option value -> what the control should show. */
-  readonly toRaw: (options: DecodeOptions) => string;
-  /** What the control shows -> the option patch it implies. */
-  readonly toOptions: (raw: string) => Partial<DecodeOptions>;
+  readonly toRawValue: (options: DecodeOptions) => string;
+  readonly toDecodeOptions: (raw: string) => Partial<DecodeOptions>;
 };
 
 export type ToolbarControlStatus = {
@@ -55,5 +54,5 @@ export type ToolbarState = {
 };
 
 export type ToolbarTransitionPayloads = {
-  [ToolbarTransition.Synced]: { options: DecodeOptions };
+  [ToolbarTransition.Synced]: { options: DecodeOptions; formatRegistry: FormatRegistry };
 };
