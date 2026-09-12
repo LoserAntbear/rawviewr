@@ -1,7 +1,6 @@
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
-import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 
-import type { ToolbarGroup, ToolbarTransition } from './definitions';
+import type { ToolbarGroup } from './definitions';
 
 export type ExtractDescriptor<
   TDescriptor,
@@ -34,25 +33,12 @@ export type ToolbarControl = {
 
   readonly tooltip?: string;
 
-  readonly toRawValue: (options: DecodeOptions) => string;
   readonly toDecodeOptions: (raw: string) => Partial<DecodeOptions>;
+  readonly toValueFromDecodeOptions: (options: DecodeOptions) => string;
 };
 
 export type ToolbarControlStatus = {
   readonly hidden?: boolean;
   readonly disabled?: boolean;
   readonly placeholder?: string;
-};
-
-export type ToolbarAvailability = Readonly<Record<string, ToolbarControlStatus>>;
-
-/** What the toolbar shows: a value per control, plus whether it applies at all. */
-export type ToolbarState = {
-  readonly kind: ToolbarTransition;
-  readonly availability: ToolbarAvailability;
-  readonly values: Readonly<Record<string, string>>;
-};
-
-export type ToolbarTransitionPayloads = {
-  [ToolbarTransition.Synced]: { options: DecodeOptions; formatRegistry: FormatRegistry };
 };

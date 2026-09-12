@@ -27,7 +27,7 @@ export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
   }
 
   /**
-   * Updateing items without changing their position,
+   * Updating items without changing their position,
    * since render is order sensitive
    */
   public upsert(items: readonly BufferItemData[]): void {

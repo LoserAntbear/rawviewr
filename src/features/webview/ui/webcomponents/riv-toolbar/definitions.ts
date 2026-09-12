@@ -5,7 +5,3 @@ export enum ToolbarGroup {
   Header = 'header',
   Geometry = 'geometry',
 }
-
-export enum ToolbarTransition {
-  Synced = 'synced',
-}

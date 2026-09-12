@@ -2,14 +2,10 @@ import { isHTMLElement } from '@features/webview/utils/html';
 
 import { RIVView } from '../RIVView';
 import { ToolbarGroup } from './definitions';
-import { TOOLBAR_CONTROLS } from './Controls/controls';
+import { TOOLBAR_CONTROLS } from './controls/controls';
 import { ElementBuilder } from './ElementBuilder/ElementBuilder';
-import type {
-  ToolbarState,
-  ControlElement,
-  ToolbarControl,
-  ToolbarAvailability,
-} from './types';
+import type { ControlElement, ToolbarControl } from './types';
+import type { ToolbarAvailability, ToolbarState } from './state/types';
 
 type ControlField = {
   readonly field: HTMLLabelElement;

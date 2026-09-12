@@ -2,8 +2,8 @@ import { Endian } from '@definitions/bits';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 
 import { ToolbarGroup } from '../definitions';
-import { TAG_DESCRIPTORS } from './tagDescriptors';
 import { ToolbarControl } from '../types';
+import { TAG_DESCRIPTORS } from './tagDescriptors';
 
 function toDimension(raw: string): number {
   const parsed = Number.parseInt(raw, 10);
@@ -30,7 +30,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Format,
     tag: TAG_DESCRIPTORS.buildFormatFieldTagDescriptor(),
     tooltip: 'How the bytes are laid out per pixel.',
-    toRawValue: (options) => options.format,
+    toValueFromDecodeOptions: (options) => options.format,
     toDecodeOptions: (raw) => ({ format: raw }),
   },
   {
@@ -38,7 +38,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: 'Width',
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
-    toRawValue: (options) => fromDimension(options.width),
+    toValueFromDecodeOptions: (options) => fromDimension(options.width),
     toDecodeOptions: (raw) => ({ width: toDimension(raw) }),
   },
   {
@@ -46,7 +46,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: 'Height',
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
-    toRawValue: (options) => fromDimension(options.height),
+    toValueFromDecodeOptions: (options) => fromDimension(options.height),
     toDecodeOptions: (raw) => ({ height: toDimension(raw) }),
   },
   {
@@ -55,7 +55,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
     tooltip: 'Bytes to skip before the first pixel.',
-    toRawValue: (options) => fromDimension(options.offset),
+    toValueFromDecodeOptions: (options) => fromDimension(options.offset),
     toDecodeOptions: (raw) => ({ offset: toDimension(raw) }),
   },
   {
@@ -64,7 +64,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
     tooltip: 'Bytes per row including padding. Empty means tightly packed.',
-    toRawValue: (options) => fromDimension(options.bytesPerRow),
+    toValueFromDecodeOptions: (options) => fromDimension(options.bytesPerRow),
     toDecodeOptions: (raw) => ({ bytesPerRow: toDimension(raw) }),
   },
   {
@@ -75,7 +75,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: Endian.Little, label: 'little' },
       { value: Endian.Big, label: 'big' },
     ]),
-    toRawValue: (options) => options.endian,
+    toValueFromDecodeOptions: (options) => options.endian,
     toDecodeOptions: (raw) => ({ endian: raw as Endian }),
   },
   {
@@ -87,7 +87,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: '', label: 'LSB first' },
     ]),
     tooltip: 'For sub-byte formats: which end of the byte the first pixel sits in.',
-    toRawValue: (options) => fromToggle(options.bitOrderMsb),
+    toValueFromDecodeOptions: (options) => fromToggle(options.bitOrderMsb),
     toDecodeOptions: (raw) => ({ bitOrderMsb: toggled(raw) }),
   },
   {
@@ -96,7 +96,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Layout,
     tag: TAG_DESCRIPTORS.TOGGLE_FIELD,
     tooltip: 'Bottom-up buffers, as most GPU captures are.',
-    toRawValue: (options) => fromToggle(options.flipY),
+    toValueFromDecodeOptions: (options) => fromToggle(options.flipY),
     toDecodeOptions: (raw) => ({ flipY: toggled(raw) }),
   },
   {
@@ -107,7 +107,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: AlphaMode.Use, label: 'use' },
       { value: AlphaMode.Ignore, label: 'ignore' },
     ]),
-    toRawValue: (options) => options.alphaMode,
+    toValueFromDecodeOptions: (options) => options.alphaMode,
     toDecodeOptions: (raw) => ({ alphaMode: raw as AlphaMode }),
   },
   {
@@ -116,7 +116,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Alpha,
     tag: TAG_DESCRIPTORS.TOGGLE_FIELD,
     tooltip: 'Divide colour back out by alpha.',
-    toRawValue: (options) => fromToggle(options.unpremultiply),
+    toValueFromDecodeOptions: (options) => fromToggle(options.unpremultiply),
     toDecodeOptions: (raw) => ({ unpremultiply: toggled(raw) }),
   },
   {
@@ -131,7 +131,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: HeaderPreset.U32BE, label: 'u32 BE' },
     ]),
     tooltip: 'Read width and height from a header instead of the fields.',
-    toRawValue: (options) => options.headerPreset,
+    toValueFromDecodeOptions: (options) => options.headerPreset,
     toDecodeOptions: (raw) => ({ headerPreset: raw as HeaderPreset }),
   },
 ];
