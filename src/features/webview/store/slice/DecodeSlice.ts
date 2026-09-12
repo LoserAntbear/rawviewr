@@ -26,10 +26,16 @@ export class DecodeSlice extends StoreSlice<StoreSliceId.Decode, DecodeOptions> 
     item: BufferItemData | undefined,
     signal?: AbortSignal,
   ): Promise<ImageBitmap | null> {
-    if (!item || item.error || item.data.byteLength === 0) {
+    try {
+      if (!item || item.error || item.data.byteLength === 0) {
+        return null;
+      }
+
+      return this.decoder.decode(item.data, this.get(), signal);
+    } catch (error) {
+      console.error('[DecodeSlice]::Failed to decode image:', error);
+
       return null;
     }
-
-    return this.decoder.decode(item.data, this.get(), signal);
   }
 }
