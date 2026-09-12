@@ -58,7 +58,7 @@ export class ElementBuilder {
     text.textContent = control.label;
 
     field.className = 'field';
-    field.dataset.field = control.id;
+    field.dataset.fieldId = control.id;
     field.append(text, element);
 
     if (control.tooltip) {
