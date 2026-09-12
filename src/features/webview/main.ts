@@ -1,4 +1,5 @@
 import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
+import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
@@ -9,6 +10,8 @@ import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
+import { FORMAT_PRESETS } from '@features/image/format/presets';
+import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.
@@ -32,9 +35,10 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const { store } = createWebviewStore();
+  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
+  const { store } = createWebviewStore(formatRegistry);
 
-  WebviewContextProvider.create({ store });
+  WebviewContextProvider.create({ store, formatRegistry });
 
   const bridge = new WebviewSessionCommunicationBridge();
   const commandDispatcher = new WebviewCommandDispatcher(
