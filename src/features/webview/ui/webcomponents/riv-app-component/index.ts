@@ -16,8 +16,8 @@ export class RIVAppComponent extends RIVHTMLElement {
 
   public connectedCallback(): void {
     this.emitCommand({
-      type: WebviewCommandType.Connected,
       payload: RIVAppComponent.tagName,
+      type: WebviewCommandType.WebviewConnected,
     });
   }
 }
