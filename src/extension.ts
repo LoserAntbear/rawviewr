@@ -12,6 +12,7 @@ import { ViewerWindowController } from '@features/viewer/windowController/Viewer
 import { SettingsController } from '@features/settings/SettingsController';
 import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import { AppContextProvider } from '@features/appContext/AppContextProvider';
+import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
 
 export function activate(context: vscode.ExtensionContext): void {
   // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
@@ -32,7 +33,8 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   const dispatcher = new IntentDispatcher({
-    ...VIEWER_INTENT_RESOLVERS(windowController, viewerRegistry),
+    ...EXPORT_INTENT_RESOLVERS(viewerRegistry),
+    ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
   const host = new ExtensionHost(context, new RawEditorProvider(context, viewerRegistry), dispatcher);
