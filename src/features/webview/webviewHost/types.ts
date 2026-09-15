@@ -1,3 +1,5 @@
+import type * as vscode from 'vscode';
+
 import type { BufferItemData } from '../../buffer';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { GalleryViewMode } from '../ui/webcomponents/types';
@@ -16,3 +18,7 @@ export type WebviewMessage =
   | { type: 'gallery:openItem'; id: string }
   | { type: 'export:png'; name: string; base64: string }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string };
+
+export interface ItemOpener {
+  openSingle(targets: readonly vscode.Uri[]): Promise<void>;
+};
