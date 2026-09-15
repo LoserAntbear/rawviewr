@@ -22,7 +22,6 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
         fileSourceForUri(document.uri),
       ],
       'single',
-      // document.uri.toString(),
     );
 
     this.viewerRegistry.register({ panel, viewer });
