@@ -16,7 +16,7 @@ export class RIVMainView extends RIVHTMLElement {
 
   public connectedCallback(): void {
     this.emitCommand({
-      type: WebviewCommandType.Connected,
+      type: WebviewCommandType.WebviewConnected,
       payload: RIVMainView.tagName,
     });
   }

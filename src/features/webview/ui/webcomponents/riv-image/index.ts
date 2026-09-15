@@ -72,7 +72,7 @@ export class RIVImage extends RIVHTMLElement {
     this.render();
 
     this.emitCommand({
-      type: WebviewCommandType.Connected,
+      type: WebviewCommandType.WebviewConnected,
       payload: RIVImage.tagName,
     });
   }

@@ -37,7 +37,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.sync();
 
     this.emitCommand({
-      type: WebviewCommandType.Connected,
+      type: WebviewCommandType.WebviewConnected,
       payload: RIVToolbar.tagName,
     });
   }
