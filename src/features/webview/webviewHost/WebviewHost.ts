@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import type { SettingsController } from '@features/settings/SettingsController';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import type { FileSource } from '../types';
@@ -10,7 +11,6 @@ import { getNonce } from '../utils';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { FileValidator } from '@features/file/FileValidator';
 import { GalleryViewMode } from '../ui/webcomponents/types';
-import { resolveInitialDecodeOptions } from '@features/settings/decodeDefaults';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
@@ -20,6 +20,7 @@ export class WebviewHost extends DisposableStore {
     private readonly webview: vscode.Webview,
     private readonly sources: FileSource[],
     private readonly viewMode: GalleryViewMode,
+    private readonly settingsController: SettingsController,
     private readonly itemOpener?: ItemOpener,
     private readonly exporter: ImageExporter = new ImageExporter(),
   ) {
@@ -114,7 +115,7 @@ export class WebviewHost extends DisposableStore {
     this.post({
       viewMode,
       type: 'session:start',
-      decodeOptions: resolveInitialDecodeOptions(),
+      decodeOptions: this.settingsController.readDefaultDecodeOptions(),
     });
   }
 
