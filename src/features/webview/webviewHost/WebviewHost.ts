@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import type { WebviewHostMessage, WebviewMessage } from './types';
+import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
+import type { ExportFormat } from '@definitions/exportFormats';
 import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import appShellHtml from './app-shell.html';
@@ -9,6 +10,9 @@ import { getNonce } from '../utils';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { FileValidator } from '@features/file/FileValidator';
 import { GalleryViewMode } from '../ui/webcomponents/types';
+import { resolveInitialDecodeOptions } from '@features/settings/decodeDefaults';
+import { ImageExporter } from '@features/image/imageExport/ImageExporter';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 export class WebviewHost extends DisposableStore {
   constructor(
@@ -16,6 +20,8 @@ export class WebviewHost extends DisposableStore {
     private readonly webview: vscode.Webview,
     private readonly sources: FileSource[],
     private readonly viewMode: GalleryViewMode,
+    private readonly itemOpener?: ItemOpener,
+    private readonly exporter: ImageExporter = new ImageExporter(),
   ) {
     super();
 
@@ -28,6 +34,11 @@ export class WebviewHost extends DisposableStore {
     this.updateWebviewHtml();
   }
 
+
+  public requestExport(format: ExportFormat): Promise<void> {
+    return this.post({ type: 'export', format });
+  }
+
   public async post(message: WebviewHostMessage): Promise<void> {
     if (!this.webview.postMessage(message)) {
       console.error('WebviewHost: Failed to post message to webview:', message);
@@ -38,7 +49,6 @@ export class WebviewHost extends DisposableStore {
     const script = this.webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview', 'main.js'),
     ).toString();
-    // const style = this.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'viewer.css'));
     const nonce = getNonce();
     const appHostTemplate = new StringTemplate(appShellHtml, ['script', 'nonce', 'cspSource']);
 
@@ -58,33 +68,38 @@ export class WebviewHost extends DisposableStore {
   }
 
   private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
-    console.log('WebviewHost: Received message from webview:', message);
-
     switch (message.type) {
       case 'app:ready':
         await this.handleAppReady();
+        break;
+      case 'gallery:openItem':
+        this.handleOpenItem(message.id);
+        break;
+      case 'export:png':
+        await this.exporter.savePng(this.sources[0]?.uri, message.name, message.base64);
+        break;
+      case 'app:status':
+        await InfoMessageController.handleMessage({
+          level: message.level,
+          message: message.message,
+        });
         break;
       // case 'optionsChanged':
       //   this.options = message.options;
       //   this.saveOptions();
       //   break;
-      // case 'openItem': {
-      //   const source = this.sources.find((s) => s.id === message.id);
-      //   if (source) {
-      //     this.onOpenItem?.(source.uri);
-      //   }
-      //   break;
-      // }
-      // case 'png':
-      //   await this.savePng(message.name, message.base64);
-      //   break;
-      // case 'status':
-      //   if (message.level === 'error') {
-      //     void vscode.window.showErrorMessage(message.message);
-      //   } else {
-      //     void vscode.window.showInformationMessage(message.message);
-      //   }
-      //   break;
+    }
+  }
+
+  private handleOpenItem(id: string): void {
+    try {
+      const source = this.sources.find((candidate) => candidate.id === id);
+
+      if (source) {
+        void this.itemOpener?.openSingle([source.uri]);
+      }
+    } catch (error) {
+      console.error('Failed to handle open item:', error);
     }
   }
 
@@ -95,10 +110,11 @@ export class WebviewHost extends DisposableStore {
   }
 
   private initializeSession(viewMode: GalleryViewMode): void {
-    // Should it include the ID? No use for it as I see, but MAYBE?
+    // TODO: Should it include the ID? No use for it as I see, but MAYBE?
     this.post({
       viewMode,
-      type: 'session',
+      type: 'session:start',
+      decodeOptions: resolveInitialDecodeOptions(),
     });
   }
 
@@ -138,7 +154,7 @@ export class WebviewHost extends DisposableStore {
 
     this.post({
       message,
-      type: 'error',
+      type: 'status:error',
     });
   }
 }
