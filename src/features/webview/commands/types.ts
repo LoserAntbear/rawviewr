@@ -1,11 +1,9 @@
 import type { WebviewCommandType } from './definitions';
 
 export type WebviewCommand =
-  {
-    type: WebviewCommandType.Connected;
-    payload: string;
-  }
-  | { type: WebviewCommandType.Ready; };
+  | { type: WebviewCommandType.AppReady; }
+  | { type: WebviewCommandType.GalleryOpenItem; payload: string; }
+  | { type: WebviewCommandType.WebviewConnected; payload: string; };
 
 
 export type WebviewCommandResolver<K extends WebviewCommandType = WebviewCommandType> = (
