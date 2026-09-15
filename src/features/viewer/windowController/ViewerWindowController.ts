@@ -4,11 +4,13 @@ import { fileSourceForUri } from '@features/vscode/utils/uri';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
+import { SettingsController } from '@features/settings/SettingsController';
 
 export class ViewerWindowController {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly viewerRegistry: ViewerRegistry,
+    private readonly settingsController: SettingsController,
   ) {}
 
   /** Opens every target in its own editor tab. */
@@ -37,7 +39,7 @@ export class ViewerWindowController {
       panel.webview,
       targets.map(fileSourceForUri),
       'gallery',
-      this,
+      this.settingsController,
     );
 
     this.viewerRegistry.register({ panel, viewer });

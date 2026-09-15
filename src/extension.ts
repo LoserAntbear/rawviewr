@@ -22,11 +22,19 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(disposableRegistry);
 
   const viewerRegistry = new ViewerRegistry();
-  const windowController = new ViewerWindowController(context, viewerRegistry);
   const configController = new VSCodeWorkspaceConfigurationController(
     new vscode.EventEmitter(),
   );
-  const settingsController = new SettingsController(context.workspaceState);
+  const settingsController = new SettingsController(
+    context.workspaceState,
+    configController,
+  );
+  const windowController = new ViewerWindowController(
+    context,
+    viewerRegistry,
+    settingsController,
+  );
+  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController);
 
   AppContextProvider.create({
     workspaceConfig: configController,
@@ -37,7 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
     ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
-  const host = new ExtensionHost(context, new RawEditorProvider(context, viewerRegistry), dispatcher);
+  const host = new ExtensionHost(context, rawEditorProvider, dispatcher);
 
   host.registerSelf();
 }
