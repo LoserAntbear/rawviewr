@@ -5,6 +5,14 @@ import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
+function handleOpenItem(uri: vscode.Uri): void {
+  try {
+    void vscode.commands.executeCommand(VSCodeCommands.OpenWith, uri, ViewType.Optional);
+  } catch (error) {
+    console.error('Failed to open item with VSCode:', error);
+  }
+}
+
 export class ViewerWindowController {
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -37,8 +45,7 @@ export class ViewerWindowController {
       panel.webview,
       targets.map(fileSourceForUri),
       'gallery',
-      // `gallery:${title}`,
-      // (uri) => void vscode.commands.executeCommand(VSCodeCommands.OpenWith, uri, ViewType.Optional),
+      handleOpenItem,
     );
 
     this.viewerRegistry.register({ panel, viewer });
