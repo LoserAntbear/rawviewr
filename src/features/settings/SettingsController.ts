@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
-const SETTINGS_VSCODE_MEMENTO_PREFIX = 'rawImageViewer.settings:';
+const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
 
 export class SettingsController {
   private get keys(): string[] {
     return this.workspaceState.keys().filter(
-      (key) => key.startsWith(SETTINGS_VSCODE_MEMENTO_PREFIX),
+      (key) => key.startsWith(VSCODE_MEMENTO_SETTINGS_PREFIX),
     );
   }
 
