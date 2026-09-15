@@ -17,7 +17,7 @@ export type Intent =
   | { readonly kind: IntentKind.viewerOpenSingle; readonly targets: readonly vscode.Uri[] }
   | { readonly kind: IntentKind.viewerOpenGallery; readonly targets: readonly vscode.Uri[] }
   | { readonly kind: IntentKind.viewerOpenFolderGallery; readonly folder: vscode.Uri | null }
-  | { readonly kind: IntentKind.viewerRequestExport; readonly format: ExportFormat }
+  | { readonly kind: IntentKind.fileExportRequest; readonly format: ExportFormat }
   | { readonly kind: IntentKind.settingsReset };
 
 export type IntentParserResult = Intent | null;
