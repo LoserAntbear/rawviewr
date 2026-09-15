@@ -31,7 +31,7 @@ export const parseOpenFolderGallery: IntentParser = (...args) => ({
 export const parseExport: IntentParser = (...args) => {
   const format = asEnumMember(ExportFormat, args[0]) || ExportFormat.Png;
 
-  return { kind: IntentKind.viewerRequestExport, format };
+  return { kind: IntentKind.fileExportRequest, format };
 };
 
 export const parseResetSettings: IntentParser = () => ({ kind: IntentKind.settingsReset });
