@@ -45,7 +45,7 @@ function launchSession(): void {
     WEBVIEW_COMMAND_RESOLVERS(bridge),
   );
   const hostMessageDispatcher = new WebviewHostMessageDispatcher(
-    WEBVIEW_HOST_MESSAGE_RESOLVERS(store),
+    WEBVIEW_HOST_MESSAGE_RESOLVERS(store, bridge),
     bridge,
   );
 
