@@ -42,7 +42,7 @@ function launchSession(): void {
 
   const bridge = new WebviewSessionCommunicationBridge();
   const commandDispatcher = new WebviewCommandDispatcher(
-    WEBVIEW_COMMAND_RESOLVERS(bridge),
+    WEBVIEW_COMMAND_RESOLVERS(bridge, store),
   );
   const hostMessageDispatcher = new WebviewHostMessageDispatcher(
     WEBVIEW_HOST_MESSAGE_RESOLVERS(store, bridge),
