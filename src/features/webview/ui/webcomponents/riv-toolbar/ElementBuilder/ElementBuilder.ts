@@ -1,29 +1,35 @@
+import type { InputDescriptor, ExtractDescriptor, SupportedInputType } from '../types';
 import type {
   ControlElement,
   ToolbarControl,
-  InputDescriptor,
-  ExtractDescriptor,
-  SupportedInputType,
   SupportedControlTag,
   ControlTagDescriptor,
-} from '../types';
+} from '../controls/types';
 import type {
   InputBuilderMap,
   InputBuilderFor,
+  FieldLabellerMap,
   ElementBuilderMap,
   ElementBuilderFor,
 } from './types';
 import { ToolbarGroup } from '../definitions';
 
 export class ElementBuilder {
-    private static readonly builders: ElementBuilderMap = {
+  private static readonly builders: ElementBuilderMap = {
     input: ElementBuilder.buildInput,
+    button: ElementBuilder.buildButton,
     select: ElementBuilder.buildSelect,
   };
 
   private static readonly inputBuilders: InputBuilderMap = {
     number: ElementBuilder.buildNumberInput,
     checkbox: ElementBuilder.buildCheckboxInput,
+  };
+
+  private static readonly labellers: FieldLabellerMap = {
+    input: ElementBuilder.labelBeside,
+    select: ElementBuilder.labelBeside,
+    button: ElementBuilder.labelWithin,
   };
 
   public static build(control: ToolbarControl): ControlElement {
@@ -38,6 +44,15 @@ export class ElementBuilder {
     return element;
   }
 
+  private static buildButton(): HTMLButtonElement {
+    const button = document.createElement('button');
+
+    button.type = 'button';
+
+    return button;
+  }
+
+
   public static buildControlsGroup(
     groupId: ToolbarGroup,
   ): HTMLElement | null{
@@ -49,23 +64,39 @@ export class ElementBuilder {
     return fieldset;
   }
 
-  public static buildField(control: ToolbarControl): [HTMLLabelElement, ControlElement] {
-    const field = document.createElement('label');
+  public static buildField(control: ToolbarControl): [HTMLElement, ControlElement] {
     const element = ElementBuilder.build(control);
-    const text = document.createElement('span');
+    const field = ElementBuilder.labellers[control.tag.tag](control.label, element);
 
-    text.className = 'field-label';
-    text.textContent = control.label;
-
+    // Everything below is common to every field, whichever way it was labelled.
     field.className = 'field';
     field.dataset.fieldId = control.id;
-    field.append(text, element);
 
     if (control.tooltip) {
       field.title = control.tooltip;
     }
 
     return [field, element];
+  }
+
+  private static labelBeside(label: string, element: HTMLElement): HTMLElement {
+    const field = document.createElement('label');
+    const text = document.createElement('span');
+
+    text.className = 'field-label';
+    text.textContent = label;
+    field.append(text, element);
+
+    return field;
+  }
+
+  private static labelWithin(label: string, element: HTMLElement): HTMLElement {
+    const field = document.createElement('div');
+
+    element.textContent = label;
+    field.append(element);
+
+    return field;
   }
 
   private static buildSelect(
