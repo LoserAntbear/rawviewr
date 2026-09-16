@@ -4,11 +4,11 @@ import { RIVView } from '../RIVView';
 import { ToolbarGroup } from './definitions';
 import { TOOLBAR_CONTROLS } from './controls/controls';
 import { ElementBuilder } from './ElementBuilder/ElementBuilder';
-import type { ControlElement, ToolbarControl } from './types';
+import type { ControlElement, ToolbarControl } from './controls/types';
 import type { ToolbarAvailability, ToolbarState } from './state/types';
 
 type ControlField = {
-  readonly field: HTMLLabelElement;
+  readonly field: HTMLElement;
   readonly element: ControlElement;
 };
 
@@ -18,6 +18,7 @@ const ORDERED_TOOLBAR_GROUPS: readonly ToolbarGroup[] = [
   ToolbarGroup.Layout,
   ToolbarGroup.Alpha,
   ToolbarGroup.Header,
+  ToolbarGroup.Actions,
 ];
 
 function groupControls(controls: readonly ToolbarControl[]): [ToolbarGroup, ToolbarControl[]][] {
@@ -91,7 +92,12 @@ export class RIVToolbarView extends RIVView {
 
   public render(state: ToolbarState): void {
     for (const [id, { element }] of this.controlFields) {
-      this.write(element, state.values[id] ?? '');
+      const value = state.values[id];
+
+      // Only value controls have an entry; anything else has no value to write.
+      if (value !== undefined) {
+        this.write(element, value);
+      }
     }
 
     this.applyAvailability(state.availability);
