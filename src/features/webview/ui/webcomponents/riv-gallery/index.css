@@ -64,3 +64,9 @@
 #gallery[data-view-mode='gallery'] > li:hover {
   border-color: var(--riv-accent);
 }
+
+/* Selection only reads as anything in gallery mode — single mode shows one tile. */
+#gallery[data-view-mode='gallery'] > li.selected {
+  border-color: var(--riv-accent);
+  box-shadow: 0 0 0 1px var(--riv-accent);
+}

@@ -66,3 +66,31 @@ input:focus-visible {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ------------------------------------------------------------------- actions */
+
+.group[data-group='actions'] {
+  /* Pushed to the far end: an action is not another option to scan past. */
+  margin-left: auto;
+  border-right: none;
+}
+
+button {
+  font: inherit;
+  color: var(--vscode-button-foreground, inherit);
+  background: var(--vscode-button-background, transparent);
+  border: 1px solid transparent;
+  border-radius: var(--riv-radius);
+  padding: 3px 10px;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+}
+
+button:focus-visible {
+  outline: 1px solid var(--riv-accent);
+  outline-offset: -1px;
+}
