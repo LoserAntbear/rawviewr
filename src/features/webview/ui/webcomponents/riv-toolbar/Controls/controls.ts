@@ -1,8 +1,10 @@
 import { Endian } from '@definitions/bits';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 
+import { WebviewCommandType } from '@features/webview/commands/definitions';
+
 import { ToolbarGroup } from '../definitions';
-import { ToolbarControl } from '../types';
+import { ToolbarControl } from './types';
 import { TAG_DESCRIPTORS } from './tagDescriptors';
 
 function toDimension(raw: string): number {
@@ -133,6 +135,14 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     tooltip: 'Read width and height from a header instead of the fields.',
     toValueFromDecodeOptions: (options) => options.headerPreset,
     toDecodeOptions: (raw) => ({ headerPreset: raw as HeaderPreset }),
+  },
+  {
+    id: 'exportPng',
+    label: 'Export PNG',
+    group: ToolbarGroup.Actions,
+    tag: TAG_DESCRIPTORS.BUTTON_FIELD,
+    tooltip: 'Save what is on screen as a PNG.',
+    command: { type: WebviewCommandType.ExportRequest },
   },
 ];
 
