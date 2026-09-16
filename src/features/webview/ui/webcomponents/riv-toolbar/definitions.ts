@@ -3,5 +3,6 @@ export enum ToolbarGroup {
   Format = 'format',
   Layout = 'layout',
   Header = 'header',
+  Actions = 'actions',
   Geometry = 'geometry',
 }
