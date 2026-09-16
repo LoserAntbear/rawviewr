@@ -22,8 +22,13 @@ const visibleIds: Selector<AppStoreState, readonly string[]> = (state) => {
   return selectedId === null ? ids.slice(0, 1) : [selectedId];
 };
 
+const selectedId: Selector<AppStoreState, string | null> = (state) => (
+  state[StoreSliceId.View].selectedId
+);
+
 export const STORE_SELECTORS = {
   item,
   itemIds,
   visibleIds,
+  selectedId,
 } satisfies SelectorMap<AppStoreState>;
