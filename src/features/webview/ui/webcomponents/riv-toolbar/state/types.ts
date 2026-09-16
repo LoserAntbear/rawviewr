@@ -1,5 +1,5 @@
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { ToolbarControlStatus } from '../types';
+import { ToolbarControlStatus } from '../controls/types';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ToolbarStateTransition } from './definitions';
 

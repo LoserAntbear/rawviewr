@@ -1,5 +1,5 @@
 import { FormatGroupEntry } from '@features/image/format/types';
-import type { ControlTagDescriptor, ToolbarChoice, ToolbarChoiceGroup } from '../types';
+import type { ControlTagDescriptor, ToolbarChoice, ToolbarChoiceGroup } from './types';
 import { WebviewContextProvider } from '@webview/webviewContext/WebviewContextProvider';
 
 const TOGGLE_FIELD: ControlTagDescriptor = { tag: 'input', type: 'checkbox' };
@@ -25,7 +25,10 @@ function buildFormatFieldTagDescriptor(): ControlTagDescriptor {
   };
 }
 
+const BUTTON_FIELD: ControlTagDescriptor = { tag: 'button' };
+
 export const TAG_DESCRIPTORS = {
+  BUTTON_FIELD,
   NUMBER_FIELD,
   TOGGLE_FIELD,
   buildSelectFieldTagDescriptor,
