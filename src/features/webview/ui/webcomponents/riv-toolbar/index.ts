@@ -8,7 +8,7 @@ import { RIVTags } from '../definitions';
 import { RIVToolbarView } from './RIVToolbarView';
 import template from './index.html';
 import styles from './index.css';
-import { getControlDefinitionForElement } from './controls/utils';
+import { getActionControlForElement, getValueControlForElement } from './controls/utils';
 import { readElementValue } from './ElementBuilder/utils';
 import { ToolbarState, ToolbarTransitionPayloads } from './state/types';
 import { EMPTY_TOOLBAR_STATE, ToolbarStateTransition } from './state/definitions';
@@ -28,6 +28,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.view.build();
 
     this.observe(this.view.rootRef, 'change', this.handleControlChange.bind(this));
+    this.observe(this.view.rootRef, 'click', this.handleControlClick.bind(this));
     this.observe(
       WebviewContextProvider.context.store.bus,
       StoreEvent.DecodeChange,
@@ -43,16 +44,25 @@ export class RIVToolbar extends RIVHTMLElement {
   }
 
   private handleControlChange(event: Event): void {
-    const value = readElementValue(event.target as HTMLElement);
-    const control = getControlDefinitionForElement(event.target as HTMLElement);
+    const control = getValueControlForElement(event.target);
 
     if (!control) {
       return;
     }
 
+    const value = readElementValue(event.target as HTMLElement);
+
     WebviewContextProvider.context.store
       .get(StoreSliceId.Decode)
       .setOptions(control.toDecodeOptions(value));
+  }
+
+  private handleControlClick(event: Event): void {
+    const control = getActionControlForElement(event.target);
+
+    if (control) {
+      this.emitCommand(control.command);
+    }
   }
 
   private sync(): void {
