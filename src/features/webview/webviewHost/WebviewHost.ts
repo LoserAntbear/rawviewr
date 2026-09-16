@@ -77,7 +77,7 @@ export class WebviewHost extends DisposableStore {
         this.handleOpenItem(message.id);
         break;
       case 'export:png':
-        await this.exporter.savePng(this.sources[0]?.uri, message.name, message.base64);
+        await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
         break;
       case 'app:status':
         await InfoMessageController.handleMessage({
