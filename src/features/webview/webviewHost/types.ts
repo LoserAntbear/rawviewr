@@ -16,7 +16,7 @@ export type WebviewMessageType = WebviewMessage['type'];
 export type WebviewMessage =
   | { type: 'app:ready' }
   | { type: 'gallery:openItem'; id: string }
-  | { type: 'export:png'; name: string; base64: string }
+  | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string };
 
 export interface ItemOpener {
