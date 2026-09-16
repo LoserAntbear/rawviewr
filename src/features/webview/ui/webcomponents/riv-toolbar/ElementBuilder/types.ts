@@ -10,5 +10,6 @@ export type ElementBuilderMap = { readonly [K in SupportedControlTag]: ElementBu
 export type InputBuilderFor<T extends SupportedInputType> = (
   descriptor: ExtractDescriptor<InputDescriptor, 'type', T>,
 ) => HTMLInputElement;
-// The same exhaustiveness one level down: a new input type must bring its builder.
 export type InputBuilderMap = { readonly [T in SupportedInputType]: InputBuilderFor<T> };
+export type FieldLabeller = (label: string, element: HTMLElement) => HTMLElement;
+export type FieldLabellerMap = { readonly [K in SupportedControlTag]: FieldLabeller };
