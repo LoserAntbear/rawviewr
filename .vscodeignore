@@ -5,3 +5,5 @@ esbuild.mjs
 tsconfig.json
 **/*.map
 **/*.ts
+vitest.config.mjs
+tsconfig-aliases.mjs
