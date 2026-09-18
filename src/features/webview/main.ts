@@ -3,7 +3,7 @@ import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
-import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVAppComponent } from './ui/webcomponents';
+import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVStatusBar, RIVAppComponent } from './ui/webcomponents';
 import { WebviewHostMessageDispatcher } from './webviewHost/messageDispatcher/WebviewHostMessageDispatcher';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/definitions';
 import { createWebviewStore } from './store/createWebviewStore';
@@ -20,6 +20,7 @@ const CUSTOM_COMPONENTS = [
   RIVToolbar,
   RIVGallery,
   RIVMainView,
+  RIVStatusBar,
   RIVAppComponent,
 ];
 
