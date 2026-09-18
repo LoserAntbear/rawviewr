@@ -1,0 +1,41 @@
+import { WebviewCommandType } from '@features/webview/commands/definitions';
+import { StoreEvent } from '@features/webview/store/definitions';
+import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+
+import { RIVHTMLElement } from '../RIVHTMLElement';
+import { RIVTags } from '../definitions';
+import { RIVStatusBarView } from './RIVStatusBarView';
+import { resolveStatusBarState, resolveStatusContext } from './state/resolvers';
+import template from './index.html';
+import styles from './index.css';
+
+const STATUS_BAR_EVENTS = [StoreEvent.ItemsChange, StoreEvent.ViewChange, StoreEvent.DecodeChange] as const;
+
+export class RIVStatusBar extends RIVHTMLElement {
+  public static readonly tagName = RIVTags.StatusBar;
+
+  protected readonly view = new RIVStatusBarView(this.mount(template, styles));
+
+  public connectedCallback(): void {
+    const { store } = WebviewContextProvider.context;
+
+    this.view.build();
+
+    for (const event of STATUS_BAR_EVENTS) {
+      this.observe(store.bus, event, this.render.bind(this));
+    }
+
+    this.render();
+
+    this.emitCommand({
+      type: WebviewCommandType.WebviewConnected,
+      payload: RIVStatusBar.tagName,
+    });
+  }
+
+  private render(): void {
+    const { store, formatRegistry } = WebviewContextProvider.context;
+
+    this.view.render(resolveStatusBarState(resolveStatusContext(store.state, formatRegistry)));
+  }
+}
