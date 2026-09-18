@@ -1,0 +1,37 @@
+:host {
+  display: block;
+  border-top: 1px solid var(--riv-border);
+  background: var(--riv-surface);
+}
+
+#status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 4px 10px;
+  color: var(--riv-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* The summary gives way first when the bar is narrow; notes are what must stay legible. */
+.segment {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.segment[data-level='warn'] {
+  color: var(--vscode-editorWarning-foreground, #cca700);
+}
+
+.segment[data-level='error'] {
+  color: var(--riv-error);
+}
