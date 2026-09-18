@@ -16,8 +16,8 @@ export default defineConfig({
       {
         // `DisposableStore` itself has no superClass (it `implements`, not `extends`), so
         // excluding by superClass alone still matches the base class's own field.
-        "selector": ":matches(ClassDeclaration, ClassExpression):not([superClass.name='DisposableStore']):not([id.name='DisposableStore']) > ClassBody > PropertyDefinition[key.name='disposables']",
-        "message": "Restricted use of `disposables`. Please extend `DisposableStore` instead. This also provides self-registration and safe cleanup on extension offload."
+        "selector": ":matches(ClassDeclaration, ClassExpression):not([superClass.name='DisposableStore']):not([id.name='DisposableStore']):not([id.name='WebviewDisposableStore']) > ClassBody > PropertyDefinition[key.name='disposables'][value.type='ArrayExpression']",
+        "message": "Restricted use of a raw `disposables` array. Extend `DisposableStore` (extension host) or hold a `WebviewDisposableStore` (webview) instead — both give safe, centralised cleanup."
       }
     ]
   }
