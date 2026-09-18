@@ -1,30 +1,12 @@
 import * as esbuild from 'esbuild';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readTsconfigAliases } from './tsconfig-aliases.mjs';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 
 // region: path aliases
-/**
- * Parsing path aliases from tsconfig.json to use them in esbuild config.
- *
- * @returns {Record<string, string>}
- */
-function readTsconfigAliases() {
-  const { compilerOptions } = JSON.parse(readFileSync(resolve(rootDir, 'tsconfig.json'), 'utf8'));
-  const baseUrl = resolve(rootDir, compilerOptions.baseUrl ?? '.');
-  const stripWildcard = (/** @type {string} */ value) => value.replace(/\/\*$/, '');
-
-  return Object.fromEntries(
-    Object.entries(compilerOptions.paths ?? {}).map(([alias, [target]]) => [
-      stripWildcard(alias),
-      resolve(baseUrl, stripWildcard(target))
-    ])
-  );
-}
-
-const alias = readTsconfigAliases();
+const alias = readTsconfigAliases(rootDir);
 // endregion
 
 // region: esbuild problem matcher plugin
