@@ -4,4 +4,5 @@ export enum RIVTags {
   Toolbar = 'riv-toolbar-component',
   Gallery = 'riv-gallery-component',
   MainView = 'riv-main-view-component',
+  StatusBar = 'riv-status-bar-component',
 }
