@@ -7,3 +7,4 @@ tsconfig.json
 **/*.ts
 vitest.config.mjs
 tsconfig-aliases.mjs
+# TODO: Add samples dir to the ignore list
