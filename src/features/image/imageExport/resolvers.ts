@@ -24,7 +24,7 @@ export const EXPORT_INTENT_RESOLVERS = (
 
       await viewer.requestExport(format);
     } catch (error) {
-      await InfoMessageController.showError(
+      InfoMessageController.showError(
         `Raw Image Viewer: failed to request export. ${error instanceof Error ? error.message : String(error)}`
       );
     }

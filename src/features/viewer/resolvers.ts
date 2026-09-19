@@ -17,7 +17,7 @@ export const VIEWER_INTENT_RESOLVERS = (
     try {
       return await windowController.openSingle(await resolveUriTargets(targets));
     } catch (error) {
-      await InfoMessageController.showError(
+      InfoMessageController.showError(
         `Failed to open single viewer: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -29,7 +29,7 @@ export const VIEWER_INTENT_RESOLVERS = (
 
       await windowController.openGallery(selectionTitle(resolved), resolved);
     } catch (error) {
-      await InfoMessageController.showError(
+      InfoMessageController.showError(
         `Failed to open gallery: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -47,7 +47,7 @@ export const VIEWER_INTENT_RESOLVERS = (
 
       await windowController.openGallery(folderTitle(resolved, targets), targets);
     } catch (error) {
-      await InfoMessageController.showError(
+      InfoMessageController.showError(
         `Failed to open folder gallery: ${error instanceof Error ? error.message : String(error)}`
       );
     }

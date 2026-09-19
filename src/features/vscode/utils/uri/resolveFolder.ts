@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { nullishCoalesce } from '@utils/coalesce';
+
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 async function resolvePickedUrisWithDialog():  Promise<vscode.Uri | null> {
   try {
@@ -11,12 +12,13 @@ async function resolvePickedUrisWithDialog():  Promise<vscode.Uri | null> {
 
     return picked?.[0] ?? null;
   } catch (err) {
-    void vscode.window.showErrorMessage(`Failed to open folder selection dialog: ${err}`);
+    InfoMessageController.showError(`Failed to open folder selection dialog: ${err}`);
 
     return null;
   }
 }
 
+/** `??` is lazy: the picker opens only when no folder was given. */
 export async function resolveFolder(parsed: vscode.Uri | null): Promise<vscode.Uri | null> {
-  return nullishCoalesce(parsed, await resolvePickedUrisWithDialog());
+  return parsed ?? await resolvePickedUrisWithDialog();
 }

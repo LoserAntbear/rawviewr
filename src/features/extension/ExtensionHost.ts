@@ -6,10 +6,11 @@ import type { RawEditorProvider } from '@features/editor/RawEditorProvider';
 import type { IntentDispatcher } from '@features/intent/IntentDispatcher';
 import { COMMANDS } from '@features/extension/commands/table';
 import type { IntentCommand } from '@features/extension/commands/types';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 const EDITOR_OPTIONS = {
-  webviewOptions: { retainContextWhenHidden: true },
   supportsMultipleEditorsPerDocument: true,
+  webviewOptions: { retainContextWhenHidden: true },
 };
 
 export class ExtensionHost {
@@ -37,8 +38,8 @@ export class ExtensionHost {
     return commands.map(({ name, parseToIntent }) => {
       try {
         /**
-         * On command regisstration we wrap the actual command to propagate intent parser.
-         * Since VScode commands can be envoked from multiple sources (command palette, keybindings, context menus, etc.)
+         * On command registration we wrap the actual command to propagate intent parser.
+         * Since VSCode commands can be invoked from multiple sources (command palette, keybindings, context menus, etc.)
          * The actual arguments passed to command callback can differ.
          *
          * We expect intentParser to handle the arguments and return a valid intent object or undefined if the arguments are invalid.
@@ -64,7 +65,7 @@ export class ExtensionHost {
     try {
       await this.dispatcher.dispatch(intent);
     } catch (error) {
-      void vscode.window.showErrorMessage(`Raw Image Viewer: Command ${name} failed — ${error}`);
+      InfoMessageController.showError(`Raw Image Viewer: Command ${name} failed — ${error}`);
 
       throw error;
     }

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
 
 function asBytes(payload: unknown): Uint8Array | null {
@@ -35,7 +37,7 @@ export class ImageExporter {
       await vscode.workspace.fs.writeFile(target, bytes);
       await this.promptOpenMessage(target);
     } catch (error) {
-      vscode.window.showErrorMessage(`Failed to save image: ${error}`);
+      InfoMessageController.showError(`Failed to save image: ${error}`);
     }
   }
 

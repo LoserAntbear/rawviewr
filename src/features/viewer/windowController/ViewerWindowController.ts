@@ -5,6 +5,7 @@ import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 import { SettingsController } from '@features/settings/SettingsController';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 export class ViewerWindowController {
   constructor(
@@ -22,7 +23,7 @@ export class ViewerWindowController {
 
   public async openGallery(title: string, targets: readonly vscode.Uri[]): Promise<void> {
     if (targets.length === 0) {
-      void vscode.window.showInformationMessage('Raw Image Viewer: no matching files to show.');
+      InfoMessageController.showInfo('Raw Image Viewer: no matching files to show.');
 
       return;
     }

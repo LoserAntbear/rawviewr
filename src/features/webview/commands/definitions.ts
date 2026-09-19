@@ -16,9 +16,7 @@ export const WEBVIEW_COMMAND_RESOLVERS = (
   bridge: WebviewSessionCommunicationBridge,
   store: AppStore,
 ): WebviewCommandResolversMap => ({
-  [WebviewCommandType.ExportRequest]: () => {
-    void exportSelected(store, bridge);
-  },
+  [WebviewCommandType.ExportRequest]: () => exportSelected(store, bridge),
   [WebviewCommandType.WebviewConnected]: (command) => {
     if (command.payload === 'riv-app-component') {
       bridge.postToWebviewHost({
