@@ -5,6 +5,7 @@ import type { StoreChangeEvent } from '@features/webview/store/types';
 import type { ItemsState } from '@features/webview/store/slice/ItemsSlice';
 import { isAbortError } from '@guards/errorGuards';
 import { withAbortSignalCheck } from '@utils/abort';
+import { attemptDetached } from '@utils/attempt';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -95,11 +96,20 @@ export class RIVImage extends RIVHTMLElement {
     }
   }
 
+  /**
+   * Called from store listeners, which cannot await. `runRender` handles a failed decode
+   * itself; this catches what falls outside it — the item lookup, a throwing commit.
+   */
   private render(): void {
     this.renderAsyncController?.abort();
     this.renderAsyncController = new AbortController();
 
-    void this.runRender(this.renderAsyncController.signal);
+    const { signal } = this.renderAsyncController;
+
+    attemptDetached(
+      () => this.runRender(signal),
+      (error) => console.error(`${this.localName}: render failed`, error),
+    );
   }
 
   private async runRender(signal: AbortSignal): Promise<void> {
