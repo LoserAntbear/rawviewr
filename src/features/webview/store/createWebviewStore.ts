@@ -8,6 +8,7 @@ import { StoreSliceId } from './definitions';
 import { ItemsSlice } from './slice/ItemsSlice';
 import { ViewSlice } from './slice/ViewSlice';
 import { DecodeSlice } from './slice/DecodeSlice';
+import { ImagesSlice } from './slice/ImagesSlice';
 import { STORE_REACTIONS } from './reactions';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
@@ -17,6 +18,7 @@ function createDefaultSlices(formatRegistry: FormatRegistry): StoreSlices {
   return {
     [StoreSliceId.View]: new ViewSlice(),
     [StoreSliceId.Items]: new ItemsSlice(),
+    [StoreSliceId.Images]: new ImagesSlice(),
     [StoreSliceId.Decode]: new DecodeSlice(new WebviewImageDecoder(formatRegistry)),
   };
 }
