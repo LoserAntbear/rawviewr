@@ -1,8 +1,8 @@
 /**
- * Idea is make it responsible for managing the component's own DOM references
- * and processing.
+ * The idea is to make it responsible for managing the component's own DOM references
+ * and processing them.
  *
- * To avoid dumping DOM handling all over the component itself.
+ * To avoid dumping DOM handlers all over the component itself.
  */
 export class RIVView {
   private readonly refs = new Map<string, HTMLElement>();
