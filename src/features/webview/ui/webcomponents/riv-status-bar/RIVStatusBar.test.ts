@@ -92,13 +92,13 @@ describe('riv-status-bar', () => {
 
 /**
  * happy-dom does not render pseudo-elements, so the lamp itself was checked in headless
- * Chrome. What is pinned here is what its CSS selector — `.telltale:not(:empty)` — relies on.
+ * Chrome. What is pinned here is what its CSS selector — `.indicator:not(:empty)` — relies on.
  *
  * `:empty` is spelled out by hand: happy-dom's own ignores text nodes, so a segment holding
  * a message still matches it. Chrome, like the spec, does not.
  */
-describe('riv-status-bar: telltales', () => {
-  const lit = (id: string) => segment(id).classList.contains('telltale') && segment(id).childNodes.length > 0;
+describe('riv-status-bar: indicators', () => {
+  const lit = (id: string) => segment(id).classList.contains('indicator') && segment(id).childNodes.length > 0;
 
   it('lights one on the notes only while they have something to say', () => {
     addBuffer(24);
