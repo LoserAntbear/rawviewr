@@ -1,7 +1,7 @@
-import { RIVView } from '../RIVView';
+import { RIVView } from '../../RIVView';
 import { ElementBuilder } from './ElementBuilder';
-import { STATUS_SEGMENTS } from './segments';
-import type { StatusBarEntry, StatusBarState } from './state/types';
+import { type StatusSegmentsMap } from './segment/segments';
+import type { StatusBarEntry, StatusBarRenderEntries, StatusBarStateContext } from '../state/types';
 import { type StatusSegment } from './segment/types';
 import { SlotLifecycleMode } from './segment/definitions';
 
@@ -13,6 +13,15 @@ type SegmentSlot = {
 
 export class RIVStatusBarView extends RIVView {
   private readonly slots = new Map<string, SegmentSlot>();
+  private readonly segments: StatusSegmentsMap;
+
+  constructor(
+    root: ShadowRoot,
+    segments: StatusSegmentsMap,
+  ) {
+    super(root);
+    this.segments = segments;
+  }
 
   public build(): void {
     const root = this.ref('status-bar');
@@ -25,15 +34,17 @@ export class RIVStatusBarView extends RIVView {
     this.slots.clear();
 
     root.replaceChildren(
-      ...this.buildSlots(STATUS_SEGMENTS.get('start') ?? []),
+      ...this.buildSlots(this.segments.get('start') ?? []),
       ElementBuilder.buildSpacer(),
-      ...this.buildSlots(STATUS_SEGMENTS.get('end') ?? []),
+      ...this.buildSlots(this.segments.get('end') ?? []),
     );
   }
 
-  public render(state: StatusBarState): void {
+  public render(context: StatusBarStateContext): void {
+    const entries = this.resolveStatusBarRenderEntries(context);
+
     for (const [id, { element, mode }] of this.slots) {
-      const entry = state[id] ?? null;
+      const entry = entries[id] ?? null;
 
       if(this.hideElementIfNeeded(element, entry, mode)) {
         continue;
@@ -52,6 +63,16 @@ export class RIVStatusBarView extends RIVView {
 
       return element;
     });
+  }
+
+  private resolveStatusBarRenderEntries(
+    context: StatusBarStateContext,
+  ): StatusBarRenderEntries {
+    return Object.fromEntries(
+      Array.from(this.segments.values())
+        .flat()
+        .map((segment) => [segment.id, segment.resolve(context)]),
+    );
   }
 
   private hideElementIfNeeded(element: HTMLElement, entry: StatusBarEntry | null  , mode?: SlotLifecycleMode): boolean {
