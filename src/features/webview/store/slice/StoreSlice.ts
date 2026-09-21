@@ -35,7 +35,7 @@ export abstract class StoreSlice<
     this._bus = bus as StoreSliceBus<TName, TState, TEvents>;
   }
 
-  public get(): TState {
+  public getState(): TState {
     return this.state;
   }
 

@@ -15,15 +15,15 @@ export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
   }
 
   public get ids(): readonly string[] {
-    return [...this.get().byId.keys()];
+    return [...this.getState().byId.keys()];
   }
 
   public getItem(id: string): BufferItemData | undefined {
-    return this.get().byId.get(id);
+    return this.getState().byId.get(id);
   }
 
   public has(id: string): boolean {
-    return this.get().byId.has(id);
+    return this.getState().byId.has(id);
   }
 
   /**
@@ -35,7 +35,7 @@ export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
       return;
     }
 
-    const byId = new Map(this.get().byId);
+    const byId = new Map(this.getState().byId);
 
     for (const item of items) {
       byId.set(item.id, item);
@@ -49,7 +49,7 @@ export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
       return;
     }
 
-    const byId = new Map(this.get().byId);
+    const byId = new Map(this.getState().byId);
 
     byId.delete(id);
 

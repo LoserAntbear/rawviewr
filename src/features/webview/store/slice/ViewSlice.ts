@@ -16,11 +16,11 @@ export class ViewSlice extends StoreSlice<StoreSliceId.View, ViewState> {
   }
 
   public get mode(): GalleryViewMode {
-    return this.get().mode;
+    return this.getState().mode;
   }
 
   public get selectedId(): string | null {
-    return this.get().selectedId;
+    return this.getState().selectedId;
   }
 
   public setMode(mode: GalleryViewMode): void {

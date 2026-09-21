@@ -3,6 +3,7 @@ import type { StoreSliceChange } from './slice/types';
 import type { ItemsSlice, ItemsSliceEvents } from './slice/ItemsSlice';
 import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
 import type { DecodeSlice, DecodeSliceEvents } from './slice/DecodeSlice';
+import type { ImagesSlice, ImagesSliceEvents } from './slice/ImagesSlice';
 import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
 import type { STORE_SELECTORS } from './selectors';
@@ -12,16 +13,17 @@ export type SliceLike<TName extends string = string> = {
   readonly name: TName;
 
   reset(): void;
-  get(): unknown;
+  getState(): unknown;
   attach(bus: TypedEventTarget<EventMap>): void;
 };
 export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSliceIds, SliceLike<TSliceIds>>>;
 export type StoreSlices = {
-  readonly [StoreSliceId.Items]: ItemsSlice;
   readonly [StoreSliceId.View]: ViewSlice;
+  readonly [StoreSliceId.Items]: ItemsSlice;
   readonly [StoreSliceId.Decode]: DecodeSlice;
+  readonly [StoreSliceId.Images]: ImagesSlice;
 };
-export type StoreEventMap = ItemsSliceEvents & ViewSliceEvents & DecodeSliceEvents;
+export type StoreEventMap = ItemsSliceEvents & ViewSliceEvents & DecodeSliceEvents & ImagesSliceEvents;
 
 export type Selector<TState, TResult, TArgs extends unknown[] = []> = (
   state: TState,
@@ -35,7 +37,7 @@ export type BoundSelectors<TState, TSelectors extends SelectorMap<TState>> = {
 };
 
 export type AppState<TSlices extends SliceMap> = {
-  readonly [K in keyof TSlices]: ReturnType<TSlices[K]['get']>;
+  readonly [K in keyof TSlices]: ReturnType<TSlices[K]['getState']>;
 };
 export type AppStore = ReactiveStore<typeof STORE_SELECTORS, StoreSlices, StoreEventMap>;
 export type AppStoreState = AppState<StoreSlices>;
