@@ -9,5 +9,5 @@ export type WebviewCommand =
 
 export type WebviewCommandResolver<K extends WebviewCommandType = WebviewCommandType> = (
   command: Extract<WebviewCommand, { type: K }>,
-) => void;
+) => void | Promise<void>;
 export type WebviewCommandResolversMap = { readonly [K in WebviewCommandType]: WebviewCommandResolver<K> };
