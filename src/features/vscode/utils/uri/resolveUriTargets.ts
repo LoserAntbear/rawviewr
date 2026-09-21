@@ -1,7 +1,7 @@
 
 import * as vscode from 'vscode';
 import { asLocalAllowedUri } from '@features/vscode/guards/uri/asLocalAllowedUri';
-import { nullishCoalesce } from '@utils/coalesce';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 function activeDocumentUri(): vscode.Uri | null {
   return asLocalAllowedUri(vscode.window.activeTextEditor?.document.uri);
@@ -16,7 +16,7 @@ async function pickTargets(): Promise<vscode.Uri[]> {
 
     return picked ?? [];
   } catch (err) {
-    void vscode.window.showErrorMessage(`Failed to open raw image selection dialog: ${err}`);
+    InfoMessageController.showError(`Failed to open raw image selection dialog: ${err}`);
 
     return [];
   }
@@ -33,9 +33,5 @@ function resolveActiveDocumentUri(): vscode.Uri[] | null {
 }
 
 export async function resolveUriTargets(parsed: readonly vscode.Uri[]): Promise<vscode.Uri[]> {
-  return nullishCoalesce(
-    resolveParsedUris(parsed),
-    resolveActiveDocumentUri(),
-    await pickTargets(),
-  ) || [];
+  return resolveParsedUris(parsed) ?? resolveActiveDocumentUri() ?? await pickTargets();
 }
