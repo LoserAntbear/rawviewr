@@ -12,8 +12,8 @@ export class ElementBuilder {
       element.setAttribute('role', 'status');
     }
 
-    if (segment.telltale) {
-      element.classList.add('telltale');
+    if (segment.indicator) {
+      element.classList.add('indicator');
     }
 
     return element;

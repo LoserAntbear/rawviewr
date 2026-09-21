@@ -9,8 +9,8 @@ export type StatusSegment = {
   readonly id: string;
 
   readonly mode?: SlotLifecycleMode;
-  /** Lights a dashboard telltale for its level. For segments that carry messages, not readouts. */
-  readonly telltale?: boolean;
+  /** Lights a dashboard indicator for its level. For segments that carry messages, not readouts. */
+  readonly indicator?: boolean;
   // Return null to render nothing.
   readonly resolve: (context: StatusBarStateContext) => StatusBarEntry | null;
 };
