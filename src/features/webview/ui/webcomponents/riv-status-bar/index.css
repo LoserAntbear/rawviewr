@@ -28,35 +28,35 @@
   min-width: 0;
 }
 
-.segment.telltale:not(:empty)::before {
+.segment.indicator:not(:empty)::before {
   content: '';
   display: inline-block;
-  width: var(--telltale-width, 1.2em);
+  width: var(--indicator-width, 1.2em);
   height: 1.2em;
   margin-inline-end: 0.4em;
   vertical-align: -0.3em;
-  background-color: var(--telltale-color);
-  -webkit-mask: var(--telltale-glyph) center / contain no-repeat;
-  mask: var(--telltale-glyph) center / contain no-repeat;
+  background-color: var(--indicator-color);
+  -webkit-mask: var(--indicator-glyph) center / contain no-repeat;
+  mask: var(--indicator-glyph) center / contain no-repeat;
 }
 
 /* Blue "i" in a circle: worth knowing. */
 .segment[data-level='info'] {
-  --telltale-color: var(--riv-info);
-  --telltale-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'><circle cx='8' cy='8' r='6.75'/><path d='M8 7.4v3.9'/><circle cx='8' cy='4.8' r='1' fill='black' stroke='none'/></svg>");
+  --indicator-color: var(--riv-info);
+  --indicator-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'><circle cx='8' cy='8' r='6.75'/><path d='M8 7.4v3.9'/><circle cx='8' cy='4.8' r='1' fill='black' stroke='none'/></svg>");
 }
 
 /* Amber warning triangle: it worked, but maybe not as you expect. */
 .segment[data-level='warn'] {
   color: var(--riv-warn);
-  --telltale-color: var(--riv-warn);
-  --telltale-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 1.9 14.6 13.6H1.4Z'/><path d='M8 5.9v3.2'/><circle cx='8' cy='11.2' r='0.95' fill='black' stroke='none'/></svg>");
+  --indicator-color: var(--riv-warn);
+  --indicator-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 1.9 14.6 13.6H1.4Z'/><path d='M8 5.9v3.2'/><circle cx='8' cy='11.2' r='0.95' fill='black' stroke='none'/></svg>");
 }
 
 /* Red parking brake-like icon: it did not work. Wider than tall, as the real lamp is, so the "!" survives 1x. */
 .segment[data-level='error'] {
   color: var(--riv-error);
-  --telltale-color: var(--riv-error);
-  --telltale-width: 1.65em;
-  --telltale-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'><circle cx='11' cy='8' r='5.6' fill='none' stroke='black' stroke-width='1.5'/><path d='M17.46 2.95A8.2 8.2 0 0 1 17.46 13.05M4.54 13.05A8.2 8.2 0 0 1 4.54 2.95' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/><path d='M11 5.1v3.4' stroke='black' stroke-width='1.6' stroke-linecap='round'/><circle cx='11' cy='10.9' r='0.95' fill='black'/></svg>");
+  --indicator-color: var(--riv-error);
+  --indicator-width: 1.65em;
+  --indicator-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'><circle cx='11' cy='8' r='5.6' fill='none' stroke='black' stroke-width='1.5'/><path d='M17.46 2.95A8.2 8.2 0 0 1 17.46 13.05M4.54 13.05A8.2 8.2 0 0 1 4.54 2.95' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/><path d='M11 5.1v3.4' stroke='black' stroke-width='1.6' stroke-linecap='round'/><circle cx='11' cy='10.9' r='0.95' fill='black'/></svg>");
 }
