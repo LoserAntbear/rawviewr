@@ -26,9 +26,16 @@ const selectedId: Selector<AppStoreState, string | null> = (state) => (
   state[StoreSliceId.View].selectedId
 );
 
+const displayedItem: Selector<AppStoreState, BufferItemData | undefined> = (state) => {
+  const [id] = visibleIds(state);
+
+  return id === undefined ? undefined : item(state, id);
+};
+
 export const STORE_SELECTORS = {
   item,
   itemIds,
   visibleIds,
   selectedId,
+  displayedItem,
 } satisfies SelectorMap<AppStoreState>;
