@@ -8,9 +8,12 @@ import { vi } from 'vitest';
  * more of the API, rather than mocking the whole surface up front.
  */
 export const window = {
+  activeTextEditor: undefined as { document: { uri: unknown } } | undefined,
   showErrorMessage: vi.fn(),
   showInformationMessage: vi.fn(),
+  showOpenDialog: vi.fn(),
   showSaveDialog: vi.fn(),
+  showWarningMessage: vi.fn(),
 };
 
 export const workspace = {
@@ -22,8 +25,28 @@ export const commands = {
   executeCommand: vi.fn(),
 };
 
-export const Uri = {
-  joinPath: vi.fn((base: { path: string }, ...segments: string[]) => ({
+/** A class, not an object: the code under test checks `instanceof vscode.Uri`. */
+export class Uri {
+  constructor(
+    public readonly scheme: string,
+    public readonly path: string,
+  ) {}
+
+  public static file(path: string): Uri {
+    return new Uri('file', path);
+  }
+
+  public static from({ scheme, path }: { scheme: string; path: string }): Uri {
+    return new Uri(scheme, path);
+  }
+
+  public static parse(value: string): Uri {
+    const [scheme, ...path] = value.split(':');
+
+    return new Uri(scheme, path.join(':'));
+  }
+
+  public static joinPath = vi.fn((base: { path: string }, ...segments: string[]) => ({
     path: [base.path, ...segments].join('/'),
-  })),
-};
+  }));
+}
