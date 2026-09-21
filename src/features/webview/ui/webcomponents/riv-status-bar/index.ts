@@ -4,17 +4,18 @@ import { WebviewContextProvider } from '@features/webview/webviewContext/Webview
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
-import { RIVStatusBarView } from './RIVStatusBarView';
-import { resolveStatusBarState, resolveStatusContext } from './state/resolvers';
+import { RIVStatusBarView } from './view/RIVStatusBarView';
 import template from './index.html';
 import styles from './index.css';
+import { STATUS_SEGMENTS } from './view/segment/segments';
+import { selectStatusBarContext } from './state/selectors';
 
 const STATUS_BAR_EVENTS = [StoreEvent.ItemsChange, StoreEvent.ViewChange, StoreEvent.DecodeChange] as const;
 
 export class RIVStatusBar extends RIVHTMLElement {
   public static readonly tagName = RIVTags.StatusBar;
 
-  protected readonly view = new RIVStatusBarView(this.mount(template, styles));
+  protected readonly view = new RIVStatusBarView(this.mount(template, styles), STATUS_SEGMENTS);
 
   public connectedCallback(): void {
     const { store } = WebviewContextProvider.context;
@@ -36,6 +37,6 @@ export class RIVStatusBar extends RIVHTMLElement {
   private render(): void {
     const { store, formatRegistry } = WebviewContextProvider.context;
 
-    this.view.render(resolveStatusBarState(resolveStatusContext(store.state, formatRegistry)));
+    this.view.render(selectStatusBarContext(store.state, formatRegistry));
   }
 }
