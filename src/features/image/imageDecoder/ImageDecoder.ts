@@ -6,14 +6,26 @@ import { type FormatRegistry } from '@features/image/format/FormatRegistry';
 import { shiftRowIndices } from '@utils/array';
 import { Geometry } from './imagePreparation/types';
 
+// TODO: Extract `GeometryResolver` if the geometry resolution logic needs to be reused independently.
 export class ImageDecoder {
   constructor(
     private readonly formatRegistry: FormatRegistry,
     private readonly geometryResolver: GeometryResolver = new GeometryResolver(formatRegistry),
   ) {}
 
-  public decode(source: Uint8Array, options: DecodeOptions): DecodeResult {
-    const geometry = this.geometryResolver.resolveGeometry(source, options);
+  public resolveGeometry(source: Uint8Array, options: DecodeOptions): Geometry {
+    return this.geometryResolver.resolveGeometry(source, options);
+  }
+
+  /**
+   * Takes the geometry when the caller already has it — the webview resolves it once, when
+   * the item arrives — and falls back to resolving it for callers that do not.
+   */
+  public decode(
+    source: Uint8Array,
+    options: DecodeOptions,
+    geometry: Geometry = this.resolveGeometry(source, options),
+  ): DecodeResult {
     const format = this.formatRegistry.get(options.format);
 
     const data = this.applyAlphaMode(
