@@ -19,6 +19,8 @@
   --riv-muted: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.9));
   --riv-accent: var(--vscode-focusBorder, #0078d4);
   --riv-error: var(--vscode-errorForeground, #f14c4c);
+  --riv-warn: var(--vscode-editorWarning-foreground, #cca700);
+  --riv-info: var(--vscode-editorInfo-foreground, #3794ff);
   --riv-surface: var(--vscode-editorWidget-background, transparent);
 }
 
