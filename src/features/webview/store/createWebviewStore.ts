@@ -8,7 +8,7 @@ import { StoreSliceId } from './definitions';
 import { ItemsSlice } from './slice/ItemsSlice';
 import { ViewSlice } from './slice/ViewSlice';
 import { DecodeSlice } from './slice/DecodeSlice';
-import { ImagesSlice } from './slice/ImagesSlice';
+import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { STORE_REACTIONS } from './reactions';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
