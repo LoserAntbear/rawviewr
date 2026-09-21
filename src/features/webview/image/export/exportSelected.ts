@@ -1,4 +1,5 @@
 import type { BufferItemData } from '@features/buffer';
+import { attemptAsync } from '@utils/attempt';
 import type { DecodedExport } from './types';
 import { ExportError } from './ExportError';
 import type { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
@@ -64,9 +65,19 @@ export function resolveExportMessage(store: AppStore): Promise<WebviewMessage> {
     .catch(resolveExportError);
 }
 
+function reportFailure(error: unknown): WebviewMessage {
+  console.error('Raw Image Viewer: export failed', error);
+
+  return {
+    type: 'app:status',
+    level: 'error',
+    message: `Raw Image Viewer: export failed — ${error instanceof Error ? error.message : String(error)}`,
+  };
+}
+
 export async function exportSelected(
   store: AppStore,
   bridge: WebviewSessionCommunicationBridge,
 ): Promise<void> {
-  bridge.postToWebviewHost(await resolveExportMessage(store));
+  bridge.postToWebviewHost(await attemptAsync(() => resolveExportMessage(store), reportFailure));
 }

@@ -51,6 +51,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('resolveExportMessage: each step halts with its own message', () => {
@@ -125,5 +126,30 @@ describe('exportSelected', () => {
     await exportSelected(storeFor(world as World), { postToWebviewHost: post } as never);
 
     expect(post).toHaveBeenCalledOnce();
+  });
+
+  it('reports a genuine failure to the user as an error status, and resolves rather than rejects', async () => {
+    encodeFails = true;
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const post = vi.fn();
+
+    await expect(exportSelected(storeFor({ selected: 'a', item, decodable: true }), { postToWebviewHost: post } as never))
+      .resolves.toBeUndefined();
+
+    expect(post).toHaveBeenCalledOnce();
+    expect(post).toHaveBeenCalledWith({
+      type: 'app:status',
+      level: 'error',
+      message: 'Raw Image Viewer: export failed — encodePng: failed to convert canvas to PNG blob: Error: encoder exploded',
+    });
+  });
+
+  it('logs that failure for the developer too — reported, not swallowed', async () => {
+    encodeFails = true;
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await exportSelected(storeFor({ selected: 'a', item, decodable: true }), { postToWebviewHost: vi.fn() } as never);
+
+    expect(consoleError).toHaveBeenCalledWith('Raw Image Viewer: export failed', expect.any(Error));
   });
 });
