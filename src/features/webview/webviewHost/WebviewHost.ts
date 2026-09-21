@@ -13,6 +13,7 @@ import { FileValidator } from '@features/file/FileValidator';
 import { GalleryViewMode } from '../ui/webcomponents/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import { attemptDetached } from '@utils/attempt';
 
 export class WebviewHost extends DisposableStore {
   constructor(
@@ -28,8 +29,12 @@ export class WebviewHost extends DisposableStore {
 
     this.setWebviewOptions();
 
+    // The listener is a sync edge: VS Code does not await it, so it is the last-resort boundary.
     this.disposables.push(
-      this.webview.onDidReceiveMessage(this.handleWebviewMessage.bind(this)),
+      this.webview.onDidReceiveMessage((message: WebviewMessage) => attemptDetached(
+        () => this.handleWebviewMessage(message),
+        (error) => console.error(`WebviewHost: handling "${message.type}" failed:`, error),
+      )),
     );
 
     this.updateWebviewHtml();
@@ -41,7 +46,7 @@ export class WebviewHost extends DisposableStore {
   }
 
   public async post(message: WebviewHostMessage): Promise<void> {
-    if (!this.webview.postMessage(message)) {
+    if (!(await this.webview.postMessage(message))) {
       console.error('WebviewHost: Failed to post message to webview:', message);
     }
   }
@@ -74,13 +79,13 @@ export class WebviewHost extends DisposableStore {
         await this.handleAppReady();
         break;
       case 'gallery:openItem':
-        this.handleOpenItem(message.id);
+        await this.handleOpenItem(message.id);
         break;
       case 'export:png':
         await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
         break;
       case 'app:status':
-        await InfoMessageController.handleMessage({
+        InfoMessageController.handleMessage({
           level: message.level,
           message: message.message,
         });
@@ -92,12 +97,12 @@ export class WebviewHost extends DisposableStore {
     }
   }
 
-  private handleOpenItem(id: string): void {
+  private async handleOpenItem(id: string): Promise<void> {
     try {
       const source = this.sources.find((candidate) => candidate.id === id);
 
       if (source) {
-        void this.itemOpener?.openSingle([source.uri]);
+        await this.itemOpener?.openSingle([source.uri]);
       }
     } catch (error) {
       console.error('Failed to handle open item:', error);
@@ -105,27 +110,27 @@ export class WebviewHost extends DisposableStore {
   }
 
   private async handleAppReady(): Promise<void> {
-    this.initializeSession(this.viewMode);
-    this.postPreloaders();
-    this.readAndPostSources();
+    await this.initializeSession(this.viewMode);
+    await this.postPreloaders();
+    await this.readAndPostSources();
   }
 
-  private initializeSession(viewMode: GalleryViewMode): void {
+  private initializeSession(viewMode: GalleryViewMode): Promise<void> {
     // TODO: Should it include the ID? No use for it as I see, but MAYBE?
-    this.post({
+    return this.post({
       viewMode,
       type: 'session:start',
       decodeOptions: this.settingsController.readDefaultDecodeOptions(),
     });
   }
 
-  private postPreloaders(): void {
+  private postPreloaders(): Promise<void> {
     // I pre-build a payload of empty sources to trigger UI render
     // And add separate loading to each one
     // so that the UI can still be responsive and show progress for each file
     const itemPreloaders: BufferItem[] = this.sources.map(BufferItem.stubFromFileSource);
 
-    this.post({
+    return this.post({
       type: 'items',
       items: itemPreloaders,
     });
@@ -140,20 +145,20 @@ export class WebviewHost extends DisposableStore {
           throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
         }
 
-        this.post({
+        await this.post({
           items: [item],
           type: 'items',
         });
       } catch (error) {
-        this.propagateErrorToWebview(error);
+        await this.propagateErrorToWebview(error);
       }
     }
   }
 
-  private propagateErrorToWebview(error: unknown): void {
+  private propagateErrorToWebview(error: unknown): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
 
-    this.post({
+    return this.post({
       message,
       type: 'status:error',
     });
