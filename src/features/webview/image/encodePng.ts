@@ -11,7 +11,7 @@ export async function encodeBitmapToPng(bitmap: ImageBitmap): Promise<ArrayBuffe
   try {
     const blob = await canvas.convertToBlob({ type: 'image/png' });
 
-    return blob.arrayBuffer();
+    return await blob.arrayBuffer();
   } catch (error) {
     // Catch and rethrow with a more descriptive error message
     throw new Error(`encodePng: failed to convert canvas to PNG blob: ${error}`);
