@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { UriLike } from '@features/vscode/types';
-import { nullishCoalesce } from '@utils/coalesce';
 
 function isUriLike(value: unknown): value is UriLike {
   if (typeof value !== 'object' || value === null) {
@@ -46,9 +45,5 @@ function asUriString(value: unknown): vscode.Uri | null {
 }
 
 export function asUri(value: unknown): vscode.Uri | null {
-  return nullishCoalesce(
-    asUriInstance(value),
-    asUriLike(value),
-    asUriString(value),
-  );
+  return asUriInstance(value) ?? asUriLike(value) ?? asUriString(value);
 }
