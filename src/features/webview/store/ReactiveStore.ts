@@ -17,7 +17,7 @@ export class ReactiveStore<
   // CAVEAT: Every time returns a new ref
   public get state(): AppState<TSlices> {
     return Object.fromEntries(
-      Array.from(this.slices.entries(), ([id, slice]) => [id, slice.get()]),
+      Array.from(this.slices.entries(), ([id, slice]) => [id, slice.getState()]),
     ) as AppState<TSlices>;
   }
 

@@ -49,7 +49,7 @@ describe('registry', () => {
 
     const { state } = store;
 
-    expect(Object.keys(state).sort()).toEqual(['decode', 'items', 'view']);
+    expect(Object.keys(state).sort()).toEqual(['decode', 'images', 'items', 'view']);
     expect([...state[StoreSliceId.Items].byId.keys()]).toEqual(['a', 'b']);
     expect(state[StoreSliceId.Decode].format).toBe(DEFAULT_DECODE_OPTIONS.format);
   });
@@ -74,11 +74,11 @@ describe('slices', () => {
   it('are copy-on-write: an upsert changes identity only for the item it touched', () => {
     items().upsert([item('a'), item('b')]);
 
-    const before = items().get().byId;
+    const before = items().getState().byId;
 
     items().upsert([item('a', 4096)]);
 
-    const after = items().get().byId;
+    const after = items().getState().byId;
 
     expect(after.get('a')).not.toBe(before.get('a'));
     expect(after.get('b')).toBe(before.get('b'));
