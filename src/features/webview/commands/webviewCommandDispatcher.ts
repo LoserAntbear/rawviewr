@@ -1,3 +1,4 @@
+import { attemptDetached } from '@utils/attempt';
 import type { WebviewCommand, WebviewCommandResolversMap, WebviewCommandResolver } from './types';
 import { RIV_COMMAND_EVENT_ID } from './definitions';
 import { listenTo } from '../disposable/listenTo';
@@ -11,7 +12,10 @@ export class WebviewCommandDispatcher {
   public dispatch(command: WebviewCommand): void {
     const resolver = this.resolvers[command.type] as WebviewCommandResolver;
 
-    resolver(command);
+    attemptDetached(
+      () => resolver(command),
+      (error) => console.error(`Command "${command.type}" failed:`, error),
+    );
   }
 
   /**
