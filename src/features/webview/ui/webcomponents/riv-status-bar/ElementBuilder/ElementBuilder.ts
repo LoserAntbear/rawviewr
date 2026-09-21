@@ -1,4 +1,5 @@
 import type { StatusSegment } from '../segment/types';
+import { SlotLifecycleMode } from '../segment/definitions';
 
 export class ElementBuilder {
   public static buildSegment(segment: StatusSegment): HTMLElement {
@@ -7,8 +8,12 @@ export class ElementBuilder {
     element.className = 'segment';
     element.dataset.segmentId = segment.id;
 
-    if (segment.mode === 'announce') {
+    if (segment.mode === SlotLifecycleMode.LiveUpdate) {
       element.setAttribute('role', 'status');
+    }
+
+    if (segment.telltale) {
+      element.classList.add('telltale');
     }
 
     return element;
