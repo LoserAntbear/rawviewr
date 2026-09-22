@@ -10,7 +10,7 @@ import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { STORE_REACTIONS } from './reactions';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
-import { WebviewImageDecoder } from '../image/WebviewImageDecoder';
+import { WebviewImageDecoder } from '../image/decode/WebviewImageDecoder';
 
 
 function createDefaultSlices(

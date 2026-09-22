@@ -3,7 +3,7 @@ import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 import type { ImageItem, ImagesState } from './types';
 import { retireImageBitmap } from './utils';
-import { WebviewImageDecoder } from '@features/webview/image/WebviewImageDecoder';
+import { WebviewImageDecoder } from '@features/webview/image/decode/WebviewImageDecoder';
 import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
