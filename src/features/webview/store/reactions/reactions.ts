@@ -1,7 +1,7 @@
 import { resolveItemsGeometry } from './geometryReactions';
 import type { StoreReaction } from '../types';
 
-import { reconcileSelectedImages, decodeVisibleImages } from './imagesReactions';
+import { reconcileSelectedImage, decodeVisibleImages } from './imagesReactions';
 
 /**
  * The idea of reactions is to provide a scoped tool
@@ -11,5 +11,5 @@ import { reconcileSelectedImages, decodeVisibleImages } from './imagesReactions'
 export const STORE_REACTIONS: readonly StoreReaction[] = [
   decodeVisibleImages,
   resolveItemsGeometry,
-  reconcileSelectedImages,
+  reconcileSelectedImage,
 ];
