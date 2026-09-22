@@ -1,40 +1,35 @@
-import type { BufferItemData } from '@features/buffer';
-
+import type { ImageItem } from './slice/ImagesSlice/types';
 import { StoreSliceId } from './definitions';
 import type { AppStoreState, Selector, SelectorMap } from './types';
 
-const itemIds: Selector<AppStoreState, readonly string[]> = (state) => (
+const imageIds: Selector<AppStoreState, readonly string[]> = (state) => (
   [...state[StoreSliceId.Sources].byId.keys()]
 );
 
-const item: Selector<AppStoreState, BufferItemData | undefined, [id: string]> = (state, id) => (
-  state[StoreSliceId.Sources].byId.get(id)
+const selectedId: Selector<AppStoreState, string | null> = (state) => (
+  state[StoreSliceId.Images].selectedId
 );
 
 const visibleIds: Selector<AppStoreState, readonly string[]> = (state) => {
-  const { mode, selectedId } = state[StoreSliceId.View];
-  const ids = itemIds(state);
+  const mode = state[StoreSliceId.View].mode;
+  const id = selectedId(state);
+  const ids = imageIds(state);
 
   if (mode === 'gallery') {
     return ids;
   }
 
-  return selectedId === null ? ids.slice(0, 1) : [selectedId];
+  return id === null ? ids.slice(0, 1) : [id];
 };
 
-const selectedId: Selector<AppStoreState, string | null> = (state) => (
-  state[StoreSliceId.View].selectedId
-);
-
-const displayedItem: Selector<AppStoreState, BufferItemData | undefined> = (state) => {
+const displayedItem: Selector<AppStoreState, ImageItem | undefined> = (state) => {
   const [id] = visibleIds(state);
 
-  return id === undefined ? undefined : item(state, id);
+  return id === undefined ? undefined : state[StoreSliceId.Images].byId.get(id);
 };
 
 export const STORE_SELECTORS = {
-  item,
-  itemIds,
+  imageIds,
   visibleIds,
   selectedId,
   displayedItem,
