@@ -8,6 +8,7 @@ import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
 /**
  * Keeps and handles the data about PROCESSED images.
@@ -17,10 +18,14 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     return this.getState().selectedId;
   }
 
+  public get decodeOptions(): DecodeOptions {
+    return this.getState().decodeOptions;
+  }
+
   constructor(
     private readonly decoder: WebviewImageDecoder,
   ) {
-    super(StoreSliceId.Images, { selectedId: null, byId: new Map() });
+    super(StoreSliceId.Images, { selectedId: null, decodeOptions: DEFAULT_DECODE_OPTIONS, byId: new Map() });
   }
 
   public getImage(id: string): ImageItem | undefined {
@@ -85,6 +90,10 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
       this.put(source.id, { kind: "failed", message });
     }
+  }
+
+  public setOptions(patch: Partial<DecodeOptions>): void {
+    this.patch({ decodeOptions: { ...this.getState().decodeOptions, ...patch } });
   }
 
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {

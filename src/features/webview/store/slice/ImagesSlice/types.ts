@@ -1,4 +1,5 @@
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 
 import type { StoreSliceEventMap } from '../types';
 import type { StoreSliceId } from '../../definitions';
@@ -11,6 +12,7 @@ export type ImageItem =
 
 export type ImagesState = {
   readonly selectedId: string | null;
+  readonly decodeOptions: DecodeOptions;
   readonly byId: ReadonlyMap<string, ImageItem>;
 };
 export type ImagesSliceEvents = StoreSliceEventMap<StoreSliceId.Images, ImagesState>;
