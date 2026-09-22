@@ -9,6 +9,7 @@ import { BufferItem } from '@features/buffer/BufferItem';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { withAbortSignalCheck } from '@utils/abort';
 
 /**
  * Keeps and handles the data about PROCESSED images.
@@ -72,20 +73,28 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
   public async decodeFromSource(
     source: FileSource,
+    abortSignal?: AbortSignal,
     options: DecodeOptions = this.decodeOptions,
   ): Promise<void> {
     try {
-      const bufferItem = await BufferItem.fromFileSource(source);
+      const bufferItem = await withAbortSignalCheck(
+        abortSignal,
+        () => BufferItem.fromFileSource(source),
+      );
 
       if (!FileValidator.isValidFileSize(bufferItem.data.byteLength)) {
         throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
       }
 
-      const image = await this.decoder.decode(bufferItem.data, options);
+      const image = await withAbortSignalCheck(
+        abortSignal,
+        () => this.decoder.decode(bufferItem.data, options),
+      );
 
       this.put(source.id, { kind: "ready", name: bufferItem.name, ...image });
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
+
       const message = Object.hasOwn((error as object), 'message') ? (error as Error).message : String(error);
 
       this.put(source.id, { kind: "failed", message });

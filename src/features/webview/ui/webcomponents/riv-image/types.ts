@@ -1,5 +1,5 @@
-import type { BufferItemData } from '@features/buffer';
 
+import { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { RIVImageStateKind, RIVImageStateTransition } from './definitions';
 
 export type RIVImageCaption = {
@@ -12,13 +12,13 @@ export type RIVImageState = { caption: RIVImageCaption } & (
   | { kind: RIVImageStateKind.Empty; }
   | { kind: RIVImageStateKind.Loading; }
   | { kind: RIVImageStateKind.Error; message: string; }
-  | { kind: RIVImageStateKind.Painted; bitmap: ImageBitmap; }
+  | { kind: RIVImageStateKind.Paint; bitmap: ImageBitmap; }
 );
 
 export type RIVImageTransitionPayloads = {
   [RIVImageStateTransition.CloseBitmap]: object;
-  [RIVImageStateTransition.Failed]: { item: BufferItemData; error: unknown };
-  [RIVImageStateTransition.Resolved]: { item: BufferItemData; bitmap: ImageBitmap | null };
+  [RIVImageStateTransition.Failed]: { error: unknown };
+  [RIVImageStateTransition.Resolved]: { item: ImageItem; };
 };
 
 export type RIVImageRenderer<K extends RIVImageStateKind = RIVImageStateKind> = (

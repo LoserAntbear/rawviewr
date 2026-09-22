@@ -1,7 +1,7 @@
 export enum RIVImageStateKind {
   Empty = 'empty',
   Error = 'error',
-  Painted = 'painted',
+  Paint = 'paint',
   Loading = 'loading',
 }
 

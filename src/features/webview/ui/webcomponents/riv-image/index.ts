@@ -2,9 +2,6 @@ import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
 import type { StoreChangeEvent } from '@features/webview/store/types';
-import type { SourcesState } from '@features/webview/store/slice/SourcesSlice/SourcesSlice';
-import { isAbortError } from '@guards/errorGuards';
-import { withAbortSignalCheck } from '@utils/abort';
 import { attemptDetached } from '@utils/attempt';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
@@ -24,6 +21,7 @@ import type {
 } from './types';
 import template from './index.html';
 import styles from './index.css';
+import { ImagesState } from '@features/webview/store/slice/ImagesSlice';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
@@ -40,10 +38,10 @@ export class RIVImage extends RIVHTMLElement {
   protected readonly view = new RIVImageView(this.mount(template, styles));
 
   private readonly renderers: RIVImageRendererMap = {
+    [RIVImageStateKind.Paint]: ({ bitmap }) => this.view.paint(bitmap),
     [RIVImageStateKind.Loading]: () => this.view.showStatus('loading…'),
     [RIVImageStateKind.Empty]: () => this.view.showStatus('nothing to decode'),
     [RIVImageStateKind.Error]: ({ message }) => this.view.showStatus(message, 'error'),
-    [RIVImageStateKind.Painted]: ({ bitmap }) => this.view.paint(bitmap),
   };
 
   /**
@@ -67,7 +65,7 @@ export class RIVImage extends RIVHTMLElement {
 
     const { store } = WebviewContextProvider.context;
 
-    this.observe(store.bus, StoreEvent.ItemsChange, this.handleItemsChange.bind(this));
+    this.observe(store.bus, StoreEvent.ImagesChange, this.handleItemsChange.bind(this));
     this.observe(store.bus, StoreEvent.DecodeOptionsChange, this.render.bind(this));
 
     this.render();
@@ -89,7 +87,7 @@ export class RIVImage extends RIVHTMLElement {
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
   // FIXME: Optimize this by having the store emit more granular events or by indexing items by ID.
   private handleItemsChange(event: Event): void {
-    const { prev, next } = (event as StoreChangeEvent<SourcesState>).detail;
+    const { prev, next } = (event as StoreChangeEvent<ImagesState>).detail;
 
     if (prev.byId.get(this.itemId) !== next.byId.get(this.itemId)) {
       this.render();
@@ -104,41 +102,21 @@ export class RIVImage extends RIVHTMLElement {
     this.renderAsyncController?.abort();
     this.renderAsyncController = new AbortController();
 
-    const { signal } = this.renderAsyncController;
-
     attemptDetached(
-      () => this.runRender(signal),
+      () => this.runRender(),
       (error) => console.error(`${this.localName}: render failed`, error),
     );
   }
 
-  private async runRender(signal: AbortSignal): Promise<void> {
+  private async runRender(): Promise<void> {
     const { store } = WebviewContextProvider.context;
-    const item = store.get(StoreSliceId.Items).getItem(this.itemId);
+    const item = store.get(StoreSliceId.Images).getImage(this.itemId);
 
     if (!item) {
       return;
     }
 
-    try {
-      // A newer render can start while this decode is finishing
-      const bitmap = await withAbortSignalCheck(
-        signal,
-        () => store.get(StoreSliceId.DecodeOptions).decode(item, signal),
-        (stale) => stale?.close(),
-      );
-
-      this.commitRender(RIVImageStateTransition.Resolved, { item, bitmap });
-    } catch (error) {
-      // I'm already handling aborts, so any other error is treated as unexpected.
-      if (isAbortError(error) || signal.aborted) {
-        return;
-      }
-
-      console.error(`${this.localName}: render failed`, error);
-
-      this.commitRender(RIVImageStateTransition.Failed, { item, error });
-    }
+    this.commitRender(RIVImageStateTransition.Resolved, { item });
   }
 
   // Render based on the updated state.
