@@ -5,7 +5,7 @@ import { ReactiveStore } from './ReactiveStore';
 import { STORE_SELECTORS } from './selectors';
 import { StoreSliceId } from './definitions';
 import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
-import { ViewSlice } from './slice/ViewSlice';
+import { ViewSlice } from './slice/ViewSlice/ViewSlice';
 import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { STORE_REACTIONS } from './reactions';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';

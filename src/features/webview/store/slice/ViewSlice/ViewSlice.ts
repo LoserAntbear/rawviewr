@@ -1,14 +1,8 @@
-import type { GalleryViewMode } from '../../ui/webcomponents/types';
+import type { GalleryViewMode } from '../../../ui/webcomponents/types';
 
-import { StoreSliceId } from '../definitions';
-import { StoreSlice } from './StoreSlice';
-import type { StoreSliceEventMap } from './types';
-
-export type ViewState = {
-  readonly mode: GalleryViewMode;
-  readonly selectedId: string | null;
-};
-export type ViewSliceEvents = StoreSliceEventMap<StoreSliceId.View, ViewState>;
+import { StoreSliceId } from '../../definitions';
+import { StoreSlice } from '../StoreSlice';
+import { ViewState } from './types';
 
 export class ViewSlice extends StoreSlice<StoreSliceId.View, ViewState> {
   constructor() {

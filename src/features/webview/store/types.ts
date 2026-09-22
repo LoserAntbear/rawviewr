@@ -1,7 +1,7 @@
 import type { EventMap, TypedEventTarget } from './TypedEventTarget';
 import type { StoreSliceChange } from './slice/types';
 import type { SourcesSlice, SourcesSliceEvents } from './slice/SourcesSlice/SourcesSlice';
-import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
+import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice/ViewSlice';
 import type { DecodeSlice, DecodeSliceEvents } from './slice/DecodeSlice';
 import type { ImagesSlice, ImagesSliceEvents } from './slice/ImagesSlice';
 import type { ReactiveStore } from './ReactiveStore';

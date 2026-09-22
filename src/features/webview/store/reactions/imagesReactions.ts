@@ -1,4 +1,4 @@
-import { ViewSlice } from '../slice/ViewSlice';
+import { ViewSlice } from '../slice/ViewSlice/ViewSlice';
 import type { SourcesSlice } from '../slice/SourcesSlice/SourcesSlice';
 import { StoreEvent, StoreSliceId } from '../definitions';
 import type { StoreReaction } from '../types';

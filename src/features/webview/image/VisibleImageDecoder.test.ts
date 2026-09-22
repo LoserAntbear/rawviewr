@@ -11,7 +11,7 @@ import { StoreSliceId } from '../store/definitions';
 import { DecodeSlice } from '../store/slice/DecodeSlice';
 import { ImagesSlice } from '../store/slice/ImagesSlice/ImagesSlice';
 import { SourcesSlice } from '../store/slice/SourcesSlice/SourcesSlice';
-import { ViewSlice } from '../store/slice/ViewSlice';
+import { ViewSlice } from '../store/slice/ViewSlice/ViewSlice';
 import type { AppStore } from '../store/types';
 
 /**
