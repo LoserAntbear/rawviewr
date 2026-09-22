@@ -26,7 +26,7 @@ export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, SourcesState>
   }
 
   /**
-   * Updating items without changing their position,
+   * Updating sources in the order they come to avoid reordering,
    * since render is order sensitive
    */
   public upsert(items: readonly FileSource[]): void {
