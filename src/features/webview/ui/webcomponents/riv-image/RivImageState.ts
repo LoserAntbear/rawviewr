@@ -1,8 +1,9 @@
-import type { BufferItemData } from '@features/buffer';
+import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import { StringFormat } from '@utils/string/formatters';
 
 import { RIVImageStateKind, RIVImageStateTransition } from './definitions';
 import type { RIVImageCaption, RIVImageState, RIVImageTransitionPayloads } from './types';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
 type RIVImageStateHandlers = {
   readonly [K in RIVImageStateTransition]: (
@@ -17,57 +18,60 @@ export const INITIAL_IMAGE_STATE: RIVImageState = {
   caption: EMPTY_IMAGE_CAPTION,
 };
 
-function resolveCaption(item: BufferItemData): RIVImageCaption {
+function resolveCaption(item?: ImageItem): RIVImageCaption {
+  if(!isReadyImageItem(item)) {
+    return EMPTY_IMAGE_CAPTION;
+  }
+
   return {
     name: item.name,
     title: item.detail ?? item.name,
-    meta: StringFormat.bytes(item.data.byteLength),
+    meta: StringFormat.bytes(item.byteLength),
   };
 }
 
 function closeUnusedBitmap(
   prev: RIVImageState,
-  incoming: ImageBitmap | null,
+  newItem: ImageItem | null,
   next: RIVImageState,
 ): RIVImageState {
-  const kept = next.kind === RIVImageStateKind.Painted ? next.bitmap : null;
+  const kept = next.kind === RIVImageStateKind.Paint ? next.bitmap : null;
 
-  if (prev.kind === RIVImageStateKind.Painted && prev.bitmap !== kept) {
+  if (prev.kind === RIVImageStateKind.Paint && prev.bitmap !== kept) {
     prev.bitmap.close();
   }
 
-  if (incoming && incoming !== kept) {
-    incoming.close();
+  if (newItem && isReadyImageItem(newItem) && newItem.bitmap !== kept) {
+    newItem.bitmap.close();
   }
 
   return next;
 }
 
 // FIXME: Introduce resolvers/handlers rather than having a billion of returns
-function resolveNextState({ item, bitmap }: RIVImageTransitionPayloads[RIVImageStateTransition.Resolved]): RIVImageState {
+function resolveNextState({ item }: RIVImageTransitionPayloads[RIVImageStateTransition.Resolved]): RIVImageState {
   const caption = resolveCaption(item);
 
-  if (item.error) {
+  if (item.kind === 'failed') {
     return {
-      kind: RIVImageStateKind.Error,
       caption,
-      message: item.error,
+      message: item.message,
+      kind: RIVImageStateKind.Error,
     }
   }
 
-  // A stub: the host has announced the file but its bytes are still in flight.
-  if (item.data.byteLength === 0) {
+  if (item.kind === 'pending') {
     return { kind: RIVImageStateKind.Loading, caption }
   }
 
-  if (!bitmap) {
+  if (!isReadyImageItem(item)) {
     return { kind: RIVImageStateKind.Empty, caption }
   }
 
   return {
-    bitmap,
-    kind: RIVImageStateKind.Painted,
-    caption: { ...caption, meta: `${bitmap.width}×${bitmap.height} · ${caption.meta}` },
+    bitmap: item.bitmap,
+    kind: RIVImageStateKind.Paint,
+    caption: { ...caption, meta: `${item.bitmap.width}×${item.bitmap.height} · ${caption.meta}` },
   }
 }
 
@@ -75,17 +79,17 @@ export const RIV_IMAGE_STATE_HANDLERS: RIVImageStateHandlers = {
   [RIVImageStateTransition.Resolved]: (prev, payload) => {
     const nextState = resolveNextState(payload);
 
-    return closeUnusedBitmap(prev, payload.bitmap, nextState);
+    return closeUnusedBitmap(prev, payload.item, nextState);
   },
 
-  [RIVImageStateTransition.Failed]: (prev, { item, error }) => closeUnusedBitmap(prev, null, {
+  [RIVImageStateTransition.Failed]: (prev, { error }) => closeUnusedBitmap(prev, null, {
     kind: RIVImageStateKind.Error,
-    caption: prev.caption.name ? prev.caption : resolveCaption(item),
+    caption: prev.caption.name ? prev.caption : resolveCaption(),
     message: error instanceof Error ? error.message : String(error),
   }),
 
   [RIVImageStateTransition.CloseBitmap]: (prev) => {
-    if (prev?.kind === RIVImageStateKind.Painted) {
+    if (prev?.kind === RIVImageStateKind.Paint) {
       prev.bitmap.close();
     }
 

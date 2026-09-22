@@ -91,7 +91,16 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
         () => this.decoder.decode(bufferItem.data, options),
       );
 
-      this.put(source.id, { kind: "ready", name: bufferItem.name, ...image });
+      this.put(
+        source.id,
+        {
+          kind: "ready",
+          name: bufferItem.name,
+          byteLength: bufferItem.data.byteLength,
+          detail: bufferItem.detail ?? bufferItem.name,
+          ...image
+        },
+      );
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
 

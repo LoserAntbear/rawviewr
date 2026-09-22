@@ -7,8 +7,10 @@ import type { StoreSliceId } from '../../definitions';
 export type ReadyImageItem = {
   readonly kind: 'ready';
   readonly name: string;
+  readonly byteLength: number;
   readonly geometry: Geometry;
   readonly bitmap: ImageBitmap;
+  readonly detail: string | null;
 };
 export type ImageItem =
   | { readonly kind: 'empty' }
