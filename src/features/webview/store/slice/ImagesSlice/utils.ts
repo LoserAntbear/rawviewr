@@ -1,6 +1,6 @@
-import type { ImageItem } from './types';
+import type { ImageItem, ReadyImageItem } from './types';
 
-export function isReadyImageItem(item: ImageItem | undefined): item is { readonly kind: 'ready'; readonly bitmap: ImageBitmap } {
+export function isReadyImageItem(item: ImageItem | undefined): item is ReadyImageItem {
   return item?.kind === 'ready';
 }
 
