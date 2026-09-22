@@ -8,8 +8,6 @@ import { DisposableStore } from '@features/disposable/DisposableStore';
 import appShellHtml from './app-shell.html';
 import { StringTemplate } from '@utils/string/StringTemplate';
 import { getNonce } from '../utils';
-import { BufferItem } from '@features/buffer/BufferItem';
-import { FileValidator } from '@features/file/FileValidator';
 import { GalleryViewMode } from '../ui/webcomponents/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
@@ -112,7 +110,6 @@ export class WebviewHost extends DisposableStore {
   private async handleAppReady(): Promise<void> {
     await this.initializeSession(this.viewMode);
     await this.postSources();
-    await this.readAndPostSources();
   }
 
   private initializeSession(viewMode: GalleryViewMode): Promise<void> {
@@ -128,34 +125,6 @@ export class WebviewHost extends DisposableStore {
       return this.post({
       type: 'sources:update',
       sources: this.sources,
-    });
-  }
-
-  private async readAndPostSources(): Promise<void> {
-    for (const source of this.sources) {
-      try {
-        const item = await BufferItem.fromFileSource(source);
-
-        if (!FileValidator.isValidFileSize(item.data.byteLength)) {
-          throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
-        }
-
-        await this.post({
-          sources: [item],
-          type: 'sources:update',
-        });
-      } catch (error) {
-        await this.propagateErrorToWebview(error);
-      }
-    }
-  }
-
-  private propagateErrorToWebview(error: unknown): Promise<void> {
-    const message = error instanceof Error ? error.message : String(error);
-
-    return this.post({
-      message,
-      type: 'status:error',
     });
   }
 }
