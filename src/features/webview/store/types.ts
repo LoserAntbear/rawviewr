@@ -18,8 +18,8 @@ export type SliceLike<TName extends string = string> = {
 export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSliceIds, SliceLike<TSliceIds>>>;
 export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
-  readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
+  readonly [StoreSliceId.Sources]: SourcesSlice;
 };
 export type StoreEventMap = SourcesSliceEvents & ViewSliceEvents & ImagesSliceEvents;
 

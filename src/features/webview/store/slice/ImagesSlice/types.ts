@@ -5,6 +5,7 @@ import type { StoreSliceEventMap } from '../types';
 import type { StoreSliceId } from '../../definitions';
 
 export type ReadyImageItem = {
+  readonly id: string;
   readonly kind: 'ready';
   readonly name: string;
   readonly byteLength: number;
@@ -12,10 +13,11 @@ export type ReadyImageItem = {
   readonly bitmap: ImageBitmap;
   readonly detail: string | null;
 };
-export type ImageItem =
+export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
   | { readonly kind: 'failed'; readonly message: string }
+)
   | ReadyImageItem;
 
 export type ImagesState = {
