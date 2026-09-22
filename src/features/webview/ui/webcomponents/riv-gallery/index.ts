@@ -19,7 +19,7 @@ export class RIVGallery extends RIVHTMLElement {
 
     // Membership and order come from items; mode and selection from view. `visibleIds`
     // is derived from both, so both have to re-render it.
-    this.observe(store.bus, StoreEvent.ItemsChange, this.render.bind(this));
+    this.observe(store.bus, StoreEvent.SourcesChange, this.render.bind(this));
     this.observe(store.bus, StoreEvent.ViewChange, this.render.bind(this));
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));

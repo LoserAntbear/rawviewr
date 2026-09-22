@@ -8,7 +8,7 @@ import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions
 import { createWebviewStore } from './createWebviewStore';
 import { StoreEvent, StoreSliceId } from './definitions';
 import { STORE_SELECTORS } from './selectors';
-import { ItemsSlice } from './slice/ItemsSlice';
+import { SourcesSlice } from './slice/ItemsSlice';
 import type { AppStore } from './types';
 
 const registry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
@@ -17,7 +17,7 @@ const item = (id: string, bytes = 8): BufferItemData => ({ id, name: `${id}.raw`
 
 let store: AppStore;
 
-const items = () => store.get(StoreSliceId.Items);
+const items = () => store.get(StoreSliceId.Sources);
 const view = () => store.get(StoreSliceId.View);
 
 function countEvents(type: string): () => number {
@@ -36,12 +36,12 @@ beforeEach(() => {
 
 describe('registry', () => {
   it('hands back each slice by its id', () => {
-    expect(items()).toBeInstanceOf(ItemsSlice);
+    expect(items()).toBeInstanceOf(SourcesSlice);
     expect(store.has(StoreSliceId.Decode)).toBe(true);
   });
 
   it('refuses to register the same id twice', () => {
-    expect(() => store.register(new ItemsSlice())).toThrow(/already registered/);
+    expect(() => store.register(new SourcesSlice())).toThrow(/already registered/);
   });
 
   it('assembles the whole app state keyed by slice id, with each slice\'s own state', () => {
@@ -50,7 +50,7 @@ describe('registry', () => {
     const { state } = store;
 
     expect(Object.keys(state).sort()).toEqual(['decode', 'images', 'items', 'view']);
-    expect([...state[StoreSliceId.Items].byId.keys()]).toEqual(['a', 'b']);
+    expect([...state[StoreSliceId.Sources].byId.keys()]).toEqual(['a', 'b']);
     expect(state[StoreSliceId.Decode].format).toBe(DEFAULT_DECODE_OPTIONS.format);
   });
 });
@@ -101,7 +101,7 @@ describe('selectors', () => {
   it('are pure functions of a snapshot when used unbound', () => {
     const snapshot = {
       ...store.state,
-      [StoreSliceId.Items]: { byId: new Map([['z', item('z')]]) },
+      [StoreSliceId.Sources]: { byId: new Map([['z', item('z')]]) },
       [StoreSliceId.View]: { mode: 'gallery' as const, selectedId: null },
     };
 

@@ -4,11 +4,11 @@ import { StoreSliceId } from './definitions';
 import type { AppStoreState, Selector, SelectorMap } from './types';
 
 const itemIds: Selector<AppStoreState, readonly string[]> = (state) => (
-  [...state[StoreSliceId.Items].byId.keys()]
+  [...state[StoreSliceId.Sources].byId.keys()]
 );
 
 const item: Selector<AppStoreState, BufferItemData | undefined, [id: string]> = (state, id) => (
-  state[StoreSliceId.Items].byId.get(id)
+  state[StoreSliceId.Sources].byId.get(id)
 );
 
 const visibleIds: Selector<AppStoreState, readonly string[]> = (state) => {

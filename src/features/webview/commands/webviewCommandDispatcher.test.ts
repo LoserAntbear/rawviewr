@@ -67,7 +67,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
   const item: BufferItemData = { id: 'a', name: 'frame.raw', data: new ArrayBuffer(8) };
   const store = {
     selectors: { selectedId: () => item.id },
-    get: (id: StoreSliceId) => (id === StoreSliceId.Items
+    get: (id: StoreSliceId) => (id === StoreSliceId.Sources
       ? { getItem: () => item }
       : { decode: async () => ({ width: 2, height: 2, close: vi.fn() }) }),
   } as unknown as AppStore;

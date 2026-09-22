@@ -111,7 +111,7 @@ export class WebviewHost extends DisposableStore {
 
   private async handleAppReady(): Promise<void> {
     await this.initializeSession(this.viewMode);
-    await this.postPreloaders();
+    await this.postSources();
     await this.readAndPostSources();
   }
 
@@ -124,15 +124,10 @@ export class WebviewHost extends DisposableStore {
     });
   }
 
-  private postPreloaders(): Promise<void> {
-    // I pre-build a payload of empty sources to trigger UI render
-    // And add separate loading to each one
-    // so that the UI can still be responsive and show progress for each file
-    const itemPreloaders: BufferItem[] = this.sources.map(BufferItem.stubFromFileSource);
-
-    return this.post({
-      type: 'items',
-      items: itemPreloaders,
+  private postSources(): Promise<void> {
+      return this.post({
+      type: 'sources:update',
+      sources: this.sources,
     });
   }
 
@@ -146,8 +141,8 @@ export class WebviewHost extends DisposableStore {
         }
 
         await this.post({
-          items: [item],
-          type: 'items',
+          sources: [item],
+          type: 'sources:update',
         });
       } catch (error) {
         await this.propagateErrorToWebview(error);

@@ -8,12 +8,12 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
   store: AppStore,
   bridge: WebviewSessionCommunicationBridge,
 ): WebviewHostMessageResolverMap => ({
-  items: (message) => {
-    if (message.type !== 'items') {
+  "sources:update": (message) => {
+    if (message.type !== 'sources:update') {
       return;
     }
 
-    store.get(StoreSliceId.Items).upsert(message.items);
+    store.get(StoreSliceId.Sources).upsert(message.sources);
   },
 
   "status:error": (message) => {

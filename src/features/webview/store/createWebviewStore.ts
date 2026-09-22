@@ -5,7 +5,7 @@ import { TypedEventTarget } from './TypedEventTarget';
 import { ReactiveStore } from './ReactiveStore';
 import { STORE_SELECTORS } from './selectors';
 import { StoreSliceId } from './definitions';
-import { ItemsSlice } from './slice/ItemsSlice';
+import { SourcesSlice } from './slice/ItemsSlice';
 import { ViewSlice } from './slice/ViewSlice';
 import { DecodeSlice } from './slice/DecodeSlice';
 import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
@@ -17,8 +17,8 @@ import type { AppStore, StoreSlices, StoreReaction } from './types';
 function createDefaultSlices(formatRegistry: FormatRegistry): StoreSlices {
   return {
     [StoreSliceId.View]: new ViewSlice(),
-    [StoreSliceId.Items]: new ItemsSlice(),
     [StoreSliceId.Images]: new ImagesSlice(),
+    [StoreSliceId.Sources]: new SourcesSlice(),
     [StoreSliceId.Decode]: new DecodeSlice(new WebviewImageDecoder(formatRegistry)),
   };
 }

@@ -1,24 +1,23 @@
-import type { BufferItemData } from '@features/buffer';
-
 import { StoreSliceId } from '../definitions';
 import { StoreSlice } from './StoreSlice';
 import type { StoreSliceEventMap } from './types';
+import { FileSource } from '@features/webview/types';
 
 export type ItemsState = {
-  readonly byId: ReadonlyMap<string, BufferItemData>;
+  readonly byId: ReadonlyMap<string, FileSource>;
 };
-export type ItemsSliceEvents = StoreSliceEventMap<StoreSliceId.Items, ItemsState>;
+export type ItemsSliceEvents = StoreSliceEventMap<StoreSliceId.Sources, ItemsState>;
 
-export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
+export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, ItemsState> {
   constructor() {
-    super(StoreSliceId.Items, { byId: new Map() });
+    super(StoreSliceId.Sources, { byId: new Map() });
   }
 
   public get ids(): readonly string[] {
     return [...this.getState().byId.keys()];
   }
 
-  public getItem(id: string): BufferItemData | undefined {
+  public getItem(id: string): FileSource | undefined {
     return this.getState().byId.get(id);
   }
 
@@ -30,7 +29,7 @@ export class ItemsSlice extends StoreSlice<StoreSliceId.Items, ItemsState> {
    * Updating items without changing their position,
    * since render is order sensitive
    */
-  public upsert(items: readonly BufferItemData[]): void {
+  public upsert(items: readonly FileSource[]): void {
     if (items.length === 0) {
       return;
     }

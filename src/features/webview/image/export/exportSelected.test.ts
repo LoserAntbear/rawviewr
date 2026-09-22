@@ -38,7 +38,7 @@ function storeFor(world: World): AppStore {
 
   return {
     selectors: { selectedId: () => world.selected },
-    get: (id: StoreSliceId) => (id === StoreSliceId.Items
+    get: (id: StoreSliceId) => (id === StoreSliceId.Sources
       ? { getItem: (lookup: string) => (world.item?.id === lookup ? world.item : undefined) }
       : { decode }),
   } as unknown as AppStore;

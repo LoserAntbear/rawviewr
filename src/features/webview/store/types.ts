@@ -1,6 +1,6 @@
 import type { EventMap, TypedEventTarget } from './TypedEventTarget';
 import type { StoreSliceChange } from './slice/types';
-import type { ItemsSlice, ItemsSliceEvents } from './slice/ItemsSlice';
+import type { SourcesSlice, ItemsSliceEvents } from './slice/ItemsSlice';
 import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
 import type { DecodeSlice, DecodeSliceEvents } from './slice/DecodeSlice';
 import type { ImagesSlice, ImagesSliceEvents } from './slice/ImagesSlice';
@@ -19,7 +19,7 @@ export type SliceLike<TName extends string = string> = {
 export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSliceIds, SliceLike<TSliceIds>>>;
 export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
-  readonly [StoreSliceId.Items]: ItemsSlice;
+  readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.Decode]: DecodeSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
 };
