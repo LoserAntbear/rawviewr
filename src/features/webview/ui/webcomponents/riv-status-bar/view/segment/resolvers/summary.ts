@@ -3,7 +3,7 @@ import { StringFormat } from '@utils/string/formatters';
 
 import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
-import { byMode, byDisplayedItem } from '../strategies';
+import { byViewMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
 
@@ -45,7 +45,7 @@ const SUMMARY_BY_MODE: ModeStrategies<string | null> = {
 };
 
 export function resolveSummary(context: StatusBarStateContext): StatusBarEntry | null {
-  const text = byMode(SUMMARY_BY_MODE, context);
+  const text = byViewMode(SUMMARY_BY_MODE, context);
 
   return text === null
     ? null

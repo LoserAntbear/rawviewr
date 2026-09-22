@@ -4,7 +4,7 @@ import { StringFormat } from '@utils/string/formatters';
 
 import type { StatusBarEntry, StatusLevel } from '../../types';
 import type { StatusBarStateContext } from '../../../state/types';
-import { byMode, byDisplayedItem } from '../strategies';
+import { byViewMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
@@ -67,5 +67,5 @@ function joinNotes(notes: readonly StatusBarEntry[]): StatusBarEntry | null {
 }
 
 export function resolveNotes(context: StatusBarStateContext): StatusBarEntry | null {
-  return joinNotes(byMode(NOTES_BY_MODE, context));
+  return joinNotes(byViewMode(NOTES_BY_MODE, context));
 }
