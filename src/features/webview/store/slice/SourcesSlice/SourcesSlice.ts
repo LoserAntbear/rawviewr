@@ -8,6 +8,10 @@ export type SourcesState = {
 };
 export type SourcesSliceEvents = StoreSliceEventMap<StoreSliceId.Sources, SourcesState>;
 
+/**
+ * Keeps and handles the data about FILE sources, received from VSCode uri.
+ * Which later can be used to fetch and decode the corresponding images.
+ */
 export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, SourcesState> {
   constructor() {
     super(StoreSliceId.Sources, { byId: new Map() });
