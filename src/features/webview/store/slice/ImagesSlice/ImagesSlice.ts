@@ -2,13 +2,19 @@ import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 import type { ImageItem, ImagesState } from './types';
 import { retireImageBitmap } from './utils';
+import { WebviewImageDecoder } from '@features/webview/image/WebviewImageDecoder';
 
+/**
+ * Keeps and handles the data about PROCESSED images.
+ */
 export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
   public get selectedId(): string | null {
     return this.getState().selectedId;
   }
 
-  constructor() {
+  constructor(
+    private readonly decoder: WebviewImageDecoder,
+  ) {
     super(StoreSliceId.Images, { selectedId: null, byId: new Map() });
   }
 
@@ -16,13 +22,19 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     return this.getState().byId.get(id);
   }
 
-  public put(id: string, image: ImageItem): void {
+  public put(id: string, image: ImageItem): void;
+  public put(entries: readonly [string, ImageItem][]): void;
+  public put(idOrEntries: string | readonly [string, ImageItem][], image?: ImageItem): void {
     const currentState = this.getState();
     const byId = new Map(currentState.byId);
 
-    retireImageBitmap(byId.get(id), image);
-
-    byId.set(id, image);
+    if (typeof idOrEntries === 'string' && image !== undefined) {
+      this.putSingle(idOrEntries, image, byId);
+    } else if (Array.isArray(idOrEntries)) {
+      idOrEntries.forEach(([id, img]) => {
+        this.putSingle(id, img, byId);
+      });
+    }
 
     this.patch({ byId });
   }
@@ -46,5 +58,17 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
   public setSelected(selectedId: string | null): void {
     this.patch({ selectedId });
+  }
+
+  public async decodeFromSource(id: string, source: ArrayBuffer): Promise<void> {
+    const image = await this.decoder.decode(source);
+
+    this.put(id, image);
+  }
+
+  private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
+    retireImageBitmap(byId.get(id), image);
+
+    byId.set(id, image);
   }
 }
