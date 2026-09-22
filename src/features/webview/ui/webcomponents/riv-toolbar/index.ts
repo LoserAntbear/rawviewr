@@ -31,7 +31,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.observe(this.view.rootRef, 'click', this.handleControlClick.bind(this));
     this.observe(
       WebviewContextProvider.context.store.bus,
-      StoreEvent.DecodeChange,
+      StoreEvent.DecodeOptionsChange,
       this.sync.bind(this),
     );
 
@@ -53,7 +53,7 @@ export class RIVToolbar extends RIVHTMLElement {
     const value = readElementValue(event.target as HTMLElement);
 
     WebviewContextProvider.context.store
-      .get(StoreSliceId.Decode)
+      .get(StoreSliceId.DecodeOptions)
       .setOptions(control.toDecodeOptions(value));
   }
 
@@ -67,7 +67,7 @@ export class RIVToolbar extends RIVHTMLElement {
 
   private sync(): void {
     const { store, formatRegistry } = WebviewContextProvider.context;
-    const options = store.get(StoreSliceId.Decode).options;
+    const options = store.get(StoreSliceId.DecodeOptions).options;
 
     this.view.render(
       this.viewState.updateState(ToolbarStateTransition.Synced, { options, formatRegistry }),

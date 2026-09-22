@@ -10,7 +10,7 @@ import styles from './index.css';
 import { STATUS_SEGMENTS } from './view/segment/segments';
 import { selectStatusBarContext } from './state/selectors';
 
-const STATUS_BAR_EVENTS = [StoreEvent.SourcesChange, StoreEvent.ViewChange, StoreEvent.DecodeChange] as const;
+const STATUS_BAR_EVENTS = [StoreEvent.SourcesChange, StoreEvent.ViewChange, StoreEvent.DecodeOptionsChange] as const;
 
 export class RIVStatusBar extends RIVHTMLElement {
   public static readonly tagName = RIVTags.StatusBar;

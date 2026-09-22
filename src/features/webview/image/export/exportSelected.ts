@@ -30,7 +30,7 @@ function requireItem(store: AppStore, id: string): BufferItemData {
 }
 
 async function requireBitmap(store: AppStore, item: BufferItemData): Promise<DecodedExport> {
-  const bitmap = await store.get(StoreSliceId.Decode).decode(item);
+  const bitmap = await store.get(StoreSliceId.Images).decode(item);
 
   if (!bitmap) {
     throw new ExportError('error', `Raw Image Viewer: ${item.name} has nothing decodable in it.`);

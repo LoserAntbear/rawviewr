@@ -33,13 +33,13 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  store.get(StoreSliceId.Decode).reset();
+  store.get(StoreSliceId.DecodeOptions).reset();
 
   toolbar = document.createElement(RIVToolbar.tagName) as RIVToolbar;
   document.body.replaceChildren(toolbar);
 });
 
-const options = () => store.get(StoreSliceId.Decode).options;
+const options = () => store.get(StoreSliceId.DecodeOptions).options;
 
 function control<T extends HTMLElement>(id: string): T {
   const element = toolbar.shadowRoot?.getElementById(id);
@@ -121,7 +121,7 @@ describe('riv-toolbar: controls write to the store', () => {
 
 describe('riv-toolbar: the store writes to the controls', () => {
   it('reflects options changed from elsewhere', () => {
-    store.get(StoreSliceId.Decode).setOptions({ format: 'bgra8888', width: 320, flipY: true });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: 'bgra8888', width: 320, flipY: true });
 
     expect(control<HTMLSelectElement>('format').value).toBe('bgra8888');
     expect(control<HTMLInputElement>('width').value).toBe('320');

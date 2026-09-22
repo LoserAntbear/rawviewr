@@ -31,7 +31,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
 
     store.get(StoreSliceId.View).setMode(message.viewMode);
     // Loading defaults
-    store.get(StoreSliceId.Decode).setOptions(message.decodeOptions);
+    store.get(StoreSliceId.DecodeOptions).setOptions(message.decodeOptions);
   },
 
   export: (message) => {

@@ -68,7 +68,7 @@ export class RIVImage extends RIVHTMLElement {
     const { store } = WebviewContextProvider.context;
 
     this.observe(store.bus, StoreEvent.ItemsChange, this.handleItemsChange.bind(this));
-    this.observe(store.bus, StoreEvent.DecodeChange, this.render.bind(this));
+    this.observe(store.bus, StoreEvent.DecodeOptionsChange, this.render.bind(this));
 
     this.render();
 
@@ -124,7 +124,7 @@ export class RIVImage extends RIVHTMLElement {
       // A newer render can start while this decode is finishing
       const bitmap = await withAbortSignalCheck(
         signal,
-        () => store.get(StoreSliceId.Decode).decode(item, signal),
+        () => store.get(StoreSliceId.DecodeOptions).decode(item, signal),
         (stale) => stale?.close(),
       );
 

@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('registry', () => {
   it('hands back each slice by its id', () => {
     expect(items()).toBeInstanceOf(SourcesSlice);
-    expect(store.has(StoreSliceId.Decode)).toBe(true);
+    expect(store.has(StoreSliceId.DecodeOptions)).toBe(true);
   });
 
   it('refuses to register the same id twice', () => {
@@ -51,22 +51,22 @@ describe('registry', () => {
 
     expect(Object.keys(state).sort()).toEqual(['decode', 'images', 'items', 'view']);
     expect([...state[StoreSliceId.Sources].byId.keys()]).toEqual(['a', 'b']);
-    expect(state[StoreSliceId.Decode].format).toBe(DEFAULT_DECODE_OPTIONS.format);
+    expect(state[StoreSliceId.DecodeOptions].format).toBe(DEFAULT_DECODE_OPTIONS.format);
   });
 });
 
 describe('slices', () => {
   it('stay silent on a no-op patch, so reactions converge instead of ping-ponging', () => {
     const viewChanges = countEvents(StoreEvent.ViewChange);
-    const decodeChanges = countEvents(StoreEvent.DecodeChange);
+    const decodeChanges = countEvents(StoreEvent.DecodeOptionsChange);
 
     view().setMode('single');
-    store.get(StoreSliceId.Decode).setOptions({ width: 0 });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 0 });
 
     expect([viewChanges(), decodeChanges()]).toEqual([0, 0]);
 
     view().setMode('gallery');
-    store.get(StoreSliceId.Decode).setOptions({ width: 64 });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
 
     expect([viewChanges(), decodeChanges()]).toEqual([1, 1]);
   });

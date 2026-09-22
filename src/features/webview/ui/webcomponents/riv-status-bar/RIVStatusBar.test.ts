@@ -27,7 +27,7 @@ beforeEach(() => {
   }
 
   store.get(StoreSliceId.View).setMode('single');
-  store.get(StoreSliceId.Decode).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: 'rgba4444', width: 4, height: 3 });
+  store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: 'rgba4444', width: 4, height: 3 });
 
   bar = document.createElement(RIVStatusBar.tagName) as RIVStatusBar;
   document.body.replaceChildren(bar);
@@ -65,7 +65,7 @@ describe('riv-status-bar', () => {
 
   it('follows the store: changing an option re-resolves the geometry', () => {
     addBuffer(24);
-    store.get(StoreSliceId.Decode).setOptions({ width: 2, height: 6 });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 2, height: 6 });
 
     expect(segment('summary').textContent).toBe('2×6 · RGBA4444 · 4 B/row · 24 B');
   });
