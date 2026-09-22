@@ -8,7 +8,7 @@ import type { Geometry } from '@features/image/imageDecoder/imagePreparation/typ
 
 import { createWebviewStore } from '../store/createWebviewStore';
 import { StoreSliceId } from '../store/definitions';
-import { DecodeOptionsSlice } from '../store/slice/DecodeSlice';
+import { DecodeOptionsSlice } from '../store/slice/DecodeOptionsSlice';
 import { ImagesSlice } from '../store/slice/ImagesSlice/ImagesSlice';
 import { SourcesSlice } from '../store/slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from '../store/slice/ViewSlice/ViewSlice';
