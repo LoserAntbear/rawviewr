@@ -72,7 +72,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
   public async decodeFromSource(
     source: FileSource,
-    options: DecodeOptions,
+    options: DecodeOptions = this.decodeOptions,
   ): Promise<void> {
     try {
       const bufferItem = await BufferItem.fromFileSource(source);
