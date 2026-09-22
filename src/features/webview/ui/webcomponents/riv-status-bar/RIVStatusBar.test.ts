@@ -22,8 +22,8 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  for (const id of store.get(StoreSliceId.Items).ids) {
-    store.get(StoreSliceId.Items).remove(id);
+  for (const id of store.get(StoreSliceId.Sources).ids) {
+    store.get(StoreSliceId.Sources).remove(id);
   }
 
   store.get(StoreSliceId.View).setMode('single');
@@ -43,8 +43,8 @@ function segment(id: string): HTMLElement {
   return element;
 }
 
-const addBuffer = (bytes: number) => store.get(StoreSliceId.Items).upsert([
-  { id: 'a', name: 'a.raw', data: new ArrayBuffer(bytes) },
+const addBuffer = (bytes: number) => store.get(StoreSliceId.Sources).upsert([
+  { id: 'a', name: 'a.raw', },
 ]);
 
 describe('riv-status-bar', () => {
@@ -65,7 +65,7 @@ describe('riv-status-bar', () => {
 
   it('follows the store: changing an option re-resolves the geometry', () => {
     addBuffer(24);
-    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 2, height: 6 });
+    store.get(StoreSliceId.Images).setOptions({ width: 2, height: 6 });
 
     expect(segment('summary').textContent).toBe('2×6 · RGBA4444 · 4 B/row · 24 B');
   });
@@ -108,6 +108,16 @@ describe('riv-status-bar: indicators', () => {
     addBuffer(10);
 
     expect(lit('notes')).toBe(true);
+  });
+
+  it('spins on the segment that is waiting, until the bytes land', () => {
+    addBuffer(0);
+
+    expect(segment('summary').hasAttribute('data-loading')).toBe(true);
+
+    addBuffer(24);
+
+    expect(segment('summary').hasAttribute('data-loading')).toBe(false);
   });
 
   it('never lights one on the summary, which is a readout rather than a message', () => {
