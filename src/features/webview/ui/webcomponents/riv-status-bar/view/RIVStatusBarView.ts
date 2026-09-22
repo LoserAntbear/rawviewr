@@ -1,7 +1,8 @@
 import { RIVView } from '../../RIVView';
 import { ElementBuilder } from './ElementBuilder';
 import { type StatusSegmentsMap } from './segment/segments';
-import type { StatusBarEntry, StatusBarRenderEntries, StatusBarStateContext } from '../state/types';
+import type { StatusBarEntry, StatusBarRenderEntries } from './types';
+import type { StatusBarStateContext } from '../state/types';
 import { type StatusSegment } from './segment/types';
 import { SlotLifecycleMode } from './segment/definitions';
 
@@ -52,6 +53,7 @@ export class RIVStatusBarView extends RIVView {
 
       element.textContent = entry?.text ?? '';
       element.dataset.level = entry?.level ?? 'info';
+      element.toggleAttribute('data-loading', entry?.loading === true);
     }
   }
 
