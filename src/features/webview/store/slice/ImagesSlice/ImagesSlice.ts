@@ -83,7 +83,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
       const image = await this.decoder.decode(bufferItem.data, options);
 
-      this.put(source.id, { kind: "ready", ...image });
+      this.put(source.id, { kind: "ready", name: bufferItem.name, ...image });
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
       const message = Object.hasOwn((error as object), 'message') ? (error as Error).message : String(error);

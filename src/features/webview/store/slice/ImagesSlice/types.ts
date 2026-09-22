@@ -8,7 +8,12 @@ export type ImageItem =
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
   | { readonly kind: 'failed'; readonly message: string }
-  | { readonly kind: 'ready'; readonly bitmap: ImageBitmap; geometry: Geometry };
+  | {
+      readonly kind: 'ready';
+      readonly name: string;
+      readonly geometry: Geometry;
+      readonly bitmap: ImageBitmap;
+    };
 
 export type ImagesState = {
   readonly selectedId: string | null;
