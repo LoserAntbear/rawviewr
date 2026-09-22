@@ -1,7 +1,7 @@
-import type { Viewer } from '@features/viewer/viewer';
 import type * as vscode from 'vscode';
+import type { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 export interface ViewerRegistryEntry {
-  viewer: Viewer;
+  viewer: WebviewHost;
   panel: vscode.WebviewPanel;
 }
