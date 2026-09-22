@@ -17,8 +17,7 @@ debugger. You tell it how the bytes are laid out; it draws them.
   display widths.
 - **Multi-image viewing**: a gallery of files as tiles, and a tile grid of
   frames inside a single buffer.
-- **Pixel probe**: hover to read a pixel's coordinates, decoded RGBA, and the
-  source byte offset the value came from.
+- **Pixel probe**: hover to read a pixel's coordinates, decoded RGBA, and the source byte offset the value came from.
 - **PNG export** of whatever is currently on screen.
 
 Everything decodes in the webview, so changing format or size is instant.
