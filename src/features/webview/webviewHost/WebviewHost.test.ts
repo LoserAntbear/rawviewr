@@ -50,7 +50,7 @@ function mount(postMessage: () => Promise<boolean>, itemOpener?: ItemOpener, sou
 describe('WebviewHost.post', () => {
   it('reports a message the webview dropped — it awaits the delivery, not the promise\'s truthiness', async () => {
     const { host } = mount(async () => false);
-    const message: WebviewHostMessage = { type: 'items', sources: [] };
+    const message: WebviewHostMessage = { type: 'sources:update', sources: [] };
 
     await host.post(message);
 
