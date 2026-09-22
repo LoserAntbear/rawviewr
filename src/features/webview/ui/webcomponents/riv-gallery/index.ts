@@ -38,7 +38,7 @@ export class RIVGallery extends RIVHTMLElement {
     const id = this.view.entryIdFor(event.target);
 
     if (id !== undefined) {
-      WebviewContextProvider.context.store.get(StoreSliceId.View).select(id);
+      WebviewContextProvider.context.store.get(StoreSliceId.Images).setSelected(id);
     }
   }
 
