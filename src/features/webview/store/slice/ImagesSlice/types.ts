@@ -1,3 +1,5 @@
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+
 import type { StoreSliceEventMap } from '../types';
 import type { StoreSliceId } from '../../definitions';
 
@@ -5,7 +7,7 @@ export type ImageItem =
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
   | { readonly kind: 'failed'; readonly message: string }
-  | { readonly kind: 'ready'; readonly bitmap: ImageBitmap };
+  | { readonly kind: 'ready'; readonly bitmap: ImageBitmap; geometry: Geometry };
 
 export type ImagesState = {
   readonly selectedId: string | null;
