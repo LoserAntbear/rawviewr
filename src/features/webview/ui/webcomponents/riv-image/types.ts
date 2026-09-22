@@ -1,6 +1,4 @@
-
-import { ImageItem } from '@features/webview/store/slice/ImagesSlice';
-import type { RIVImageStateKind, RIVImageStateTransition } from './definitions';
+import type { RIVImageStateKind } from './definitions';
 
 export type RIVImageCaption = {
   name: string;
@@ -15,11 +13,6 @@ export type RIVImageState = { caption: RIVImageCaption } & (
   | { kind: RIVImageStateKind.Paint; bitmap: ImageBitmap; }
 );
 
-export type RIVImageTransitionPayloads = {
-  [RIVImageStateTransition.CloseBitmap]: object;
-  [RIVImageStateTransition.Failed]: { error: unknown };
-  [RIVImageStateTransition.Resolved]: { item: ImageItem; };
-};
 
 export type RIVImageRenderer<K extends RIVImageStateKind = RIVImageStateKind> = (
   state: Extract<RIVImageState, { kind: K }>,
