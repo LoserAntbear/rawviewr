@@ -88,10 +88,6 @@ export class WebviewHost extends DisposableStore {
           message: message.message,
         });
         break;
-      // case 'optionsChanged':
-      //   this.options = message.options;
-      //   this.saveOptions();
-      //   break;
     }
   }
 
