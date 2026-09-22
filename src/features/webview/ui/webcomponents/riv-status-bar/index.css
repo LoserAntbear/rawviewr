@@ -28,7 +28,8 @@
   min-width: 0;
 }
 
-.segment.indicator:not(:empty)::before {
+.segment.indicator:not(:empty)::before,
+.segment[data-loading]::before {
   content: '';
   display: inline-block;
   width: var(--indicator-width, 1.2em);
@@ -59,4 +60,30 @@
   --indicator-color: var(--riv-error);
   --indicator-width: 1.65em;
   --indicator-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'><circle cx='11' cy='8' r='5.6' fill='none' stroke='black' stroke-width='1.5'/><path d='M17.46 2.95A8.2 8.2 0 0 1 17.46 13.05M4.54 13.05A8.2 8.2 0 0 1 4.54 2.95' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/><path d='M11 5.1v3.4' stroke='black' stroke-width='1.6' stroke-linecap='round'/><circle cx='11' cy='10.9' r='0.95' fill='black'/></svg>");
+}
+
+/*
+ * Waiting on bytes. Last, so it stands in for whatever lamp the level would light, and on
+ * any segment — the summary carries no lamp of its own but still says when it is waiting.
+ */
+.segment[data-loading] {
+  --indicator-width: 1.2em;
+  --indicator-color: var(--riv-muted);
+  --indicator-glyph: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.6a6.4 6.4 0 1 1-6.4 6.4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>");
+}
+
+.segment[data-loading]::before {
+  animation: riv-spin 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment[data-loading]::before {
+    animation: none;
+  }
+}
+
+@keyframes riv-spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
