@@ -6,7 +6,7 @@ export type DisplayedItem =
   | { readonly kind: 'none' }
   | { readonly kind: 'failed'; readonly message: string }
   | { readonly kind: 'loading'; readonly item: ImageItem }
-  | { readonly kind: 'resolved'; readonly item: ImageItem; };
+  | { readonly kind: 'resolved'; readonly item: ImageItem };
 
 export type StatusBarStateContext = {
   readonly appState: AppStoreState;
