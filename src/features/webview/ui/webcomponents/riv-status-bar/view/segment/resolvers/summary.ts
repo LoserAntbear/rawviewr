@@ -1,4 +1,3 @@
-import type { BufferItemData } from '@features/buffer';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { StringFormat } from '@utils/string/formatters';
 
@@ -6,42 +5,42 @@ import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
 import { byMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
 
-/** Some labels carry a description after an em dash; the bar only has room for the name. */
 function formatName({ appState, formatRegistry }: StatusBarStateContext): string {
-  return formatRegistry.get(appState[StoreSliceId.DecodeOptions].format).label.split(' — ')[0];
+  return formatRegistry.get(appState[StoreSliceId.Images].decodeOptions.format).label.split(' — ')[0];
 }
 
-function isLoaded(item: BufferItemData): boolean {
-  return item.data.byteLength > 0 && !item.error;
-}
-
-/**
- * The summary is always informational, so its strategies only decide the text. The payload
- * is built once, in `resolveSummary`, rather than restated in every branch.
- */
 const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
   none: () => null,
-  loading: ({ item }) => `${item.name} · loading…`,
-  // The reason goes to the notes segment; the summary only says which buffer it was.
-  failed: ({ item }) => item.name,
-  resolved: ({ item, geometry }, context) => [
-    `${geometry.width}×${geometry.height}`,
-    formatName(context),
-    `${geometry.bytesPerRow} B/row`,
-    StringFormat.bytes(item.data.byteLength),
-    ...(geometry.frameCount > 1 ? [`${geometry.frameCount} frames`] : []),
-  ].join(' · '),
+  loading: () => `loading…`,
+  failed: ({ message }) => `failed: ${message}`,
+  resolved: ({ item }, context) => {
+    if (!isReadyImageItem(item)) {
+      return null;
+    }
+
+    const geometry = item.geometry;
+
+    return [
+      `${geometry.width}×${geometry.height}`,
+      formatName(context),
+      `${geometry.bytesPerRow} B/row`,
+      StringFormat.bytes(item.byteLength),
+      ...(geometry.frameCount > 1 ? [`${geometry.frameCount} frames`] : []),
+    ].join(' · ');
+  },
 };
 
 const SUMMARY_BY_MODE: ModeStrategies<string | null> = {
   single: (context) => byDisplayedItem(SUMMARY_BY_DISPLAYED_ITEM, context),
   gallery: (context) => {
-    const items = [...context.appState[StoreSliceId.Sources].byId.values()];
+    const sources = [...context.appState[StoreSliceId.Sources].byId.values()];
+    const imageItems = [...context.appState[StoreSliceId.Images].byId.values()];
 
-    return items.length === 0
+    return imageItems.length === 0
       ? null
-      : `${items.filter(isLoaded).length} / ${items.length} buffers · ${formatName(context)}`;
+      : `${imageItems.filter(isReadyImageItem).length} / ${sources.length} sources · ${formatName(context)}`;
   },
 };
 
