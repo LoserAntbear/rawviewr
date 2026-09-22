@@ -4,7 +4,7 @@ import { TypedEventTarget } from './TypedEventTarget';
 import { ReactiveStore } from './ReactiveStore';
 import { STORE_SELECTORS } from './selectors';
 import { StoreSliceId } from './definitions';
-import { SourcesSlice } from './slice/ItemsSlice';
+import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from './slice/ViewSlice';
 import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { STORE_REACTIONS } from './reactions';

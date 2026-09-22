@@ -1,5 +1,5 @@
 import type { BufferItemData as FileSource, ItemGeometry } from '@features/buffer';
-import type { SourcesSlice } from '../slice/ItemsSlice';
+import type { SourcesSlice } from '../slice/SourcesSlice/SourcesSlice';
 import type { DecodeSlice } from '../slice/DecodeSlice';
 import { StoreEvent, StoreSliceId } from '../definitions';
 import { StoreReaction } from '../types';

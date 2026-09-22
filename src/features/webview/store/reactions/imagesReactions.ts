@@ -1,5 +1,5 @@
 import { ViewSlice } from '../slice/ViewSlice';
-import type { SourcesSlice } from '../slice/ItemsSlice';
+import type { SourcesSlice } from '../slice/SourcesSlice/SourcesSlice';
 import { StoreEvent, StoreSliceId } from '../definitions';
 import type { StoreReaction } from '../types';
 

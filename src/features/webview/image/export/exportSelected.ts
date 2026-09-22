@@ -20,7 +20,7 @@ function requireSelectedId(store: AppStore): string {
 }
 
 function requireItem(store: AppStore, id: string): BufferItemData {
-  const item = store.get(StoreSliceId.Sources).getItem(id);
+  const item = store.get(StoreSliceId.Sources).getSource(id);
 
   if (!item) {
     throw new ExportError('warn', 'Raw Image Viewer: nothing to export.');

@@ -8,7 +8,7 @@ import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions
 import { createWebviewStore } from './createWebviewStore';
 import { StoreEvent, StoreSliceId } from './definitions';
 import { STORE_SELECTORS } from './selectors';
-import { SourcesSlice } from './slice/ItemsSlice';
+import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { AppStore } from './types';
 
 const registry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);

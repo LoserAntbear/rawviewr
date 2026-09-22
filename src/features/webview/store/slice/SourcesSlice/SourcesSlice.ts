@@ -1,14 +1,14 @@
-import { StoreSliceId } from '../definitions';
-import { StoreSlice } from './StoreSlice';
-import type { StoreSliceEventMap } from './types';
+import { StoreSliceId } from '../../definitions';
+import { StoreSlice } from '../StoreSlice';
+import type { StoreSliceEventMap } from '../types';
 import { FileSource } from '@features/webview/types';
 
-export type ItemsState = {
+export type SourcesState = {
   readonly byId: ReadonlyMap<string, FileSource>;
 };
-export type ItemsSliceEvents = StoreSliceEventMap<StoreSliceId.Sources, ItemsState>;
+export type SourcesSliceEvents = StoreSliceEventMap<StoreSliceId.Sources, SourcesState>;
 
-export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, ItemsState> {
+export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, SourcesState> {
   constructor() {
     super(StoreSliceId.Sources, { byId: new Map() });
   }
@@ -17,7 +17,7 @@ export class SourcesSlice extends StoreSlice<StoreSliceId.Sources, ItemsState> {
     return [...this.getState().byId.keys()];
   }
 
-  public getItem(id: string): FileSource | undefined {
+  public getSource(id: string): FileSource | undefined {
     return this.getState().byId.get(id);
   }
 

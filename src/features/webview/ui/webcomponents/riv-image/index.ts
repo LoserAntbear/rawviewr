@@ -2,7 +2,7 @@ import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
 import type { StoreChangeEvent } from '@features/webview/store/types';
-import type { ItemsState } from '@features/webview/store/slice/ItemsSlice';
+import type { SourcesState } from '@features/webview/store/slice/SourcesSlice/SourcesSlice';
 import { isAbortError } from '@guards/errorGuards';
 import { withAbortSignalCheck } from '@utils/abort';
 import { attemptDetached } from '@utils/attempt';
@@ -89,7 +89,7 @@ export class RIVImage extends RIVHTMLElement {
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
   // FIXME: Optimize this by having the store emit more granular events or by indexing items by ID.
   private handleItemsChange(event: Event): void {
-    const { prev, next } = (event as StoreChangeEvent<ItemsState>).detail;
+    const { prev, next } = (event as StoreChangeEvent<SourcesState>).detail;
 
     if (prev.byId.get(this.itemId) !== next.byId.get(this.itemId)) {
       this.render();
