@@ -71,12 +71,52 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     this.patch({ selectedId });
   }
 
+  public async decodeFromSource(source: FileSource, abortSignal?: AbortSignal, options?: DecodeOptions): Promise<void>;
+  public async decodeFromSource(sources: FileSource[], abortSignal?: AbortSignal, options?: DecodeOptions): Promise<void>;
   public async decodeFromSource(
-    source: FileSource,
+    sourceOrSources: FileSource | FileSource[],
     abortSignal?: AbortSignal,
     options: DecodeOptions = this.decodeOptions,
   ): Promise<void> {
+    if (Array.isArray(sourceOrSources)) {
+      const results = await Promise.all(
+        sourceOrSources.map(
+          async source => {
+            const result = await this.decodeSingle(source, abortSignal, options);
+
+            return result ? [result.id, result] : undefined;
+          }
+        ).filter(Boolean)
+      ) as [string, ImageItem][];
+
+      this.put(results);
+    } else {
+      const result = await this.decodeSingle(sourceOrSources, abortSignal, options);
+
+      if (result) {
+        this.put(result.id, result);
+      }
+    }
+  }
+
+  public setOptions(patch: Partial<DecodeOptions>): void {
+    this.patch({ decodeOptions: { ...this.getState().decodeOptions, ...patch } });
+  }
+
+  private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
+    retireImageBitmap(byId.get(id), image);
+
+    byId.set(id, image);
+  }
+
+  private async decodeSingle(
+    source: FileSource,
+    abortSignal?: AbortSignal,
+    options: DecodeOptions = this.decodeOptions,
+  ): Promise<ImageItem | undefined> {
     try {
+      this.put(source.id, { kind: "pending", id: source.id });
+
       const bufferItem = await withAbortSignalCheck(
         abortSignal,
         () => BufferItem.fromFileSource(source),
@@ -91,32 +131,22 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
         () => this.decoder.decode(bufferItem.data, options),
       );
 
-      this.put(
-        source.id,
-        {
-          kind: "ready",
-          name: bufferItem.name,
-          byteLength: bufferItem.data.byteLength,
-          detail: bufferItem.detail ?? bufferItem.name,
-          ...image
-        },
-      );
+      return {
+        kind: "ready",
+        id: source.id,
+        name: bufferItem.name,
+        byteLength: bufferItem.data.byteLength,
+        detail: bufferItem.detail ?? bufferItem.name,
+        ...image
+      };
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
 
       const message = Object.hasOwn((error as object), 'message') ? (error as Error).message : String(error);
 
-      this.put(source.id, { kind: "failed", message });
+      this.put(source.id, { kind: "failed", message, id: source.id });
+
+      return undefined;
     }
-  }
-
-  public setOptions(patch: Partial<DecodeOptions>): void {
-    this.patch({ decodeOptions: { ...this.getState().decodeOptions, ...patch } });
-  }
-
-  private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
-    retireImageBitmap(byId.get(id), image);
-
-    byId.set(id, image);
   }
 }
