@@ -4,6 +4,5 @@ import type { StoreSliceId } from '../../definitions';
 
 export type ViewState = {
   readonly mode: GalleryViewMode;
-  readonly selectedId: string | null;
 };
 export type ViewSliceEvents = StoreSliceEventMap<StoreSliceId.View, ViewState>;

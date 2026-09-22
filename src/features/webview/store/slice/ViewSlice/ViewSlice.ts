@@ -6,22 +6,14 @@ import { ViewState } from './types';
 
 export class ViewSlice extends StoreSlice<StoreSliceId.View, ViewState> {
   constructor() {
-    super(StoreSliceId.View, { mode: 'single', selectedId: null });
+    super(StoreSliceId.View, { mode: 'single' });
   }
 
   public get mode(): GalleryViewMode {
     return this.getState().mode;
   }
 
-  public get selectedId(): string | null {
-    return this.getState().selectedId;
-  }
-
   public setMode(mode: GalleryViewMode): void {
     this.patch({ mode });
-  }
-
-  public select(selectedId: string | null): void {
-    this.patch({ selectedId });
   }
 }

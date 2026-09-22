@@ -8,6 +8,7 @@ export type ImageItem =
   | { readonly kind: 'ready'; readonly bitmap: ImageBitmap };
 
 export type ImagesState = {
+  readonly selectedId: string | null;
   readonly byId: ReadonlyMap<string, ImageItem>;
 };
 export type ImagesSliceEvents = StoreSliceEventMap<StoreSliceId.Images, ImagesState>;
