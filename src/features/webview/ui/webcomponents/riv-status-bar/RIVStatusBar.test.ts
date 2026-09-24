@@ -1,10 +1,12 @@
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { FORMAT_PRESETS } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
+import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { AppStore } from '@features/webview/store/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
@@ -26,6 +28,7 @@ beforeEach(() => {
     store.get(StoreSliceId.Sources).remove(id);
   }
 
+  store.get(StoreSliceId.Images).clear();
   store.get(StoreSliceId.View).setMode('single');
   store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: 'rgba4444', width: 4, height: 3 });
 
@@ -43,9 +46,32 @@ function segment(id: string): HTMLElement {
   return element;
 }
 
-const addBuffer = (bytes: number) => store.get(StoreSliceId.Sources).upsert([
-  { id: 'a', name: 'a.raw', },
-]);
+const geometry = (availableBytes: number): Geometry => ({
+  width: 4,
+  height: 3,
+  frameCount: 1,
+  bytesPerRow: 8,
+  bytesPerFrame: 24,
+  availableBytes,
+  baseOffset: 0,
+  lockedByHeader: false,
+});
+
+/** The source arrives first, then whatever the store made of it. */
+function show(image: ImageItem): void {
+  store.get(StoreSliceId.Sources).upsert([{ id: image.id, name: `${image.id}.raw`, uri: { path: '/a.raw' } as never }]);
+  store.get(StoreSliceId.Images).put(image.id, image);
+}
+
+const decoded = (bytes: number): ImageItem => ({
+  id: 'a',
+  kind: 'ready',
+  name: 'a.raw',
+  detail: null,
+  byteLength: bytes,
+  geometry: geometry(bytes),
+  bitmap: { width: 4, height: 3, close: vi.fn() } as unknown as ImageBitmap,
+});
 
 describe('riv-status-bar', () => {
   it('lays segments out start, spacer, end', () => {
@@ -54,31 +80,31 @@ describe('riv-status-bar', () => {
     expect(children.map((child) => child.dataset.segmentId ?? child.className)).toEqual(['summary', 'spacer', 'notes']);
   });
 
-  it('follows the store: a buffer arriving fills the summary', () => {
+  it('follows the store: a decoded image fills the summary', () => {
     expect(segment('summary').hidden).toBe(true);
 
-    addBuffer(24);
+    show(decoded(24));
 
     expect(segment('summary').hidden).toBe(false);
     expect(segment('summary').textContent).toBe('4×3 · RGBA4444 · 8 B/row · 24 B');
   });
 
-  it('follows the store: changing an option re-resolves the geometry', () => {
-    addBuffer(24);
-    store.get(StoreSliceId.Images).setOptions({ width: 2, height: 6 });
+  it('follows the store: a changed format re-reads the summary', () => {
+    show(decoded(24));
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: 'rgbx4444' });
 
-    expect(segment('summary').textContent).toBe('2×6 · RGBA4444 · 4 B/row · 24 B');
+    expect(segment('summary').textContent).toBe('4×3 · RGBX4444 · 8 B/row · 24 B');
   });
 
   it('marks a warning with its level', () => {
-    addBuffer(10);
+    show(decoded(10));
 
     expect(segment('notes').dataset.level).toBe('warn');
   });
 
   it('keeps the notes live region in the accessibility tree while it is empty', () => {
     // Hiding a live region would swallow the announcement when it next fills.
-    addBuffer(24);
+    show(decoded(24));
 
     expect(segment('notes').textContent).toBe('');
     expect(segment('notes').hidden).toBe(false);
@@ -101,27 +127,27 @@ describe('riv-status-bar: indicators', () => {
   const lit = (id: string) => segment(id).classList.contains('indicator') && segment(id).childNodes.length > 0;
 
   it('lights one on the notes only while they have something to say', () => {
-    addBuffer(24);
+    show(decoded(24));
 
     expect(lit('notes')).toBe(false);
 
-    addBuffer(10);
+    show(decoded(10));
 
     expect(lit('notes')).toBe(true);
   });
 
   it('spins on the segment that is waiting, until the bytes land', () => {
-    addBuffer(0);
+    show({ id: 'a', kind: 'pending' });
 
     expect(segment('summary').hasAttribute('data-loading')).toBe(true);
 
-    addBuffer(24);
+    show(decoded(24));
 
     expect(segment('summary').hasAttribute('data-loading')).toBe(false);
   });
 
   it('never lights one on the summary, which is a readout rather than a message', () => {
-    addBuffer(24);
+    show(decoded(24));
 
     expect(segment('summary').textContent).not.toBe('');
     expect(lit('summary')).toBe(false);
