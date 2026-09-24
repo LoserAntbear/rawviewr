@@ -8,7 +8,7 @@ import type { ModeStrategies, DisplayedItemStrategies } from '../types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
 
 function formatName({ appState, formatRegistry }: StatusBarStateContext): string {
-  return formatRegistry.get(appState[StoreSliceId.Images].decodeOptions.format).label.split(' — ')[0];
+  return formatRegistry.get(appState[StoreSliceId.DecodeOptions].format).label.split(' — ')[0];
 }
 
 const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
