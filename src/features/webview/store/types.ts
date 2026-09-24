@@ -3,6 +3,7 @@ import type { StoreSliceChange } from './slice/types';
 import type { SourcesSlice, SourcesSliceEvents } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
 import type { ImagesSlice, ImagesSliceEvents } from './slice/ImagesSlice';
+import type { DecodeOptionsSlice, DecodeOptionsSliceEvents } from './slice/DecodeOptionsSlice';
 import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
 import type { STORE_SELECTORS } from './selectors';
@@ -20,8 +21,9 @@ export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
   readonly [StoreSliceId.Sources]: SourcesSlice;
+  readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
 };
-export type StoreEventMap = SourcesSliceEvents & ViewSliceEvents & ImagesSliceEvents;
+export type StoreEventMap = SourcesSliceEvents & ViewSliceEvents & ImagesSliceEvents & DecodeOptionsSliceEvents;
 
 export type Selector<TState, TResult, TArgs extends unknown[] = []> = (
   state: TState,
