@@ -17,7 +17,7 @@ export const window = {
 };
 
 export const workspace = {
-  fs: { writeFile: vi.fn() },
+  fs: { writeFile: vi.fn(), readFile: vi.fn() },
   asRelativePath: vi.fn((target: { path: string }) => target.path),
 };
 
