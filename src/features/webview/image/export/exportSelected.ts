@@ -10,9 +10,10 @@ import { ImageItem } from '@features/webview/store/slice/ImagesSlice/types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
 function requireSelectedId(store: AppStore): string {
-  const id = store.selectors.selectedId();
+  // `??` is lazy: what is on screen is only consulted when nothing was picked.
+  const id = store.selectors.selectedId() ?? store.selectors.visibleIds()[0];
 
-  if (id === null) {
+  if (id === undefined) {
     throw new ExportError('warn', 'unable to detect selected image for export.');
   }
 

@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { BufferItemData } from '@features/buffer';
-
-import { StoreSliceId } from '../../store/definitions';
+import type { ImageItem } from '../../store/slice/ImagesSlice';
 import type { AppStore } from '../../store/types';
 import { exportSelected, resolveExportMessage } from './exportSelected';
 
@@ -27,20 +25,23 @@ class FakeOffscreenCanvas {
   }
 }
 
-type World = { selected: string | null; item?: BufferItemData; decodable: boolean };
-
-const item: BufferItemData = { id: 'a', name: 'frame.raw', data: new ArrayBuffer(8) };
 const close = vi.fn();
-const decode = vi.fn();
 
-function storeFor(world: World): AppStore {
-  decode.mockImplementation(async () => (world.decodable ? { width: 2, height: 2, close } : null));
+const ready = (): ImageItem => ({
+  id: 'a',
+  kind: 'ready',
+  name: 'frame.raw',
+  detail: null,
+  byteLength: 24,
+  geometry: { width: 2, height: 2 } as never,
+  bitmap: { width: 2, height: 2, close } as unknown as ImageBitmap,
+});
 
+/** The export reads one thing: the image the store decoded for the id on screen. */
+function storeFor(selected: string | null, image?: ImageItem, visible: string[] = []): AppStore {
   return {
-    selectors: { selectedId: () => world.selected },
-    get: (id: StoreSliceId) => (id === StoreSliceId.Sources
-      ? { getItem: (lookup: string) => (world.item?.id === lookup ? world.item : undefined) }
-      : { decode }),
+    selectors: { selectedId: () => selected, visibleIds: () => visible },
+    get: () => ({ getImage: (id: string) => (image?.id === id ? image : undefined) }),
   } as unknown as AppStore;
 }
 
@@ -56,24 +57,28 @@ afterEach(() => {
 
 describe('resolveExportMessage: each step halts with its own message', () => {
   it.each([
-    ['nothing selected', { selected: null, decodable: true }, 'warn', 'unable to detect selected image for export.'],
-    ['a selection with no item', { selected: 'ghost', item, decodable: true }, 'warn', 'Raw Image Viewer: nothing to export.'],
-    ['nothing decodable', { selected: 'a', item, decodable: false }, 'error', 'Raw Image Viewer: frame.raw has nothing decodable in it.'],
-  ])('%s', async (_label, world, level, message) => {
-    await expect(resolveExportMessage(storeFor(world as World)))
-      .resolves.toEqual({ type: 'app:status', level, message });
-  });
-
-  it('stops at the first halt — nothing is decoded without a selection', async () => {
-    await resolveExportMessage(storeFor({ selected: null, decodable: true }));
-
-    expect(decode).not.toHaveBeenCalled();
+    ['nothing selected', storeFor(null), 'warn', 'unable to detect selected image for export.'],
+    ['a selection with no image', storeFor('ghost', ready()), 'warn', 'Raw Image Viewer: nothing to export.'],
+    [
+      'an image still decoding',
+      storeFor('a', { id: 'a', kind: 'pending' }),
+      'warn',
+      'Raw Image Viewer: image is not ready for export.',
+    ],
+    [
+      'an image that failed to decode',
+      storeFor('a', { id: 'a', kind: 'failed', message: 'bad header' }),
+      'warn',
+      'Raw Image Viewer: image is not ready for export.',
+    ],
+  ])('%s', async (_label, store, level, message) => {
+    await expect(resolveExportMessage(store)).resolves.toEqual({ type: 'app:status', level, message });
   });
 });
 
 describe('resolveExportMessage: success', () => {
-  it('resolves to the encoded PNG, named after the item', async () => {
-    const message = await resolveExportMessage(storeFor({ selected: 'a', item, decodable: true }));
+  it('resolves to the encoded PNG, named after the image', async () => {
+    const message = await resolveExportMessage(storeFor('a', ready()));
 
     expect(message).toMatchObject({ type: 'export:png', name: 'frame.raw.png' });
     expect(new Uint8Array((message as { data: ArrayBuffer }).data)[0]).toBe(0x89);
@@ -85,14 +90,13 @@ describe('resolveExportMessage: genuine failures', () => {
   it('propagates an encoder error instead of reporting it as "nothing to export"', async () => {
     encodeFails = true;
 
-    await expect(resolveExportMessage(storeFor({ selected: 'a', item, decodable: true })))
-      .rejects.toThrow('encoder exploded');
+    await expect(resolveExportMessage(storeFor('a', ready()))).rejects.toThrow('encoder exploded');
   });
 
   it('still closes the bitmap when encoding throws', async () => {
     encodeFails = true;
 
-    await resolveExportMessage(storeFor({ selected: 'a', item, decodable: true })).catch(() => undefined);
+    await resolveExportMessage(storeFor('a', ready())).catch(() => undefined);
 
     expect(close).toHaveBeenCalledOnce();
   });
@@ -118,14 +122,22 @@ describe('resolveExportMessage: genuine failures', () => {
 
 describe('exportSelected', () => {
   it.each([
-    ['a halt', { selected: null, decodable: true }],
-    ['a success', { selected: 'a', item, decodable: true }],
-  ])('posts exactly once on %s', async (_label, world) => {
+    ['a halt', storeFor(null)],
+    ['a success', storeFor('a', ready())],
+  ])('posts exactly once on %s', async (_label, store) => {
     const post = vi.fn();
 
-    await exportSelected(storeFor(world as World), { postToWebviewHost: post } as never);
+    await exportSelected(store, { postToWebviewHost: post } as never);
 
     expect(post).toHaveBeenCalledOnce();
+  });
+
+  it('exports what is on screen when nothing was ever picked, as in single mode', async () => {
+    const post = vi.fn();
+
+    await exportSelected(storeFor(null, ready(), ['a']), { postToWebviewHost: post } as never);
+
+    expect(post).toHaveBeenCalledWith(expect.objectContaining({ type: 'export:png', name: 'frame.raw.png' }));
   });
 
   it('reports a genuine failure to the user as an error status, and resolves rather than rejects', async () => {
@@ -133,7 +145,7 @@ describe('exportSelected', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const post = vi.fn();
 
-    await expect(exportSelected(storeFor({ selected: 'a', item, decodable: true }), { postToWebviewHost: post } as never))
+    await expect(exportSelected(storeFor('a', ready()), { postToWebviewHost: post } as never))
       .resolves.toBeUndefined();
 
     expect(post).toHaveBeenCalledOnce();
@@ -148,7 +160,7 @@ describe('exportSelected', () => {
     encodeFails = true;
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    await exportSelected(storeFor({ selected: 'a', item, decodable: true }), { postToWebviewHost: vi.fn() } as never);
+    await exportSelected(storeFor('a', ready()), { postToWebviewHost: vi.fn() } as never);
 
     expect(consoleError).toHaveBeenCalledWith('Raw Image Viewer: export failed', expect.any(Error));
   });
