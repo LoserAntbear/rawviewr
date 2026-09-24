@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 
-import type { BufferItemData } from '@features/buffer';
-
-import { StoreSliceId } from '../store/definitions';
+import type { ImageItem } from '../store/slice/ImagesSlice';
 import type { AppStore } from '../store/types';
 import { RIV_COMMAND_EVENT_ID, WEBVIEW_COMMAND_RESOLVERS, WebviewCommandType } from './definitions';
 import type { WebviewCommandResolver, WebviewCommandResolversMap } from './types';
@@ -64,12 +62,18 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     }
   }
 
-  const item: BufferItemData = { id: 'a', name: 'frame.raw', data: new ArrayBuffer(8) };
+  const image: ImageItem = {
+    id: 'a',
+    kind: 'ready',
+    name: 'frame.raw',
+    detail: null,
+    byteLength: 24,
+    geometry: { width: 2, height: 2 } as never,
+    bitmap: { width: 2, height: 2, close: vi.fn() } as unknown as ImageBitmap,
+  };
   const store = {
-    selectors: { selectedId: () => item.id },
-    get: (id: StoreSliceId) => (id === StoreSliceId.Sources
-      ? { getItem: () => item }
-      : { decode: async () => ({ width: 2, height: 2, close: vi.fn() }) }),
+    selectors: { selectedId: () => image.id },
+    get: () => ({ getImage: () => image }),
   } as unknown as AppStore;
 
   it('a riv:command export with a failing encoder reaches the user as an error status', async () => {
