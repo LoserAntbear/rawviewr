@@ -7,6 +7,7 @@ import { StoreSliceId } from './definitions';
 import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from './slice/ViewSlice/ViewSlice';
 import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
+import { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
 import { STORE_REACTIONS } from './reactions';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
@@ -22,6 +23,7 @@ function createDefaultSlices(
     [StoreSliceId.View]: new ViewSlice(),
     [StoreSliceId.Sources]: new SourcesSlice(),
     [StoreSliceId.Images]: new ImagesSlice(decoder),
+    [StoreSliceId.DecodeOptions]: new DecodeOptionsSlice(),
   };
 }
 
