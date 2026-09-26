@@ -4,12 +4,14 @@ import { StoreSlice } from '../StoreSlice';
 import type { ImageItem, ImagesState } from './types';
 import { retireImageBitmap } from './utils';
 import { WebviewImageDecoder } from '@features/webview/image/decode/WebviewImageDecoder';
-import { FileValidator } from '@features/file/FileValidator';
-import { BufferItem } from '@features/buffer/BufferItem';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
-import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { withAbortSignalCheck } from '@utils/abort';
+
+import { FileValidator } from '@features/file/FileValidator';
+import { BufferItem } from '@features/buffer/BufferItem';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import { StoreSliceEvent } from '../SliceEvents/definitions';
 
 /**
  * Keeps and handles the data about PROCESSED images.
@@ -140,6 +142,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
         ...image
       };
     } catch (error) {
+      this.emit(StoreSliceEvent.Error, { message: error instanceof Error ? error.message : String(error) });
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
 
       const message = Object.hasOwn((error as object), 'message') ? (error as Error).message : String(error);
