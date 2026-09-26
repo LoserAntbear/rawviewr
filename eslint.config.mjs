@@ -33,4 +33,31 @@ export default defineConfig({
     '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: false, checkThenables: true }],
     '@typescript-eslint/no-misused-promises': 'error',
   },
+}, {
+  /**
+   * The webview is its own bundle: no `vscode` API, no file system, no app context. Reaching
+   * for one of them fails at build time with `Could not resolve "vscode"` or, worse, at
+   * runtime when a host-only singleton throws inside the webview. Ask the host over the
+   * message bridge instead — `SourceLoader` is the example.
+   *
+   * `WebviewHost.ts` is the exception: host code that lives under this root.
+   */
+  files: ['src/features/webview/**/*.ts'],
+  ignores: ['**/*.test.ts', 'src/features/webview/webviewHost/WebviewHost.ts'],
+  rules: {
+    '@typescript-eslint/no-restricted-imports': ['error', {
+      paths: [
+        { name: 'vscode', allowTypeImports: true, message: 'The webview has no vscode API. Ask the host over the message bridge.' },
+        { name: '@features/buffer/BufferItem', message: 'Reads files through vscode.workspace.fs, which the webview cannot do.' },
+        { name: '@features/file/FileValidator', message: 'Reads the app context, which only the extension host creates.' },
+      ],
+      patterns: [
+        {
+          group: ['@features/infoMessage/*', '@features/appContext/*'],
+          allowTypeImports: true,
+          message: 'Host-only: the webview posts an app:status message instead.',
+        },
+      ],
+    }],
+  },
 });
