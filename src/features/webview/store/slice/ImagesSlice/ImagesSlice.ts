@@ -1,16 +1,7 @@
-import { FileSource } from '@features/webview/types';
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 import type { ImageItem, ImagesState } from './types';
 import { retireImageBitmap } from './utils';
-import { WebviewImageDecoder } from '@features/webview/image/decode/WebviewImageDecoder';
-import { DecodeOptions } from '@features/image/imageDecoder/types';
-import { withAbortSignalCheck } from '@utils/abort';
-
-import { FileValidator } from '@features/file/FileValidator';
-import { BufferItem } from '@features/buffer/BufferItem';
-import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import { StoreSliceEvent } from '../SliceEvents/definitions';
 
 /**
  * Keeps and handles the data about PROCESSED images.
@@ -20,9 +11,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     return this.getState().selectedId;
   }
 
-  constructor(
-    private readonly decoder: WebviewImageDecoder,
-  ) {
+  constructor() {
     super(StoreSliceId.Images, { selectedId: null, byId: new Map() });
   }
 
@@ -68,83 +57,9 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     this.patch({ selectedId });
   }
 
-  public async decodeFromSource(source: FileSource, abortSignal?: AbortSignal, options?: DecodeOptions): Promise<void>;
-  public async decodeFromSource(sources: FileSource[], abortSignal?: AbortSignal, options?: DecodeOptions): Promise<void>;
-  public async decodeFromSource(
-    sourceOrSources: FileSource | FileSource[],
-    abortSignal?: AbortSignal,
-    options?: DecodeOptions,
-  ): Promise<void> {
-    if (Array.isArray(sourceOrSources)) {
-      const results = await Promise.all(
-        sourceOrSources.map(
-          async source => {
-            const result = await this.decodeSingle(source, abortSignal, options);
-
-            return result ? [result.id, result] : undefined;
-          }
-        ).filter(Boolean)
-      ) as [string, ImageItem][];
-
-      this.put(results);
-    } else {
-      const result = await this.decodeSingle(sourceOrSources, abortSignal, options);
-
-      if (result) {
-        this.put(result.id, result);
-      }
-    }
-  }
-
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
     retireImageBitmap(byId.get(id), image);
 
     byId.set(id, image);
-  }
-
-  private async decodeSingle(
-    source: FileSource,
-    abortSignal?: AbortSignal,
-    options?: DecodeOptions,
-  ): Promise<ImageItem | undefined> {
-    try {
-      this.put(source.id, { kind: "pending", id: source.id });
-
-      const bufferItem = await withAbortSignalCheck(
-        abortSignal,
-        () => BufferItem.fromFileSource(source),
-      );
-
-      if (!FileValidator.isValidFileSize(bufferItem.data.byteLength)) {
-        throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
-      }
-
-      if (!options) {
-        throw new Error('Decode options are required.');
-      }
-
-      const image = await withAbortSignalCheck(
-        abortSignal,
-        () => this.decoder.decode(bufferItem.data, options),
-      );
-
-      return {
-        kind: "ready",
-        id: source.id,
-        name: bufferItem.name,
-        byteLength: bufferItem.data.byteLength,
-        detail: bufferItem.detail ?? bufferItem.name,
-        ...image
-      };
-    } catch (error) {
-      this.emit(StoreSliceEvent.Error, { message: error instanceof Error ? error.message : String(error) });
-      InfoMessageController.showError(`Failed to decode image from source: ${error}`);
-
-      const message = Object.hasOwn((error as object), 'message') ? (error as Error).message : String(error);
-
-      this.put(source.id, { kind: "failed", message, id: source.id });
-
-      return undefined;
-    }
   }
 }
