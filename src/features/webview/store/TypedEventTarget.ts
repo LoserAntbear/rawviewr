@@ -25,8 +25,7 @@ export class TypedEventTarget<
     this.removeEventListener(type, listener as EventListener, options);
   }
 
-  public emit<K extends Key>(type: K, ...args: Map[K] extends void ? [] : [detail: Map[K]]): void {
-    const detail = args[0] as Map[K];
+  public emit<K extends Key>(type: K, detail: Map[K]): void {
     const event = new CustomEvent(type, { detail });
 
     this.dispatchEvent(event);
