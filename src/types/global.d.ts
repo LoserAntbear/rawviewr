@@ -22,3 +22,8 @@ declare function acquireVsCodeApi<
   setState: (newState: State) => void;
   postMessage: (message: Message) => void;
 };
+declare type UnionToIntersection<TUnion> = (
+  TUnion extends unknown ? (member: TUnion) => void : never
+) extends (member: infer TIntersection) => void
+  ? TIntersection
+  : never;
