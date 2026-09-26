@@ -1,5 +1,5 @@
 
-export type EventMap = Record<string, unknown>;
+export type EventMap<K extends string = string> = Record<K, unknown>;
 type Listener<T> = (event: CustomEvent<T>) => void;
 type UnsubscribeCallback = () => void;
 
@@ -31,5 +31,4 @@ export class TypedEventTarget<
 
     this.dispatchEvent(event);
   }
-
 }
