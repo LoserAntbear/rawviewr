@@ -1,14 +1,8 @@
-import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+import type { DecodeResult } from '@features/image/imageDecoder/types';
 
 export type ReadyImageItem = {
-  readonly id: string;
   readonly kind: 'ready';
-  readonly name: string;
-  readonly byteLength: number;
-  readonly geometry: Geometry;
-  readonly bitmap: ImageBitmap;
-  readonly detail: string | null;
-};
+} & DecodeResult;
 export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
