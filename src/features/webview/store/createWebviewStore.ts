@@ -13,6 +13,10 @@ import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { AppStore, StoreSlices, StoreReaction } from './types';
 import { WebviewImageDecoder } from '../image/decode/WebviewImageDecoder';
 
+type CreateWebviewStoreResult = {
+  store: AppStore;
+  disposables: WebviewDisposableStore;
+};
 
 function createDefaultSlices(
   formatRegistry: FormatRegistry
@@ -31,7 +35,7 @@ export function createWebviewStore(
   formatRegistry: FormatRegistry,
   slices: StoreSlices = createDefaultSlices(formatRegistry),
   reactions: readonly StoreReaction[] = STORE_REACTIONS,
-): { store: AppStore; disposables: WebviewDisposableStore } {
+): CreateWebviewStoreResult {
   const disposables = new WebviewDisposableStore();
   const store: AppStore = new ReactiveStore(slices, new TypedEventTarget(), STORE_SELECTORS);
 
