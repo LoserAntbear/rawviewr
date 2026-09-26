@@ -40,4 +40,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
 
     return exportSelected(store, bridge);
   },
+
+  "source:failed": () => {},
+  "source:send:array-buffer": () => {},
 });

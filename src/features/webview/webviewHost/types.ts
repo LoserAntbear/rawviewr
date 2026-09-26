@@ -10,12 +10,15 @@ export type WebviewHostMessage =
   | { type: 'export'; format: ExportFormat; }
   | { type: 'status:error'; message: string; }
   | { type: 'sources:update'; sources: FileSource[]; }
+  | { type: 'source:failed'; id: string; message: string; }
+  | { type: 'source:send:array-buffer'; id: string; data: ArrayBuffer; }
   | { type: 'session:start'; viewMode: GalleryViewMode; decodeOptions: DecodeOptions; };
 
 export type WebviewMessageType = WebviewMessage['type'];
 export type WebviewMessage =
   | { type: 'app:ready' }
   | { type: 'gallery:openItem'; id: string }
+  | { type: 'sources:request'; ids: string[] }
   | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string };
 
