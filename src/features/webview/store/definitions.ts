@@ -1,4 +1,4 @@
-import { StoreSliceEvent } from './slice/definitions';
+import { StoreSliceEvent } from './slice/SliceEvents/definitions';
 
 export enum StoreSliceId {
   View = 'view',
