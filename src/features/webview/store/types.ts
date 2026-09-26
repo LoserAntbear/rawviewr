@@ -1,13 +1,25 @@
 import type { EventMap, TypedEventTarget } from './TypedEventTarget';
-import type { StoreSliceChange } from './slice/types';
-import type { SourcesSlice, SourcesSliceEvents } from './slice/SourcesSlice/SourcesSlice';
-import type { ViewSlice, ViewSliceEvents } from './slice/ViewSlice';
-import type { ImagesSlice, ImagesSliceEvents } from './slice/ImagesSlice';
-import type { DecodeOptionsSlice, DecodeOptionsSliceEvents } from './slice/DecodeOptionsSlice';
+import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
+import type { ViewSlice } from './slice/ViewSlice';
+import type { ImagesSlice } from './slice/ImagesSlice';
+import type { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
 import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
 import type { STORE_SELECTORS } from './selectors';
 import { WebviewDisposable } from '../disposable';
+import { StoreSlice } from './slice/StoreSlice';
+
+type InferStoreSlicePayloads<TSlice extends StoreSlice<string, unknown>> = TSlice extends StoreSlice<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  infer _TName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  infer _TState,
+  infer TPayloads,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  infer _TBus
+>
+  ? TPayloads
+  : never;
 
 export type SliceLike<TName extends string = string> = {
   readonly name: TName;
@@ -17,13 +29,17 @@ export type SliceLike<TName extends string = string> = {
   attach(bus: TypedEventTarget<EventMap>): void;
 };
 export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSliceIds, SliceLike<TSliceIds>>>;
+// TODO: Replace explicit StoreSlices mapping with a more generic approach, inferring from store creation
 export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
   readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
 };
-export type StoreEventMap = SourcesSliceEvents & ViewSliceEvents & ImagesSliceEvents & DecodeOptionsSliceEvents;
+export type StoreEventMap<
+  TSliceKeys extends keyof StoreSlices = keyof StoreSlices,
+  TSlices extends StoreSlices[TSliceKeys] = StoreSlices[TSliceKeys],
+> = InferStoreSlicePayloads<TSlices>;
 
 export type Selector<TState, TResult, TArgs extends unknown[] = []> = (
   state: TState,
@@ -42,9 +58,6 @@ export type AppState<TSlices extends SliceMap> = {
 export type AppStore = ReactiveStore<typeof STORE_SELECTORS, StoreSlices, StoreEventMap>;
 export type AppStoreState = AppState<StoreSlices>;
 export type AppBus = TypedEventTarget<StoreEventMap>;
-
-export type StoreChangeEvent<TState> = CustomEvent<StoreSliceChange<TState>>;
-
 export type StoreReaction = (store: AppStore) => WebviewDisposable;
 
 export type { EventMap };

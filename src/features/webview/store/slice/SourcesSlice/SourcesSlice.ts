@@ -1,12 +1,10 @@
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
-import type { StoreSliceEventMap } from '../types';
 import { FileSource } from '@features/webview/types';
 
 export type SourcesState = {
   readonly byId: ReadonlyMap<string, FileSource>;
-};
-export type SourcesSliceEvents = StoreSliceEventMap<StoreSliceId.Sources, SourcesState>;
+}
 
 /**
  * Keeps and handles the data about FILE sources, received from VSCode uri.

@@ -5,8 +5,7 @@ import type { StoreReaction } from '../types';
 const decodeNewSourcesReaction: StoreReaction = (store) => {
   const sources = store.get(StoreSliceId.Sources);
   const images = store.get(StoreSliceId.Images);
-
-  const dispose = store.bus.on("sources:change", () => {
+  const decodeSources = () => {
     attemptDetached(
       async () => {
         const newSources = Array.from(sources.getState().byId.entries()).map(([, source]) => source);
@@ -20,9 +19,14 @@ const decodeNewSourcesReaction: StoreReaction = (store) => {
         store.bus.emit("images:error", { message });
       }
     );
-  });
+  }
 
-  return { dispose };
+  const disposables = [
+    store.bus.on("sources:change", decodeSources),
+    store.bus.on("options:change", decodeSources),
+  ];
+
+  return { dispose: () => disposables.forEach((dispose) => dispose()) };
 }
 
 /**
