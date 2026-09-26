@@ -1,17 +1,19 @@
-import { TypedEventTarget, EventMap } from '../TypedEventTarget';
 import type {
-  NoSliceEvents,
   StoreSliceBus,
-  StoreSliceChange,
+  StoreSliceEventKey,
 } from './types';
-import { StoreSliceEvent } from './definitions';
+import { StoreSliceEvent } from './SliceEvents/definitions';
+import { StoreSliceEventPayloads } from './SliceEvents/types';
+
+type EventNames = StoreSliceEvent;
 
 export abstract class StoreSlice<
   TName extends string,
   TState,
-  TEvents extends EventMap = NoSliceEvents,
+  TPayloads extends StoreSliceEventPayloads<TName, TState> = StoreSliceEventPayloads<TName, TState>,
+  TBus extends StoreSliceBus<TName, TState, TPayloads> = StoreSliceBus<TName, TState, TPayloads>,
 > {
-  private get bus(): StoreSliceBus<TName, TState, TEvents> | undefined {
+  private get bus(): TBus | undefined {
     if (!this._bus) {
       console.error(new Error(`Event bus is not attached to slice "${this.name}"`));
     }
@@ -20,19 +22,19 @@ export abstract class StoreSlice<
   }
 
   private state: TState;
-  private _bus?: StoreSliceBus<TName, TState, TEvents>;
+  private _bus?: TBus;
 
   constructor(
     public readonly name: TName,
     private readonly initialState: TState,
-    bus?: TypedEventTarget<EventMap>,
+    bus?: TBus,
   ) {
     this.state = initialState;
-    this._bus = bus as StoreSliceBus<TName, TState, TEvents> | undefined;
+    this._bus = bus as TBus | undefined;
   }
 
-  public attach(bus: TypedEventTarget<EventMap>): void {
-    this._bus = bus as StoreSliceBus<TName, TState, TEvents>;
+  public attach(bus: TBus): void {
+    this._bus = bus;
   }
 
   public getState(): TState {
@@ -52,7 +54,11 @@ export abstract class StoreSlice<
 
     this.state = next;
 
-    this.dispatch(StoreSliceEvent.Change, { prev, next } satisfies StoreSliceChange<TState>);
+    this.emit(
+      StoreSliceEvent.Change as EventNames,
+      // @ts-expect-error TypeScript may not be able to infer the exact payload type here.
+      { prev, next } as TPayloads[StoreSliceEventKey<TName, StoreSliceEvent.Change>],
+    );
   }
 
   protected patch(partial: Partial<TState>): void {
@@ -67,17 +73,17 @@ export abstract class StoreSlice<
     this.set({ ...this.state, ...partial });
   }
 
-  protected emit<K extends keyof TEvents & string>(
+  // Strongly typed wrapper around `dispatch`, thus dispatch is private.
+  protected emit<
+    K extends EventNames,
+  >(
     type: K,
-    ...args: TEvents[K] extends void ? [] : [detail: TEvents[K]]
+    // @ts-expect-error TypeScript may not be able to infer the exact payload type here.
+    payload: TPayloads[StoreSliceEventKey<TName, K>],
   ): void {
-    this.dispatch(type, (args as [detail?: TEvents[K]])[0]);
-  }
+    const eventName = `${this.name}:${type}` as StoreSliceEventKey<TName, K>;
 
-  /**
-   * TypeScript cannot match `${TName}:${K}` against `StoreSliceEventMap`'s key remapping
-   */
-  private dispatch(type: string, detail: unknown): void {
-    (this.bus as TypedEventTarget<EventMap> | undefined)?.emit(`${this.name}:${type}`, detail);
+    // @ts-expect-error TypeScript may not be able to infer the exact payload type here.
+    this.bus?.emit(eventName, payload);
   }
 }
