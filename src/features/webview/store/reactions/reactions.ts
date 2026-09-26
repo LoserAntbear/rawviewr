@@ -1,7 +1,6 @@
 import { attemptDetached } from '@utils/attempt';
 import { StoreSliceId } from '../definitions';
 import type { StoreReaction } from '../types';
-import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 const decodeNewSourcesReaction: StoreReaction = (store) => {
   const sources = store.get(StoreSliceId.Sources);
@@ -18,7 +17,7 @@ const decodeNewSourcesReaction: StoreReaction = (store) => {
       (error) => {
         const message = error instanceof Error ? error.message : String(error);
 
-        InfoMessageController.showError(message);
+        store.bus.emit("images:error", { message });
       }
     );
   });
