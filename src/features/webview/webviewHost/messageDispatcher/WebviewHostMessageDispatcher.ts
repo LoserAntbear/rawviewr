@@ -1,5 +1,5 @@
 import type { WebviewHostMessage } from '../types';
-import type { WebviewHostMessageResolverMap } from './types';
+import type { WebviewHostMessageResolver, WebviewHostMessageResolverMap } from './types';
 import type { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
 import { WebviewDisposable } from '@features/webview/disposable/types';
 
@@ -11,7 +11,7 @@ export class WebviewHostMessageDispatcher {
 
   public dispatch(message: WebviewHostMessage): Promise<void> {
     try {
-      const resolver = this.resolvers[message.type];
+      const resolver = this.resolvers[message.type] as WebviewHostMessageResolver | undefined;
 
       if (!resolver) {
         throw new Error(`No resolver found for message type ${message.type}`);

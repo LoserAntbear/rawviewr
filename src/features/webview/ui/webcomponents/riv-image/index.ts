@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
+import { StoreSliceId } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -40,8 +40,8 @@ export class RIVImage extends RIVHTMLElement {
 
     const { store } = WebviewContextProvider.context;
 
-    this.observe(store.bus, StoreEvent.ImagesChange, this.handleItemsChange.bind(this));
-    this.observe(store.bus, StoreEvent.DecodeOptionsChange, this.render.bind(this));
+    this.observe(store.bus, "images:change", this.handleItemsChange.bind(this));
+    this.observe(store.bus, "decodeOptions:change", this.render.bind(this));
 
     this.render();
 

@@ -1,5 +1,4 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
-import { StoreEvent } from '@features/webview/store/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
@@ -11,10 +10,10 @@ import { STATUS_SEGMENTS } from './view/segment/segments';
 import { selectStatusBarContext } from './state/selectors';
 
 const STATUS_BAR_EVENTS = [
-  StoreEvent.ViewChange,
-  StoreEvent.ImagesChange,
-  StoreEvent.SourcesChange,
-  StoreEvent.DecodeOptionsChange,
+  "view:change",
+  "images:change",
+  "sources:change",
+  "decodeOptions:change",
 ] as const;
 
 export class RIVStatusBar extends RIVHTMLElement {

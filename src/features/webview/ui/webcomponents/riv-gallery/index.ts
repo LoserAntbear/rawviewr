@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
+import { StoreSliceId } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -19,8 +19,8 @@ export class RIVGallery extends RIVHTMLElement {
 
     // Membership and order come from items; mode and selection from view. `visibleIds`
     // is derived from both, so both have to re-render it.
-    this.observe(store.bus, StoreEvent.SourcesChange, this.render.bind(this));
-    this.observe(store.bus, StoreEvent.ViewChange, this.render.bind(this));
+    this.observe(store.bus, "sources:change", this.render.bind(this));
+    this.observe(store.bus, "view:change", this.render.bind(this));
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));
     this.observe(this.view.rootRef, 'dblclick', this.handleDoubleClick.bind(this));

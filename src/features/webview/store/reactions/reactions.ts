@@ -23,7 +23,7 @@ const decodeNewSourcesReaction: StoreReaction = (store) => {
 
   const disposables = [
     store.bus.on("sources:change", decodeSources),
-    store.bus.on("options:change", decodeSources),
+    store.bus.on("decodeOptions:change", decodeSources),
   ];
 
   return { dispose: () => disposables.forEach((dispose) => dispose()) };

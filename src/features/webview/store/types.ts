@@ -36,10 +36,7 @@ export type StoreSlices = {
   readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
 };
-export type StoreEventMap<
-  TSliceKeys extends keyof StoreSlices = keyof StoreSlices,
-  TSlices extends StoreSlices[TSliceKeys] = StoreSlices[TSliceKeys],
-> = InferStoreSlicePayloads<TSlices>;
+export type StoreEventMap = UnionToIntersection<InferStoreSlicePayloads<StoreSlices[keyof StoreSlices]>>;
 
 export type Selector<TState, TResult, TArgs extends unknown[] = []> = (
   state: TState,

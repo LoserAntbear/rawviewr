@@ -12,7 +12,8 @@ export class ReactiveStore<
   TSelectors extends SelectorMap<AppState<TSlices>>,
   TSlices extends SliceMap,
   TEvents extends EventMap,
-  TSliceIds extends keyof TSlices & string = keyof TSlices & string
+  TSliceIds extends keyof TSlices & string = keyof TSlices & string,
+  TBus extends TypedEventTarget<TEvents> = TypedEventTarget<TEvents>
 > {
   // CAVEAT: Every time returns a new ref
   public get state(): AppState<TSlices> {
@@ -21,14 +22,14 @@ export class ReactiveStore<
     ) as AppState<TSlices>;
   }
 
-  public readonly bus: TypedEventTarget<TEvents>;
+  public readonly bus: TBus;
   public readonly selectors: BoundSelectors<AppState<TSlices>, TSelectors>;
 
   private readonly slices = new Map<TSliceIds, TSlices[TSliceIds]>();
 
   constructor(
     slices: TSlices,
-    bus: TypedEventTarget<TEvents>,
+    bus: TBus,
     selectors: TSelectors = {} as TSelectors,
   ) {
     this.bus = bus;

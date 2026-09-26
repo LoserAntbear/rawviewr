@@ -1,6 +1,6 @@
 import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-import { StoreEvent, StoreSliceId } from '@features/webview/store/definitions';
+import { StoreSliceId } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVViewState } from '../RIVViewState';
@@ -31,7 +31,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.observe(this.view.rootRef, 'click', this.handleControlClick.bind(this));
     this.observe(
       WebviewContextProvider.context.store.bus,
-      StoreEvent.DecodeOptionsChange,
+      "decodeOptions:change",
       this.sync.bind(this),
     );
 

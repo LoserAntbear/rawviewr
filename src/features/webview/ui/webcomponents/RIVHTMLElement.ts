@@ -27,6 +27,7 @@ export abstract class RIVHTMLElement extends HTMLElement {
     );
   }
 
+  // TODO: Add mapping to store events
   // Just a convenience method to observe events and automatically manage their disposal.
   protected observe(...args: Parameters<typeof WebviewDisposableUtils.listenTo>): void {
     this.disposableStore.add(WebviewDisposableUtils.listenTo(...args));
