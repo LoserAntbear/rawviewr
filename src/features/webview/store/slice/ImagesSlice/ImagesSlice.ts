@@ -5,7 +5,6 @@ import type { ImageItem, ImagesState } from './types';
 import { retireImageBitmap } from './utils';
 import { WebviewImageDecoder } from '@features/webview/image/decode/WebviewImageDecoder';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
-import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { withAbortSignalCheck } from '@utils/abort';
 
 import { FileValidator } from '@features/file/FileValidator';
@@ -21,14 +20,10 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     return this.getState().selectedId;
   }
 
-  public get decodeOptions(): DecodeOptions {
-    return this.getState().decodeOptions;
-  }
-
   constructor(
     private readonly decoder: WebviewImageDecoder,
   ) {
-    super(StoreSliceId.Images, { selectedId: null, decodeOptions: DEFAULT_DECODE_OPTIONS, byId: new Map() });
+    super(StoreSliceId.Images, { selectedId: null, byId: new Map() });
   }
 
   public getImage(id: string): ImageItem | undefined {
@@ -78,7 +73,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
   public async decodeFromSource(
     sourceOrSources: FileSource | FileSource[],
     abortSignal?: AbortSignal,
-    options: DecodeOptions = this.decodeOptions,
+    options?: DecodeOptions,
   ): Promise<void> {
     if (Array.isArray(sourceOrSources)) {
       const results = await Promise.all(
@@ -101,10 +96,6 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     }
   }
 
-  public setOptions(patch: Partial<DecodeOptions>): void {
-    this.patch({ decodeOptions: { ...this.getState().decodeOptions, ...patch } });
-  }
-
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
     retireImageBitmap(byId.get(id), image);
 
@@ -114,7 +105,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
   private async decodeSingle(
     source: FileSource,
     abortSignal?: AbortSignal,
-    options: DecodeOptions = this.decodeOptions,
+    options?: DecodeOptions,
   ): Promise<ImageItem | undefined> {
     try {
       this.put(source.id, { kind: "pending", id: source.id });
@@ -126,6 +117,10 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
 
       if (!FileValidator.isValidFileSize(bufferItem.data.byteLength)) {
         throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
+      }
+
+      if (!options) {
+        throw new Error('Decode options are required.');
       }
 
       const image = await withAbortSignalCheck(

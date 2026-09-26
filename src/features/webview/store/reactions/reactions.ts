@@ -5,13 +5,14 @@ import type { StoreReaction } from '../types';
 const decodeNewSourcesReaction: StoreReaction = (store) => {
   const sources = store.get(StoreSliceId.Sources);
   const images = store.get(StoreSliceId.Images);
+  const decodeOptions = store.get(StoreSliceId.DecodeOptions);
   const decodeSources = () => {
     attemptDetached(
       async () => {
         const newSources = Array.from(sources.getState().byId.entries()).map(([, source]) => source);
 
         // Trigger decoding of new sources in the images slice
-        await images.decodeFromSource(newSources);
+        await images.decodeFromSource(newSources, undefined, decodeOptions.getState());
       },
       (error) => {
         const message = error instanceof Error ? error.message : String(error);
