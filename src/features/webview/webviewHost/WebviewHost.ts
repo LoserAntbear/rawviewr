@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-
 import type { SettingsController } from '@features/settings/SettingsController';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { ExportFormat } from '@definitions/exportFormats';
@@ -38,7 +37,6 @@ export class WebviewHost extends DisposableStore {
     this.updateWebviewHtml();
   }
 
-
   public requestExport(format: ExportFormat): Promise<void> {
     return this.post({ type: 'export', format });
   }
@@ -63,7 +61,6 @@ export class WebviewHost extends DisposableStore {
     });
   }
 
-
   private setWebviewOptions(): void {
     this.webview.options = {
       enableScripts: true,
@@ -80,6 +77,7 @@ export class WebviewHost extends DisposableStore {
         await this.handleOpenItem(message.id);
         break;
       case 'export:png':
+        //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
         await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
         break;
       case 'app:status':
