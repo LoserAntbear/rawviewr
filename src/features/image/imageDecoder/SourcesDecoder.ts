@@ -1,54 +1,49 @@
 import { FileSource } from '@features/webview/types';
-import { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { DecodeOptions, DecodedImage } from '@features/image/imageDecoder/types';
+import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
 import { withAbortSignalCheck } from '@utils/abort';
 
 import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import { WebviewImageDecoder } from '@features/image/imageDecoder/WebviewImageDecoder';
-import { Geometry } from './imagePreparation/types';
 
-type DecodeResult = {
-  readonly id: string;
-  readonly name: string;
-  readonly byteLength: number;
-  readonly geometry: Geometry;
-  readonly bitmap: ImageBitmap;
-  readonly detail: string | null;
-}
+import type { DecodedArrayBuffer, DecodedFileSource } from './types';
+import { FormatRegistry } from '../format/FormatRegistry';
+import { Geometry } from './imagePreparation/types';
 
 export class SourcesDecoder {
   constructor(
-    private readonly decoder: WebviewImageDecoder,
+    formatRegistry: FormatRegistry,
+    private readonly decoder: ImageDecoder = new ImageDecoder(formatRegistry),
   ) {}
 
-  public async decodeFromSource(source: FileSource, abortSignal?: AbortSignal, options?: DecodeOptions): Promise<DecodeResult[] | undefined>;
-  public async decodeFromSource(sources: FileSource[], abortSignal?: AbortSignal, options?: DecodeOptions): Promise<DecodeResult[] | undefined>;
+  public async decodeFromSource(source: FileSource, options?: DecodeOptions, abortSignal?: AbortSignal,): Promise<DecodedFileSource[]>;
+  public async decodeFromSource(sources: FileSource[], options?: DecodeOptions, abortSignal?: AbortSignal): Promise<DecodedFileSource[]>;
   public async decodeFromSource(
     sourceOrSources: FileSource | FileSource[],
-    abortSignal?: AbortSignal,
     options?: DecodeOptions,
-  ): Promise<DecodeResult[] | undefined> {
+    abortSignal?: AbortSignal,
+  ): Promise<DecodedFileSource[]> {
     if (Array.isArray(sourceOrSources)) {
       return await Promise.all(
         sourceOrSources.map(
           async source => {
-            return await this.decodeSingle(source, abortSignal, options);
+            return await this.decodeSingle(source, options, abortSignal);
           }
         ).filter(Boolean)
-      ) as DecodeResult[];
+      ) as DecodedFileSource[];
     } else {
-      const result = await this.decodeSingle(sourceOrSources, abortSignal, options);
+      const result = await this.decodeSingle(sourceOrSources, options, abortSignal);
 
-      return result ? [result] : undefined;
+      return [result];
     }
   }
 
   private async decodeSingle(
     source: FileSource,
-    abortSignal?: AbortSignal,
     options?: DecodeOptions,
-  ): Promise<DecodeResult | undefined> {
+    abortSignal?: AbortSignal,
+  ): Promise<DecodedFileSource> {
     try {
       const bufferItem = await withAbortSignalCheck(
         abortSignal,
@@ -65,10 +60,12 @@ export class SourcesDecoder {
 
       const image = await withAbortSignalCheck(
         abortSignal,
-        () => this.decoder.decode(bufferItem.data, options),
+        () => this.decodeArrayBuffer(bufferItem.data, options),
       );
 
       return {
+        status: 'success',
+
         id: source.id,
         name: bufferItem.name,
         byteLength: bufferItem.data.byteLength,
@@ -78,7 +75,42 @@ export class SourcesDecoder {
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
 
-      return undefined;
+      return {
+        status: 'failure',
+
+        id: source.id,
+        message: String(error),
+      };
     }
+  }
+
+  private async decodeArrayBuffer(
+    data: ArrayBuffer,
+    options: DecodeOptions,
+    signal?: AbortSignal,
+    geometry: Geometry = this.resolveGeometry(data, options),
+  ): Promise<DecodedArrayBuffer> {
+    signal?.throwIfAborted();
+
+    const { image } = this.decoder.decode(new Uint8Array(data), options, geometry);
+
+    // Decoding can take long
+    return withAbortSignalCheck(
+      signal,
+      async () => {
+        const bitmap = await createImageBitmap(this.toImageData(image));
+
+        return { geometry, bitmap };
+      },
+      ({ bitmap }) => bitmap.close(),
+    );
+  }
+
+  private toImageData(image: DecodedImage): ImageData {
+    return new ImageData(image.data, image.width, image.height);
+  }
+
+  private resolveGeometry(data: ArrayBuffer, options: DecodeOptions): Geometry {
+    return this.decoder.resolveGeometry(new Uint8Array(data), options);
   }
 }
