@@ -277,42 +277,41 @@ code under `happy-dom`, extension-host code under plain Node, so host code canno
 ### The decode chain
 
 ```
-sources -> buffer items (bytes)  ->  geometry on the item  ->  store decodes what is visible  ->  components render
-              ItemsSlice            resolveItemGeometry          VisibleImageDecoder              riv-image
+host                                   │ webview
+sources (uri, name)  ──sources:update──▶ SourcesSlice
+                     ◀──sources:request─ SourceLoader  (marks each pending)
+reads the file, checks the size
+                     ──source:send:array-buffer────▶ ImagesSlice.decode  ──▶ ImageItem: ready | failed
 ```
 
-- **Geometry belongs to the decode, not the view.** `DecodeSlice.resolveGeometry` measures a
-  buffer with the decoder's own resolver, and the `resolveItemGeometry` reaction stores the
-  result on the item: `pending` -> `resolved` | `failed`. Everyone reads it; nobody
-  re-derives it, and `ImageDecoder.decode` now takes it rather than measuring again.
-- **The store owns decoding, for what is on screen and nothing else.** `VisibleImageDecoder`
-  keeps `ImagesSlice` in step with the visible ids: `pending` -> `ready` | `empty` | `failed`.
-  All of the asynchrony lives there — aborting a decode the options outdated, and closing a
-  bitmap that arrives after its turn.
-- **`ImagesSlice` is the only owner of an `ImageBitmap`.** What it drops, it closes, so no
-  component carries a lifetime rule. `riv-image` subscribes to one event and renders what it
-  is told; it starts no decode and closes no bitmap.
-- Passes are coalesced onto a microtask, so a change that arrives as two events (the item,
-  then its geometry) decodes once.
+- **The host owns the file system.** The webview has no `vscode` API, so it asks for the
+  bytes of the ids it needs and the host answers per id with `source:send:array-buffer` or
+  `source:failed`. Reading is sequential: a gallery's worth of buffers is not read at once.
+- **Bytes are never stored.** They arrive, they are decoded, and only the `ImageItem`
+  (bitmap + geometry + name) is kept. That is also why a change to the decode options
+  re-asks the host: there is nothing left to decode a second time.
+- **`ImagesSlice` owns every `ImageBitmap`** and closes what it displaces or drops.
+- **`SourceLoader`** (session layer) decides *when* to ask. It is not a store reaction: the
+  store knows no transport.
+- **A lint rule keeps the sides apart.** `vscode`, `BufferItem`, `FileValidator`,
+  `InfoMessageController` and the app context are restricted imports under
+  `src/features/webview/**` (except `WebviewHost.ts`, which is host code living there).
+  Reaching across used to fail at build time with `Could not resolve "vscode"`, or worse, at
+  runtime when a host-only singleton throws inside the webview.
 
-**Why not simply store every decoded image** (measured 2026-09-21, `ImageDecoder` on the
-samples dir, 3,931 files / 122.7 MB raw):
+**Still open — virtualisation.** `SourceLoader.requestMissing` treats every source as
+visible, so a folder gallery asks for everything at once. The measurements that set the
+budget (2026-09-21, `ImageDecoder` over `samples/`, 3,931 files / 122.7 MB raw):
 
 | | cost |
 | --- | --- |
-| Geometry for every item | 1 ms (width given), 67 ms (guessed) |
 | Decoded RGBA for every item | 245 MB at rgb565, 491 MB at gray8, **3.9 GB at gray1** |
 | Decoding the ~24 tiles on screen | 6.9 ms, 1.5 MB |
-| Re-decoding everything on one option change | 0.4-0.7 s, per keystroke |
 | One probe pixel from the source bytes | 1.1 us |
 
-Decoded RGBA is 1x-32x the raw size, and the formats this tool exists for are the worst
-end of that (`gray1` 32x, `gray4` 8x, `gray8` 4x). Pixels stay transient and bounded by the
-screen; the pixel probe reads from the source bytes instead of stored RGBA.
-
-**Still open:** the gallery has no virtualisation, so every item is "visible" and gets
-decoded — as before this change. Once tiles virtualise, the store's footprint follows
-automatically, because it decodes exactly what `visibleIds` reports.
+Decoded RGBA is 1x-32x the raw bytes, worst for the formats this tool exists for. So the
+gallery needs to ask for what is on screen and drop what is not
+(`ImagesSlice.clearAllExcept`), which is the same input both halves need.
 
 ### Async discipline
 
@@ -353,4 +352,12 @@ automatically, because it decodes exactly what `visibleIds` reports.
 - webview serialization (`WebviewPanelSerializer`)
 - custom header presets
 
-0. Real-DOM test harness → 1. Status bar → 2. Zoom → 3. Shortcuts → 4. Probe → 5. Frames → 6. Backdrop + tile size → 7. Guess picker → 8. Remember options.
+0. Real-DOM test harness →
+1. Status bar →
+2. Zoom →
+3. Keyboard Shortcuts →
+4. Probe →
+5. Frames →
+6. Backdrop + tile size →
+7. Guess picker →
+8. Remember options.
