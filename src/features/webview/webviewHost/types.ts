@@ -11,7 +11,6 @@ export type WebviewHostMessage =
   | { type: 'export'; format: ExportFormat; }
   | { type: 'status:error'; message: string; }
   | { type: 'sources:update'; sources: FileSource[]; }
-  | { type: 'source:failed'; id: string; message: string; }
   | { type: 'images:decode:ready'; images: DecodedFileSource[]; }
   | { type: 'session:start'; viewMode: GalleryViewMode; decodeOptions: DecodeOptions; };
 
