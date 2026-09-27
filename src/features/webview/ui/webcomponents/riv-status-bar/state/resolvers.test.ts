@@ -50,7 +50,7 @@ const source = (id: string): FileSource => ({ id, name: `${id}.raw`, uri: { path
 let store: AppStore;
 
 beforeEach(() => {
-  ({ store } = createWebviewStore(registry));
+  ({ store } = createWebviewStore());
   store.get(StoreSliceId.DecodeOptions).setOptions({ format: 'rgba4444', width: 4, height: 3 });
 });
 

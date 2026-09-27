@@ -26,7 +26,7 @@ let toolbar: RIVToolbar;
 
 beforeAll(() => {
   formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
-  ({ store } = createWebviewStore(formatRegistry));
+  ({ store } = createWebviewStore());
 
   WebviewContextProvider.create({ store, formatRegistry });
   customElements.define(RIVToolbar.tagName, RIVToolbar);
