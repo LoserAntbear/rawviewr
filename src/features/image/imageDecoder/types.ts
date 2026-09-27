@@ -33,6 +33,15 @@ export type DecodedImage = {
   data: Uint8ClampedArray<ArrayBuffer>;
 };
 
+export type DecodedFileSource = {
+  readonly id: string;
+  readonly name: string;
+  readonly byteLength: number;
+  readonly geometry: Geometry;
+  readonly bitmap: ImageBitmap;
+  readonly detail: string | null;
+};
+
 /**
  * Pixel probing needs all three to relate a pixel back to its bytes;
  * canvas needs only `image`.
