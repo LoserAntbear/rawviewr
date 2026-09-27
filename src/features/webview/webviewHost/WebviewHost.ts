@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { SettingsController } from '@features/settings/SettingsController';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
+import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import type { ExportFormat } from '@definitions/exportFormats';
 import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
@@ -19,6 +20,7 @@ export class WebviewHost extends DisposableStore {
     private readonly sources: FileSource[],
     private readonly viewMode: GalleryViewMode,
     private readonly settingsController: SettingsController,
+    private readonly sourcesDecoder: SourcesDecoder,
     private readonly itemOpener?: ItemOpener,
     private readonly exporter: ImageExporter = new ImageExporter(),
   ) {
@@ -69,23 +71,33 @@ export class WebviewHost extends DisposableStore {
   }
 
   private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
-    switch (message.type) {
-      case 'app:ready':
-        await this.handleAppReady();
-        break;
-      case 'gallery:openItem':
-        await this.handleOpenItem(message.id);
-        break;
-      case 'export:png':
-        //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
-        await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
-        break;
-      case 'app:status':
-        InfoMessageController.handleMessage({
-          level: message.level,
-          message: message.message,
-        });
-        break;
+    try {
+      switch (message.type) {
+        case 'app:ready':
+          await this.handleAppReady();
+          break;
+        case 'gallery:openItem':
+          await this.handleOpenItem(message.id);
+          break;
+        case 'export:png':
+          //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
+          await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
+          break;
+        case 'sources:request:decode':
+          await this.handleRequestDecode(message.ids);
+          break;
+        case 'app:status':
+          InfoMessageController.handleMessage({
+            level: message.level,
+            message: message.message,
+          });
+          break;
+      }
+    } catch (error) {
+      InfoMessageController.handleMessage({
+        level: 'error',
+        message: 'Failed to handle webview message: ' + (error instanceof Error ? error.message : String(error)),
+      });
     }
   }
 
@@ -102,8 +114,15 @@ export class WebviewHost extends DisposableStore {
   }
 
   private async handleAppReady(): Promise<void> {
-    await this.initializeSession(this.viewMode);
-    await this.postSources();
+    try {
+      await this.initializeSession(this.viewMode);
+      await this.postSources();
+    } catch (error) {
+      InfoMessageController.handleMessage({
+        level: 'error',
+        message: 'Failed to handle app ready: ' + (error instanceof Error ? error.message : String(error)),
+      });
+    }
   }
 
   private initializeSession(viewMode: GalleryViewMode): Promise<void> {
@@ -116,9 +135,18 @@ export class WebviewHost extends DisposableStore {
   }
 
   private postSources(): Promise<void> {
-      return this.post({
+    return this.post({
       type: 'sources:update',
       sources: this.sources,
+    });
+  }
+
+  private async handleRequestDecode(ids: FileSource[]): Promise<void> {
+    const decodedSources = await this.sourcesDecoder.decodeFromSource(ids);
+
+    await this.post({
+      type: 'images:decode:ready',
+      images: decodedSources,
     });
   }
 }
