@@ -4,12 +4,14 @@ import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { fileSourceForUri } from '@features/vscode/utils/uri';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 import type { SettingsController } from '@features/settings/SettingsController';
+import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 
 export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly viewerRegistry: ViewerRegistry,
     private readonly settingsController: SettingsController,
+    private readonly sourcesDecoder: SourcesDecoder,
   ) {}
 
   public openCustomDocument(uri: vscode.Uri): RawDocument {
@@ -25,6 +27,7 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
       ],
       'single',
       this.settingsController,
+      this.sourcesDecoder,
     );
 
     this.viewerRegistry.register({ panel, viewer });

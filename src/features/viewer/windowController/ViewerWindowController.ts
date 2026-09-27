@@ -5,6 +5,7 @@ import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 import { SettingsController } from '@features/settings/SettingsController';
+import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 export class ViewerWindowController {
@@ -12,6 +13,7 @@ export class ViewerWindowController {
     private readonly context: vscode.ExtensionContext,
     private readonly viewerRegistry: ViewerRegistry,
     private readonly settingsController: SettingsController,
+    private readonly sourcesDecoder: SourcesDecoder,
   ) {}
 
   /** Opens every target in its own editor tab. */
@@ -41,6 +43,7 @@ export class ViewerWindowController {
       targets.map(fileSourceForUri),
       'gallery',
       this.settingsController,
+      this.sourcesDecoder,
     );
 
     this.viewerRegistry.register({ panel, viewer });
