@@ -34,13 +34,21 @@ export type DecodedImage = {
 };
 
 export type DecodedFileSource = {
+  readonly status: 'success';
+
   readonly id: string;
   readonly name: string;
   readonly byteLength: number;
   readonly geometry: Geometry;
   readonly bitmap: ImageBitmap;
   readonly detail: string | null;
+} | { readonly status: 'failure'; readonly id: string; readonly message: string; };
+
+export type DecodedArrayBuffer = {
+  geometry: Geometry;
+  bitmap: ImageBitmap;
 };
+
 
 /**
  * Pixel probing needs all three to relate a pixel back to its bytes;
