@@ -18,7 +18,7 @@ let bar: RIVStatusBar;
 beforeAll(() => {
   const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
 
-  ({ store } = createWebviewStore(formatRegistry));
+  ({ store } = createWebviewStore());
   WebviewContextProvider.create({ store, formatRegistry });
   customElements.define(RIVStatusBar.tagName, RIVStatusBar);
 });
