@@ -1,8 +1,8 @@
-import type { DecodeResult } from '@features/image/imageDecoder/types';
+import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 
 export type ReadyImageItem = {
   readonly kind: 'ready';
-} & DecodeResult;
+} & DecodedFileSource;
 export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
