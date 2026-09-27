@@ -12,8 +12,6 @@ import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
 import { FORMAT_PRESETS } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-import { WebviewImageDecoder } from '../image/imageDecoder/WebviewImageDecoder';
-import { SourcesDecoder } from '../image/imageDecoder/SourcesDecoder';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.
@@ -39,8 +37,6 @@ function registerCustomComponents(): void {
 
 function launchSession(): void {
   const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
-  const decoder = new WebviewImageDecoder(formatRegistry);
-  const sourcesDecoder = new SourcesDecoder(decoder);
   const { store } = createWebviewStore();
 
   WebviewContextProvider.create({ store, formatRegistry });
