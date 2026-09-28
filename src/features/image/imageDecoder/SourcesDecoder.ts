@@ -8,13 +8,11 @@ import { BufferItem } from '@features/buffer/BufferItem';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 import type { DecodedArrayBuffer, DecodedFileSource } from './types';
-import { FormatRegistry } from '../format/FormatRegistry';
 import { Geometry } from './imagePreparation/types';
 
 export class SourcesDecoder {
   constructor(
-    formatRegistry: FormatRegistry,
-    private readonly decoder: ImageDecoder = new ImageDecoder(formatRegistry),
+    private readonly decoder: ImageDecoder = new ImageDecoder(),
   ) {}
 
   public async decodeFromSource(source: FileSource, options?: DecodeOptions, abortSignal?: AbortSignal,): Promise<DecodedFileSource[]>;
