@@ -2,7 +2,7 @@ import { clamp } from '@utils/math';
 import { asEnumMember } from '@utils/enum';
 import { ViewerBackground } from '@features/viewer/definitions';
 import { AlphaMode } from '@features/image/imageDecoder/definitions';
-import { PIXEL_FORMAT_PRESETS } from '@features/image/format/presets';
+import { PixelFormatPresets } from '@features/image/format/presets';
 import type { NumericRange } from '@app-types/math';
 
 import {
@@ -13,8 +13,6 @@ import {
 } from './definitions';
 import type { ConfigValidatorsMap } from './types';
 
-/** TODO: read through the format registry once `@features/format` exposes a singleton. */
-const FORMAT_IDS: ReadonlySet<string> = new Set(PIXEL_FORMAT_PRESETS.map((format) => format.id));
 export function asBoolean(raw: unknown): boolean | null {
   return typeof raw === 'boolean' ? raw : null;
 }
@@ -33,7 +31,7 @@ export function asClampedInt({ min, max }: NumericRange, raw: unknown): number |
   return value !== null ? clamp(value, min, max) : null;
 }
 
-export function asFormatId(raw: unknown, formats: ReadonlySet<string> = FORMAT_IDS): string | null {
+export function asFormatId(raw: unknown, formats: ReadonlySet<string> = PixelFormatPresets.PRESET_IDS): string | null {
   return typeof raw === 'string' && formats.has(raw) ? raw : null;
 }
 

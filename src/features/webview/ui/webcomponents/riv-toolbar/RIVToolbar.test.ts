@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { PIXEL_FORMAT_PRESETS, getPixelFormatPreset } from '@features/image/format/presets';
+import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@features/image/imageDecoder/definitions';
 import { RIV_COMMAND_EVENT_ID, WebviewCommandType } from '@features/webview/commands/definitions';
 import type { WebviewCommand } from '@features/webview/commands/types';
@@ -25,7 +25,7 @@ let formatRegistry: FormatRegistry;
 let toolbar: RIVToolbar;
 
 beforeAll(() => {
-  formatRegistry = new FormatRegistry(PIXEL_FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
+  formatRegistry = new FormatRegistry(PixelFormatPresets.PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
   ({ store } = createWebviewStore());
 
   WebviewContextProvider.create({ store, formatRegistry });
@@ -121,7 +121,7 @@ describe('riv-toolbar: controls write to the store', () => {
 
 describe('riv-toolbar: the store writes to the controls', () => {
   it('reflects options changed from elsewhere', () => {
-    store.get(StoreSliceId.DecodeOptions).setOptions({ format: getPixelFormatPreset('bgra8888'), width: 320, flipY: true });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: PixelFormatPresets.getPreset('bgra8888'), width: 320, flipY: true });
 
     expect(control<HTMLSelectElement>('format').value).toBe('bgra8888');
     expect(control<HTMLInputElement>('width').value).toBe('320');

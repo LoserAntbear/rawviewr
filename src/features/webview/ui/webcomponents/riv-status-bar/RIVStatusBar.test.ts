@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { PIXEL_FORMAT_PRESETS, getPixelFormatPreset } from '@features/image/format/presets';
+import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
@@ -16,7 +16,7 @@ let store: AppStore;
 let bar: RIVStatusBar;
 
 beforeAll(() => {
-  const formatRegistry = new FormatRegistry(PIXEL_FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
+  const formatRegistry = new FormatRegistry(PixelFormatPresets.PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
 
   ({ store } = createWebviewStore());
   WebviewContextProvider.create({ store, formatRegistry });
@@ -30,7 +30,7 @@ beforeEach(() => {
 
   store.get(StoreSliceId.Images).clear();
   store.get(StoreSliceId.View).setMode('single');
-  store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: getPixelFormatPreset('rgba4444'), width: 4, height: 3 });
+  store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: PixelFormatPresets.getPreset('rgba4444'), width: 4, height: 3 });
 
   bar = document.createElement(RIVStatusBar.tagName) as RIVStatusBar;
   document.body.replaceChildren(bar);
@@ -92,7 +92,7 @@ describe('riv-status-bar', () => {
 
   it('follows the store: a changed format re-reads the summary', () => {
     show(decoded(24));
-    store.get(StoreSliceId.DecodeOptions).setOptions({ format: getPixelFormatPreset('rgbx4444') });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: PixelFormatPresets.getPreset('rgbx4444') });
 
     expect(segment('summary').textContent).toBe('4×3 · RGBX4444 · 8 B/row · 24 B');
   });

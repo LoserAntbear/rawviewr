@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { DecodeOptions } from '@features/image/imageDecoder/types';
+import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
@@ -22,12 +23,12 @@ export class SettingsController {
   public readDefaultDecodeOptions(): DecodeOptions {
     try {
       return {
-          ...DEFAULT_DECODE_OPTIONS,
-        format: this.configController.read('defaultFormat'),
+        ...DEFAULT_DECODE_OPTIONS,
         width: this.configController.read('defaultWidth'),
         height: this.configController.read('defaultHeight'),
         offset: this.configController.read('defaultOffset'),
         alphaMode: this.configController.read('defaultAlphaMode'),
+        format: PixelFormatPresets.getPreset(this.configController.read('defaultFormat')),
         endian: this.configController.read('defaultLittleEndian') ? Endian.Little : Endian.Big,
       }
     } catch (error) {
