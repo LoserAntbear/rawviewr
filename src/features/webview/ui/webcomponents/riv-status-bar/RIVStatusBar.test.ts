@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { FORMAT_PRESETS } from '@features/image/format/presets';
+import { FORMAT_PRESETS, getFormatPreset } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
@@ -16,7 +16,7 @@ let store: AppStore;
 let bar: RIVStatusBar;
 
 beforeAll(() => {
-  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
+  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
 
   ({ store } = createWebviewStore());
   WebviewContextProvider.create({ store, formatRegistry });
@@ -30,7 +30,7 @@ beforeEach(() => {
 
   store.get(StoreSliceId.Images).clear();
   store.get(StoreSliceId.View).setMode('single');
-  store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: 'rgba4444', width: 4, height: 3 });
+  store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: getFormatPreset('rgba4444'), width: 4, height: 3 });
 
   bar = document.createElement(RIVStatusBar.tagName) as RIVStatusBar;
   document.body.replaceChildren(bar);
@@ -66,6 +66,7 @@ function show(image: ImageItem): void {
 const decoded = (bytes: number): ImageItem => ({
   id: 'a',
   kind: 'ready',
+  status: 'success',
   name: 'a.raw',
   detail: null,
   byteLength: bytes,
@@ -91,7 +92,7 @@ describe('riv-status-bar', () => {
 
   it('follows the store: a changed format re-reads the summary', () => {
     show(decoded(24));
-    store.get(StoreSliceId.DecodeOptions).setOptions({ format: 'rgbx4444' });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: getFormatPreset('rgbx4444') });
 
     expect(segment('summary').textContent).toBe('4×3 · RGBX4444 · 8 B/row · 24 B');
   });
