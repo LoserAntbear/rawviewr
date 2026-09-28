@@ -18,7 +18,7 @@ export type WebviewMessageType = WebviewMessage['type'];
 export type WebviewMessage =
   | { type: 'app:ready' }
   | { type: 'gallery:openItem'; id: string }
-  | { type: 'sources:request:decode'; ids: FileSource[] }
+  | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
   | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string };
 
