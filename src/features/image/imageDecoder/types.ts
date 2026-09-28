@@ -1,5 +1,7 @@
 import type { Endian } from '@definitions/bits';
 
+import type { PixelFormat } from '@features/image/format/types';
+
 import type { HeaderPreset, AlphaMode } from './definitions';
 import { Geometry } from './imagePreparation/types';
 
@@ -8,9 +10,9 @@ export type DecodeOptions = {
   width: number; /** --- Pixels per row. 0 asks the caller to fall back to a guess. */
   height: number; /** --- Rows per frame. 0 means "all remaining rows". */
   offset: number;
-  format: string;
   flipY: boolean;
   endian: Endian;
+  format: PixelFormat;
   bytesPerRow: number; /** --- Bytes per row including padding. 0 = tightly packed. */
   bitOrderMsb: boolean;
   alphaMode: AlphaMode;
