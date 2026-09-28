@@ -35,7 +35,7 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format);
+  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
   const { store } = createWebviewStore();
 
   WebviewContextProvider.create({ store, formatRegistry });
