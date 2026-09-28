@@ -13,6 +13,7 @@ import { SettingsController } from '@features/settings/SettingsController';
 import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import { AppContextProvider } from '@features/appContext/AppContextProvider';
 import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
+import { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 
 export function activate(context: vscode.ExtensionContext): void {
   // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
@@ -29,12 +30,15 @@ export function activate(context: vscode.ExtensionContext): void {
     context.workspaceState,
     configController,
   );
+  const sourcesDecoder = new SourcesDecoder();
+
   const windowController = new ViewerWindowController(
     context,
     viewerRegistry,
     settingsController,
+    sourcesDecoder,
   );
-  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController);
+  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController, sourcesDecoder);
 
   AppContextProvider.create({
     workspaceConfig: configController,
