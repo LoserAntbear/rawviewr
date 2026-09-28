@@ -30,6 +30,7 @@ const close = vi.fn();
 const ready = (): ImageItem => ({
   id: 'a',
   kind: 'ready',
+  status: 'success',
   name: 'frame.raw',
   detail: null,
   byteLength: 24,

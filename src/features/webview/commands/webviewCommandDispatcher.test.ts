@@ -65,6 +65,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
   const image: ImageItem = {
     id: 'a',
     kind: 'ready',
+    status: 'success',
     name: 'frame.raw',
     detail: null,
     byteLength: 24,
