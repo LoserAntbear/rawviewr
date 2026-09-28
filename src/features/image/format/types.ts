@@ -6,30 +6,32 @@ export interface RowOptions {
   bitOrderMsb: boolean; /** --- For sub-byte formats: does the first pixel of a row sit in the high bits? */
 }
 
+/**
+ * What a format *is*: plain data, and nothing it can do. Being data, it stores, it travels
+ * between host and webview, and it compares without ceremony.
+ */
 export interface PixelFormat {
-  id: string;
   bpp: Bits; /** --- Bits per pixel. BEWARE: May be < 8 for the sub-byte formats. */
+  id: string;
   label: string;
   group: FormatGroup;
   hasAlpha: boolean;
   endianSensitive: boolean;
   bitOrderSensitive: boolean;
-  /**
-   * Decode `pixelCount` consecutive pixels starting at `byteOffset` into a fresh
-   * RGBA8888 row. Pixels that fall past the end of `source` come back as
-   * transparent black rather than throwing.
-   *
-   * FIXME: Rename into `decodeRowToRgba8888` or similar, to make it clear that the output is always RGBA8888.
-   */
-  decodeRow(
-    source: Uint8Array,
-    byteOffset: number,
-    pixelCount: number,
-    options: RowOptions,
-  ): Uint8ClampedArray;
 }
 
-/** Formats of one group, in the order the registry was given them. */
+/**
+ * Decodes `pixelCount` pixels starting at `byteOffset` into RGBA8888 row.
+ *
+ * FIXME: Rename into `decodeRowToRgba8888` or similar, to make it clear that the output is always RGBA8888.
+ */
+export type RowDecoder = (
+  source: Uint8Array,
+  byteOffset: number,
+  pixelCount: number,
+  options: RowOptions,
+) => Uint8ClampedArray;
+
 export interface FormatGroupEntry {
   group: FormatGroup;
   formats: readonly PixelFormat[];
