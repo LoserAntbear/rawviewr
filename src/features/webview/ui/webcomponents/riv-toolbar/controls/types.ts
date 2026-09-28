@@ -1,6 +1,7 @@
-import { WebviewCommand } from '@features/webview/commands/types';
-import { DecodeOptions } from '@features/image/imageDecoder/types';
-import { ToolbarGroup } from '../definitions';
+import type { FormatRegistry } from '@features/image/format/FormatRegistry';
+import type { WebviewCommand } from '@features/webview/commands/types';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { ToolbarGroup } from '../definitions';
 
 export type ToolbarChoice = {
   readonly value: string;
@@ -30,7 +31,7 @@ type ToolbarControlBase = {
 export type ToolbarValueControl = ToolbarControlBase & {
   readonly command?: never;
 
-  readonly toDecodeOptions: (raw: string) => Partial<DecodeOptions>;
+  readonly toDecodeOptions: (raw: string, formats: FormatRegistry) => Partial<DecodeOptions>;
   readonly toValueFromDecodeOptions: (options: DecodeOptions) => string;
 
 };

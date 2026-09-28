@@ -54,7 +54,7 @@ export class RIVToolbar extends RIVHTMLElement {
 
     WebviewContextProvider.context.store
       .get(StoreSliceId.DecodeOptions)
-      .setOptions(control.toDecodeOptions(value));
+      .setOptions(control.toDecodeOptions(value, WebviewContextProvider.context.formatRegistry));
   }
 
   private handleControlClick(event: Event): void {
@@ -66,11 +66,11 @@ export class RIVToolbar extends RIVHTMLElement {
   }
 
   private sync(): void {
-    const { store, formatRegistry } = WebviewContextProvider.context;
+    const { store } = WebviewContextProvider.context;
     const options = store.get(StoreSliceId.DecodeOptions).options;
 
     this.view.render(
-      this.viewState.updateState(ToolbarStateTransition.Synced, { options, formatRegistry }),
+      this.viewState.updateState(ToolbarStateTransition.Synced, { options }),
     );
   }
 }

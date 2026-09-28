@@ -32,8 +32,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Format,
     tag: TAG_DESCRIPTORS.buildFormatFieldTagDescriptor(),
     tooltip: 'How the bytes are laid out per pixel.',
-    toValueFromDecodeOptions: (options) => options.format,
-    toDecodeOptions: (raw) => ({ format: raw }),
+    toValueFromDecodeOptions: (options) => options.format.id,
+    toDecodeOptions: (raw, formatRegistry) => ({ format: formatRegistry.get(raw) }),
   },
   {
     id: 'width',
