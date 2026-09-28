@@ -1,16 +1,15 @@
+import { getRowDecoder } from '@features/image/format/rowDecoders';
+
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 import { DecodeOptions, DecodeResult } from './types';
-import { type PixelFormat } from '@features/image/format/types';
-import { type FormatRegistry } from '@features/image/format/FormatRegistry';
 import { shiftRowIndices } from '@utils/array';
 import { Geometry } from './imagePreparation/types';
 
 // TODO: Extract `GeometryResolver` if the geometry resolution logic needs to be reused independently.
 export class ImageDecoder {
   constructor(
-    private readonly formatRegistry: FormatRegistry,
-    private readonly geometryResolver: GeometryResolver = new GeometryResolver(formatRegistry),
+    private readonly geometryResolver: GeometryResolver = new GeometryResolver(),
   ) {}
 
   public resolveGeometry(source: Uint8Array, options: DecodeOptions): Geometry {
@@ -26,10 +25,8 @@ export class ImageDecoder {
     options: DecodeOptions,
     geometry: Geometry = this.resolveGeometry(source, options),
   ): DecodeResult {
-    const format = this.formatRegistry.get(options.format);
-
     const data = this.applyAlphaMode(
-      this.decodeSource(source, geometry, options, format),
+      this.decodeSource(source, geometry, options),
       options,
     );
 
@@ -44,13 +41,13 @@ export class ImageDecoder {
     source: Uint8Array,
     geometry: Geometry,
     options: DecodeOptions,
-    format: PixelFormat,
   ): Uint8ClampedArray<ArrayBuffer> {
-    const locator = new PixelLocator(geometry, options, format.bpp);
+    const decodeRow = getRowDecoder(options.format.id);
+    const locator = new PixelLocator(geometry, options, options.format.bpp);
     const result = new Uint8ClampedArray(geometry.width * geometry.height * 4);
 
     for (let y = 0; y < geometry.height; y++) {
-      const row = format.decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions);
+      const row = decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions);
 
       result.set(row, y * geometry.width * 4);
     }
