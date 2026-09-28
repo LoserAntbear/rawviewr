@@ -2,7 +2,7 @@ import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 
 export type ReadyImageItem = {
   readonly kind: 'ready';
-} & DecodedFileSource;
+} & Extract<DecodedFileSource, { status: 'success' }>;
 export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
