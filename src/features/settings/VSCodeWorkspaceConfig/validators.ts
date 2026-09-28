@@ -2,7 +2,7 @@ import { clamp } from '@utils/math';
 import { asEnumMember } from '@utils/enum';
 import { ViewerBackground } from '@features/viewer/definitions';
 import { AlphaMode } from '@features/image/imageDecoder/definitions';
-import { FORMAT_PRESETS } from '@features/image/format/presets';
+import { PIXEL_FORMAT_PRESETS } from '@features/image/format/presets';
 import type { NumericRange } from '@app-types/math';
 
 import {
@@ -14,7 +14,7 @@ import {
 import type { ConfigValidatorsMap } from './types';
 
 /** TODO: read through the format registry once `@features/format` exposes a singleton. */
-const FORMAT_IDS: ReadonlySet<string> = new Set(FORMAT_PRESETS.map((format) => format.id));
+const FORMAT_IDS: ReadonlySet<string> = new Set(PIXEL_FORMAT_PRESETS.map((format) => format.id));
 export function asBoolean(raw: unknown): boolean | null {
   return typeof raw === 'boolean' ? raw : null;
 }

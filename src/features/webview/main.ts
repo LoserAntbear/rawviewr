@@ -9,7 +9,7 @@ import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
-import { FORMAT_PRESETS } from '@features/image/format/presets';
+import { PIXEL_FORMAT_PRESETS } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
@@ -35,7 +35,7 @@ function registerCustomComponents(): void {
 }
 
 function launchSession(): void {
-  const formatRegistry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
+  const formatRegistry = new FormatRegistry(PIXEL_FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
   const { store } = createWebviewStore();
 
   WebviewContextProvider.create({ store, formatRegistry });

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
-import { FORMAT_PRESETS, getFormatPreset } from '@features/image/format/presets';
+import { PIXEL_FORMAT_PRESETS, getPixelFormatPreset } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
@@ -18,7 +18,7 @@ import { selectStatusBarContext } from './selectors';
  * its own tests; what is pinned here is what the bar makes of each outcome.
  */
 
-const registry = new FormatRegistry(FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
+const registry = new FormatRegistry(PIXEL_FORMAT_PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
 
 /** rgba4444 is 2 bytes a pixel, so a 4×3 frame is exactly 24 bytes. */
 const geometry = (overrides: Partial<Geometry> = {}): Geometry => ({
@@ -52,7 +52,7 @@ let store: AppStore;
 
 beforeEach(() => {
   ({ store } = createWebviewStore());
-  store.get(StoreSliceId.DecodeOptions).setOptions({ format: getFormatPreset('rgba4444'), width: 4, height: 3 });
+  store.get(StoreSliceId.DecodeOptions).setOptions({ format: getPixelFormatPreset('rgba4444'), width: 4, height: 3 });
 });
 
 function status(images: ImageItem[]) {
@@ -95,7 +95,7 @@ describe('status bar: single view', () => {
 
   it('names the format without the description some labels carry', () => {
     // The registry label is "RGBX4444 — alpha nibble ignored"; the bar has no room for it.
-    store.get(StoreSliceId.DecodeOptions).setOptions({ format: getFormatPreset('rgbx4444') });
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: getPixelFormatPreset('rgbx4444') });
 
     expect(status([ready('a')]).summary?.text).toBe('4×3 · RGBX4444 · 8 B/row · 24 B');
   });

@@ -6,10 +6,6 @@ export interface RowOptions {
   bitOrderMsb: boolean; /** --- For sub-byte formats: does the first pixel of a row sit in the high bits? */
 }
 
-/**
- * What a format *is*: plain data, and nothing it can do. Being data, it stores, it travels
- * between host and webview, and it compares without ceremony.
- */
 export interface PixelFormat {
   bpp: Bits; /** --- Bits per pixel. BEWARE: May be < 8 for the sub-byte formats. */
   id: string;
