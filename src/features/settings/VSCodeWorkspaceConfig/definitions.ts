@@ -1,9 +1,9 @@
-import { MAX_DIMENSION } from '@features/image/imageDecoder/definitions';
+import { MAX_FILE_DIMENSION_PX } from '@features/image/imageDecoder/definitions';
 import { ViewerConfigKeySet } from './types';
 
 export const EXTENSION_CONFIGURATION_KEY = 'rawImageViewer';
 
-export const DIMENSION_LIMITS_PX = { min: 0, max: MAX_DIMENSION } as const;
+export const DIMENSION_LIMITS_PX = { min: 0, max: MAX_FILE_DIMENSION_PX } as const;
 export const BYTE_OFFSET_LIMITS = { min: 0, max: Number.MAX_SAFE_INTEGER } as const;
 /**
  * TODO: Connect to the UI toolbar input

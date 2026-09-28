@@ -1,4 +1,4 @@
-import { HeaderPreset, MAX_DIMENSION } from '../definitions';
+import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../definitions';
 import { DecodeOptions } from '../types';
 import { DimensionSource, Geometry, Dimension } from './types';
 import { resolveHeaderDimensions } from './header/headerResolution';
@@ -20,7 +20,7 @@ function getMinBytesPerRow(bpp: number, width: number): number {
 function resolveDimension(
   given: number,
   deriveDimension: () => number,
-  max: number = MAX_DIMENSION,
+  max: number = MAX_FILE_DIMENSION_PX,
 ): number {
   const value = given >= 1 ? given : deriveDimension();
 

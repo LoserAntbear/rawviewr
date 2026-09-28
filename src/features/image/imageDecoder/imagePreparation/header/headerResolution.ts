@@ -1,6 +1,6 @@
 import { Endian } from '@definitions/bits';
 import { readWord } from '@utils/bits';
-import { HeaderPreset, MAX_DIMENSION } from '../../definitions';
+import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../../definitions';
 import { HeaderImplausibleError, HeaderTruncatedError } from './headerErrors';
 import type { HeaderDimensions, HeaderLayout, DefinedHeaderedPreset } from '../types';
 
@@ -15,7 +15,7 @@ const HEADER_LAYOUTS: Record<DefinedHeaderedPreset, HeaderLayout> = {
 };
 
 function isPlausibleDimension(value: number): boolean {
-  return value > 0 && value <= MAX_DIMENSION;
+  return value > 0 && value <= MAX_FILE_DIMENSION_PX;
 }
 
 function prepareDimensionValue(

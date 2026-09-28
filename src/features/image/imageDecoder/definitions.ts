@@ -1,8 +1,9 @@
+import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
 import { DecodeOptions } from './types';
 
 /** Upper bound for a decoded width or height, in pixels. */
-export const MAX_DIMENSION = 65535;
+export const MAX_FILE_DIMENSION_PX = 65535;
 
 export enum HeaderPreset {
   None = 'none',
@@ -25,9 +26,9 @@ export const DEFAULT_DECODE_OPTIONS: DecodeOptions = {
   flipY: false,
   bytesPerRow: 0,
   bitOrderMsb: true,
-  format: 'rgba4444', // TODO: Move formats to a separate enum and use it here. If possible.
   unpremultiply: false,
   endian: Endian.Little,
   alphaMode: AlphaMode.Use,
   headerPreset: HeaderPreset.None,
+  format: PixelFormatPresets.getPreset('rgba4444'),
 };
