@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
-import { Uri } from 'vscode';
+import { Uri, window } from 'vscode';
 
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
@@ -41,6 +41,7 @@ function mount(postMessage: () => Promise<boolean>, itemOpener?: ItemOpener, sou
     sources,
     'gallery' as never,
     { readDefaultDecodeOptions: () => DEFAULT_DECODE_OPTIONS } as never,
+    { decodeFromSource: async () => [] } as never,
     itemOpener,
   );
 
@@ -69,11 +70,12 @@ describe('WebviewHost: failures end handled', () => {
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith('Failed to handle open item:', failure));
   });
 
-  it('what no handler catches is caught at the listener edge', async () => {
+  it('tells the user when handling a message fails, rather than only the console', async () => {
     const { receive } = mount(() => Promise.reject(failure));
 
     expect(() => receive({ type: 'app:ready' })).not.toThrow();
 
-    await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith('WebviewHost: handling "app:ready" failed:', failure));
+    await vi.waitFor(() => expect(window.showErrorMessage)
+      .toHaveBeenCalledWith('Failed to handle app ready: gone'));
   });
 });

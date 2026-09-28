@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { SettingsController } from '@features/settings/SettingsController';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
@@ -84,7 +85,7 @@ export class WebviewHost extends DisposableStore {
           await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
           break;
         case 'sources:request:decode':
-          await this.handleRequestDecode(message.ids);
+          await this.handleRequestDecode(message.ids, message.options);
           break;
         case 'app:status':
           InfoMessageController.handleMessage({
@@ -141,8 +142,8 @@ export class WebviewHost extends DisposableStore {
     });
   }
 
-  private async handleRequestDecode(ids: FileSource[]): Promise<void> {
-    const decodedSources = await this.sourcesDecoder.decodeFromSource(ids);
+  private async handleRequestDecode(sources: FileSource[], options: DecodeOptions): Promise<void> {
+    const decodedSources = await this.sourcesDecoder.decodeFromSource(sources, options);
 
     await this.post({
       type: 'images:decode:ready',
