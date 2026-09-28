@@ -1,4 +1,4 @@
-import { getRowDecoder } from '@features/image/format/rowDecoders';
+import { FormatDecodersLibrary } from '@features/image/format/rowDecoders';
 
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import { PixelLocator } from '../pixelLocator/PixelLocator';
@@ -42,7 +42,7 @@ export class ImageDecoder {
     geometry: Geometry,
     options: DecodeOptions,
   ): Uint8ClampedArray<ArrayBuffer> {
-    const decodeRow = getRowDecoder(options.format.id);
+    const decodeRow = FormatDecodersLibrary.getRowDecoder(options.format.id);
     const locator = new PixelLocator(geometry, options, options.format.bpp);
     const result = new Uint8ClampedArray(geometry.width * geometry.height * 4);
 
