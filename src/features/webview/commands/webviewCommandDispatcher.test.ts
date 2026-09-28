@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 
 import type { ImageItem } from '../store/slice/ImagesSlice';
 import type { AppStore } from '../store/types';
-import { RIV_COMMAND_EVENT_ID, WEBVIEW_COMMAND_RESOLVERS, WebviewCommandType } from './definitions';
+import { RIV_COMMAND_EVENT_ID, WEBVIEW_COMMAND_RESOLVERS } from './definitions';
 import type { WebviewCommandResolver, WebviewCommandResolversMap } from './types';
 import { WebviewCommandDispatcher } from './webviewCommandDispatcher';
 
@@ -24,12 +24,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function dispatcherWith(exportRequest: WebviewCommandResolver<WebviewCommandType.ExportRequest>): WebviewCommandDispatcher {
+function dispatcherWith(exportRequest: WebviewCommandResolver<'export:request'>): WebviewCommandDispatcher {
   const resolvers: WebviewCommandResolversMap = {
-    [WebviewCommandType.AppReady]: vi.fn(),
-    [WebviewCommandType.ExportRequest]: exportRequest,
-    [WebviewCommandType.GalleryOpenItem]: vi.fn(),
-    [WebviewCommandType.WebviewConnected]: vi.fn(),
+    'app:ready': vi.fn(),
+    'export:request': exportRequest,
+    'gallery:openItem': vi.fn(),
   };
 
   return new WebviewCommandDispatcher(resolvers);
@@ -48,7 +47,7 @@ describe('WebviewCommandDispatcher: the last-resort boundary', () => {
   ])('a resolver that %s is caught and logged, and dispatch itself never throws', async (_label, resolver) => {
     const dispatcher = dispatcherWith(resolver);
 
-    expect(() => dispatcher.dispatch({ type: WebviewCommandType.ExportRequest })).not.toThrow();
+    expect(() => dispatcher.dispatch({ type: 'export:request' })).not.toThrow();
 
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith('Command "export:request" failed:', failure));
   });
@@ -83,7 +82,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     const target = new EventTarget();
 
     new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS({ postToWebviewHost: post } as never, store)).listen(target);
-    target.dispatchEvent(new CustomEvent(RIV_COMMAND_EVENT_ID, { detail: { type: WebviewCommandType.ExportRequest } }));
+    target.dispatchEvent(new CustomEvent(RIV_COMMAND_EVENT_ID, { detail: { type: 'export:request' } }));
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
     expect(post).toHaveBeenCalledWith({
@@ -98,10 +97,21 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     const post = vi.fn();
 
     new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS({ postToWebviewHost: post } as never, store))
-      .dispatch({ type: WebviewCommandType.ExportRequest });
+      .dispatch({ type: 'export:request' });
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
     expect(consoleError).toHaveBeenCalledOnce();
     expect(consoleError).toHaveBeenCalledWith('Raw Image Viewer: export failed', expect.any(Error));
+  });
+});
+
+describe('WebviewCommandDispatcher: a message nobody resolves', () => {
+  it('says so rather than passing it over in silence', async () => {
+    new WebviewCommandDispatcher({}).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
+
+    await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(
+      'Command "app:status" failed:',
+      expect.objectContaining({ message: 'No resolver for command "app:status".' }),
+    ));
   });
 });

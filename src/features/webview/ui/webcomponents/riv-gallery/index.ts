@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
 
@@ -27,11 +26,6 @@ export class RIVGallery extends RIVHTMLElement {
 
     // Items may already be in the store by now — paint from current state, don't just listen.
     this.render();
-
-    this.emitCommand({
-      type: WebviewCommandType.WebviewConnected,
-      payload: RIVGallery.tagName,
-    });
   }
 
   private handleClick(event: Event): void {
@@ -46,7 +40,7 @@ export class RIVGallery extends RIVHTMLElement {
     const id = this.view.entryIdFor(event.target);
 
     if (id !== undefined) {
-      this.emitCommand({ type: WebviewCommandType.GalleryOpenItem, payload: id });
+      this.emitCommand({ type: 'gallery:openItem', id });
     }
   }
 

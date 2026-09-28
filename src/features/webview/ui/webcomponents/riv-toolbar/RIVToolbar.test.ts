@@ -3,8 +3,8 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@features/image/imageDecoder/definitions';
-import { RIV_COMMAND_EVENT_ID, WebviewCommandType } from '@features/webview/commands/definitions';
-import type { WebviewCommand } from '@features/webview/commands/types';
+import { RIV_COMMAND_EVENT_ID } from '@features/webview/commands/definitions';
+import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { AppStore } from '@features/webview/store/types';
@@ -154,16 +154,16 @@ describe('riv-toolbar: the store writes to the controls', () => {
 
 describe('riv-toolbar: actions', () => {
   it('the export button emits its command and leaves the options alone', () => {
-    const emitted: WebviewCommand[] = [];
+    const emitted: WebviewMessage[] = [];
     const before = options();
 
     document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
-      emitted.push((event as CustomEvent<WebviewCommand>).detail);
+      emitted.push((event as CustomEvent<WebviewMessage>).detail);
     });
 
     control<HTMLButtonElement>('exportPng').click();
 
-    expect(emitted.filter((command) => command.type === WebviewCommandType.ExportRequest)).toHaveLength(1);
+    expect(emitted.filter(({ type }) => type === 'export:request')).toHaveLength(1);
     expect(options()).toBe(before);
   });
 });

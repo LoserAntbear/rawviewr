@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
 
@@ -36,11 +35,6 @@ export class RIVToolbar extends RIVHTMLElement {
     );
 
     this.sync();
-
-    this.emitCommand({
-      type: WebviewCommandType.WebviewConnected,
-      payload: RIVToolbar.tagName,
-    });
   }
 
   private handleControlChange(event: Event): void {

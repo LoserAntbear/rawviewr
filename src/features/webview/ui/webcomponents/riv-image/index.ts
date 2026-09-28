@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
 
@@ -44,11 +43,6 @@ export class RIVImage extends RIVHTMLElement {
     this.observe(store.bus, "decodeOptions:change", this.render.bind(this));
 
     this.render();
-
-    this.emitCommand({
-      type: WebviewCommandType.WebviewConnected,
-      payload: RIVImage.tagName,
-    });
   }
 
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.

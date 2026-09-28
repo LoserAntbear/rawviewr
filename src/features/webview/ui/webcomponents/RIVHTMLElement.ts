@@ -1,4 +1,4 @@
-import type { WebviewCommand } from '../../commands/types';
+import type { WebviewMessage } from '../../webviewHost/types';
 import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
 import { WebviewDisposableUtils } from '@features/webview/disposable';
@@ -17,9 +17,9 @@ export abstract class RIVHTMLElement extends HTMLElement {
     this.disposableStore.dispose();
   }
 
-  protected emitCommand(command: WebviewCommand): void {
+  protected emitCommand(command: WebviewMessage): void {
     this.dispatchEvent(
-      new CustomEvent<WebviewCommand>(RIV_COMMAND_EVENT_ID, {
+      new CustomEvent<WebviewMessage>(RIV_COMMAND_EVENT_ID, {
         bubbles: true,
         composed: true, // To allow the event to cross shadow DOM boundaries
         detail: command,

@@ -1,7 +1,6 @@
 import { Endian } from '@definitions/bits';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 
 import { ToolbarGroup } from '../definitions';
 import { ToolbarControl } from './types';
@@ -141,8 +140,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: 'Export PNG',
     group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
+    command: { type: 'export:request' },
     tooltip: 'Save what is on screen as a PNG.',
-    command: { type: WebviewCommandType.ExportRequest },
   },
 ];
 

@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -14,10 +13,5 @@ export class RIVMainView extends RIVHTMLElement {
     this.mount(template, styles);
   }
 
-  public connectedCallback(): void {
-    this.emitCommand({
-      type: WebviewCommandType.WebviewConnected,
-      payload: RIVMainView.tagName,
-    });
-  }
+  public connectedCallback(): void {  }
 }

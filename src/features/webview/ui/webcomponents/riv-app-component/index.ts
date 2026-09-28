@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
@@ -15,9 +14,7 @@ export class RIVAppComponent extends RIVHTMLElement {
   }
 
   public connectedCallback(): void {
-    this.emitCommand({
-      payload: RIVAppComponent.tagName,
-      type: WebviewCommandType.WebviewConnected,
-    });
+    // The host waits for this before sending the session and its sources.
+    this.emitCommand({ type: 'app:ready' });
   }
 }

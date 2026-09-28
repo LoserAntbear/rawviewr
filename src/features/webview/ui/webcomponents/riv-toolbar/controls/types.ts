@@ -1,5 +1,5 @@
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
-import type { WebviewCommand } from '@features/webview/commands/types';
+import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ToolbarGroup } from '../definitions';
 
@@ -36,7 +36,7 @@ export type ToolbarValueControl = ToolbarControlBase & {
 
 };
 export type ToolbarActionControl = ToolbarControlBase & {
-  readonly command: WebviewCommand;
+  readonly command: WebviewMessage;
 
   readonly toDecodeOptions?: never;
   readonly toValueFromDecodeOptions?: never;

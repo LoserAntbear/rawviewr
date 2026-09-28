@@ -1,4 +1,3 @@
-import { WebviewCommandType } from '@features/webview/commands/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
@@ -31,11 +30,6 @@ export class RIVStatusBar extends RIVHTMLElement {
     }
 
     this.render();
-
-    this.emitCommand({
-      type: WebviewCommandType.WebviewConnected,
-      payload: RIVStatusBar.tagName,
-    });
   }
 
   private render(): void {
