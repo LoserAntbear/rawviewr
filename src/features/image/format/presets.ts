@@ -1,8 +1,9 @@
 import { buildFormat } from './formatBuilders/builders';
 import { FORMAT_DEFINITIONS } from './definitions';
-import { PixelFormat } from './types';
+import type { FormatDefinition, PixelFormat } from './types';
 
 export class PixelFormatPresets {
+  public static readonly DEFINITIONS: readonly FormatDefinition[] = FORMAT_DEFINITIONS;
   public static readonly PRESETS: readonly PixelFormat[] = FORMAT_DEFINITIONS.map(buildFormat);
 
   public static get PRESET_IDS(): ReadonlySet<string> {
