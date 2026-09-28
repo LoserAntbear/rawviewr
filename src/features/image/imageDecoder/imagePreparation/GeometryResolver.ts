@@ -1,7 +1,6 @@
 import { HeaderPreset, MAX_DIMENSION } from '../definitions';
 import { DecodeOptions } from '../types';
 import { DimensionSource, Geometry, Dimension } from './types';
-import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { resolveHeaderDimensions } from './header/headerResolution';
 import { guessDimensions } from './dimension/guessDimensions';
 import { clamp } from '@utils/math';
@@ -29,14 +28,10 @@ function resolveDimension(
 }
 
 export class GeometryResolver {
-  constructor(
-    private readonly formatRegistry: FormatRegistry,
-  ) {}
-
   // TODO: Add exception handling for invalid header presets, formats, etc.
   public resolveGeometry(data: Uint8Array, options: DecodeOptions): Geometry {
     const source = this.resolveDimensionSource(data, options);
-    const formatDescriptor = this.formatRegistry.get(options.format);
+    const formatDescriptor = options.format;
 
     const offset = clamp(source.headerBytes + options.offset, 0, data.length);
     const availableBytes = Math.max(0, data.length - offset);
