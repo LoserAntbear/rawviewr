@@ -1,5 +1,4 @@
 import { Vector2 } from '@definitions/geometry';
-import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelLocator } from '@features/image/pixelLocator/PixelLocator';
 import { SourceReader } from '@features/image/sourceReader/SourceReader';
 import { DecodedImage, DecodeOptions, DecodeResult } from '@features/image/imageDecoder/types';
@@ -18,7 +17,6 @@ function readRgba({ data, width }: DecodedImage, { x, y }: Vector2): Rgba {
 
 export class PixelProbe {
   constructor(
-    private readonly formatRegistry: FormatRegistry,
     private readonly sourceReader: SourceReader = new SourceReader(),
   ) {}
 
@@ -28,18 +26,13 @@ export class PixelProbe {
     position: Vector2,
   ): PixelSample | null {
     const { source, geometry, image } = decoded;
-    const { bpp } = this.formatRegistry.get(options.format);
-    const location = new PixelLocator(geometry, options, bpp).locate(position);
+    const location = new PixelLocator(geometry, options, options.format.bpp).locate(position);
 
-    if (!location) {
-      return null;
-    }
-
-    return {
+    return location ? {
       ...location,
       position,
       rgba: readRgba(image, position),
       ...this.sourceReader.read(source, location, options.endian),
-    };
+    } : null;
   }
 }
