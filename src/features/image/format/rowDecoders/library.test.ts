@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { Endian } from '@definitions/bits';
 
 import type { RowOptions } from '../types';
-import { getRowDecoder, ROW_DECODERS } from './library';
-import { FORMAT_DEFINITIONS } from '../definitions';
+import { PixelFormatPresets } from '../presets';
+import { FormatDecodersLibrary } from './library';
 
 /**
  * One row per kind of format, read straight from the library — the formats themselves are
@@ -14,7 +14,7 @@ import { FORMAT_DEFINITIONS } from '../definitions';
 const LITTLE_MSB: RowOptions = { endian: Endian.Little, bitOrderMsb: true };
 
 const row = (id: string, bytes: number[], pixels = 1, options: RowOptions = LITTLE_MSB) =>
-  [...getRowDecoder(id)(new Uint8Array(bytes), 0, pixels, options)];
+  [...FormatDecodersLibrary.getRowDecoder(id)(new Uint8Array(bytes), 0, pixels, options)];
 
 describe('row decoders', () => {
   it.each([
@@ -37,10 +37,11 @@ describe('row decoders', () => {
   });
 
   it('has one decoder for every format there is', () => {
-    expect([...ROW_DECODERS.keys()].sort()).toEqual(FORMAT_DEFINITIONS.map(({ id }) => id).sort());
+    expect([...FormatDecodersLibrary.ROW_DECODERS.keys()].sort())
+      .toEqual(PixelFormatPresets.DEFINITIONS.map(({ id }) => id).sort());
   });
 
   it('refuses an id it has no decoder for, rather than returning nothing', () => {
-    expect(() => getRowDecoder('nonesuch')).toThrow('No row decoder for pixel format "nonesuch"');
+    expect(() => FormatDecodersLibrary.getRowDecoder('nonesuch')).toThrow('No row decoder for pixel format "nonesuch"');
   });
 });
