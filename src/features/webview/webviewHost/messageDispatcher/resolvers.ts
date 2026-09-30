@@ -1,15 +1,10 @@
 import { exportSelected } from '../../image/export/exportSelected';
-import type { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
 import { StoreSliceId } from '../../store/definitions';
-import type { AppStore } from '../../store/types';
 
 import type { WebviewHostMessageResolverMap } from './types';
 
-export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
-  store: AppStore,
-  bridge: WebviewSessionCommunicationBridge,
-): WebviewHostMessageResolverMap => ({
-  "sources:update": (message) => {
+export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolverMap> = {
+  "sources:update": (message, { store }) => {
     store.get(StoreSliceId.Sources).upsert(message.sources);
   },
 
@@ -17,16 +12,16 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS = (
     console.error('WebviewHost reported an error:', message.message);
   },
 
-  "session:start": (message) => {
+  "session:start": (message, { store }) => {
     store.get(StoreSliceId.View).setMode(message.viewMode);
     store.get(StoreSliceId.DecodeOptions).setOptions(message.decodeOptions);
   },
 
-  export: () => {
+  export: (_message, { store, bridge }) => {
     return exportSelected(store, bridge);
   },
 
-  "images:decode:ready": (message) => {
+  "images:decode:ready": (message, { store }) => {
     store.get(StoreSliceId.Images).upsert(message.images);
   }
-});
+};

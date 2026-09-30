@@ -20,8 +20,8 @@ function createDefaultSlices(
 ): StoreSlices {
   return {
     [StoreSliceId.View]: new ViewSlice(),
-    [StoreSliceId.Sources]: new SourcesSlice(),
     [StoreSliceId.Images]: new ImagesSlice(),
+    [StoreSliceId.Sources]: new SourcesSlice(),
     [StoreSliceId.DecodeOptions]: new DecodeOptionsSlice(),
   };
 }
