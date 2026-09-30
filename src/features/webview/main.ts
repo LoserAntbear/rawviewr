@@ -2,7 +2,7 @@ import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
-import { WEBVIEW_COMMAND_RESOLVERS } from './commands/definitions';
+import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';
 import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVStatusBar, RIVAppComponent } from './ui/webcomponents';
 import { WebviewHostMessageDispatcher, WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/messageDispatcher';
 import { createWebviewStore } from './store/createWebviewStore';
@@ -11,6 +11,7 @@ import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { ResolverContext } from './messaging';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.
@@ -41,13 +42,11 @@ function launchSession(): void {
   WebviewContextProvider.create({ store, formatRegistry });
 
   const bridge = new WebviewSessionCommunicationBridge();
-  const commandDispatcher = new WebviewCommandDispatcher(
-    WEBVIEW_COMMAND_RESOLVERS(bridge, store),
-  );
-  const hostMessageDispatcher = new WebviewHostMessageDispatcher(
-    WEBVIEW_HOST_MESSAGE_RESOLVERS(store, bridge),
-    bridge,
-  );
+  // What every resolver acts through, handed to it at dispatch time.
+  const context: ResolverContext = { store, bridge };
+
+  const commandDispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, context);
+  const hostMessageDispatcher = new WebviewHostMessageDispatcher(WEBVIEW_HOST_MESSAGE_RESOLVERS, context);
 
   new WebviewSession(
     commandDispatcher,
