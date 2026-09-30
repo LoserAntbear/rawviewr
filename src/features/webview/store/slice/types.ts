@@ -1,5 +1,5 @@
 import type { StoreSliceEvent } from './SliceEvents/definitions';
-import type { TypedEventTarget } from '../TypedEventTarget';
+import type { TypedEventTarget } from '../../messaging/TypedEventTarget/TypedEventTarget';
 import { StoreSliceEventPayloads } from './SliceEvents/types';
 
 

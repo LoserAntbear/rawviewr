@@ -1,4 +1,4 @@
-import type { EventMap, TypedEventTarget } from './TypedEventTarget';
+import type { EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice } from './slice/ViewSlice';
 import type { ImagesSlice } from './slice/ImagesSlice';

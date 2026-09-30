@@ -1,5 +1,5 @@
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
-import { TypedEventTarget } from './TypedEventTarget';
+import { TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 
 import { ReactiveStore } from './ReactiveStore';
 import { STORE_SELECTORS } from './selectors';
