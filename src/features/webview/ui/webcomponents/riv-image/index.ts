@@ -10,6 +10,7 @@ import type { RIVImageRenderer, RIVImageRendererMap, RIVImageState } from './typ
 import template from './index.html';
 import styles from './index.css';
 import { ImagesState } from '@features/webview/store/slice/ImagesSlice';
+import type { BusEvent } from '@features/webview/messaging';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
@@ -48,7 +49,7 @@ export class RIVImage extends RIVHTMLElement {
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
   // FIXME: Optimize this by having the store emit more granular events or by indexing items by ID.
   private handleItemsChange(event: Event): void {
-    const { prev, next } = (event as CustomEvent<{ prev: ImagesState; next: ImagesState }>).detail;
+    const { prev, next } = (event as BusEvent<{ prev: ImagesState; next: ImagesState }>).detail;
 
     if (prev.byId.get(this.itemId) !== next.byId.get(this.itemId)) {
       this.render();
