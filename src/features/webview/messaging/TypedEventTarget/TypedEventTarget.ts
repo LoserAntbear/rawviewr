@@ -1,7 +1,9 @@
+import { BusEvent } from '@features/webview/messaging/BusEvent';
 
 export type EventMap<K extends string = string> = Record<K, unknown>;
-type Listener<T> = (event: CustomEvent<T>) => void;
 type UnsubscribeCallback = () => void;
+
+type Listener<T> = (event: BusEvent<T>) => void;
 
 export class TypedEventTarget<
   Map extends EventMap,
@@ -26,8 +28,6 @@ export class TypedEventTarget<
   }
 
   public emit<K extends Key>(type: K, detail: Map[K]): void {
-    const event = new CustomEvent(type, { detail });
-
-    this.dispatchEvent(event);
+    this.dispatchEvent(new BusEvent(type, detail));
   }
 }
