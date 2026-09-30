@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 
 import type { ImageItem } from '../store/slice/ImagesSlice';
 import type { AppStore } from '../store/types';
-import { RIV_COMMAND_EVENT_ID, WEBVIEW_COMMAND_RESOLVERS } from './definitions';
+import { RIV_COMMAND_EVENT_ID } from './definitions';
+import { WEBVIEW_COMMAND_RESOLVERS } from './resolvers';
 import type { WebviewCommandResolver, WebviewCommandResolversMap } from './types';
 import { WebviewCommandDispatcher } from './webviewCommandDispatcher';
 
@@ -31,7 +32,7 @@ function dispatcherWith(exportRequest: WebviewCommandResolver<'export:request'>)
     'gallery:openItem': vi.fn(),
   };
 
-  return new WebviewCommandDispatcher(resolvers);
+  return new WebviewCommandDispatcher(resolvers, { store: {} as never, bridge: {} as never });
 }
 
 describe('WebviewCommandDispatcher: the last-resort boundary', () => {
@@ -49,7 +50,7 @@ describe('WebviewCommandDispatcher: the last-resort boundary', () => {
 
     expect(() => dispatcher.dispatch({ type: 'export:request' })).not.toThrow();
 
-    await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith('Command "export:request" failed:', failure));
+    await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith('Command: "export:request" failed:', failure));
   });
 });
 
@@ -81,7 +82,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     const post = vi.fn();
     const target = new EventTarget();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS({ postToWebviewHost: post } as never, store)).listen(target);
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { store, bridge: { postToWebviewHost: post } as never }).listen(target);
     target.dispatchEvent(new CustomEvent(RIV_COMMAND_EVENT_ID, { detail: { type: 'export:request' } }));
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -96,7 +97,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     vi.stubGlobal('OffscreenCanvas', ContextlessOffscreenCanvas);
     const post = vi.fn();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS({ postToWebviewHost: post } as never, store))
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { store, bridge: { postToWebviewHost: post } as never })
       .dispatch({ type: 'export:request' });
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -105,13 +106,24 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
   });
 });
 
+describe('WebviewCommandDispatcher: the context', () => {
+  it('hands each resolver what it acts through, so a table needs no constructing', async () => {
+    const resolve = vi.fn();
+    const context = { store: { marker: 'store' } as never, bridge: { marker: 'bridge' } as never };
+
+    new WebviewCommandDispatcher({ 'app:ready': resolve }, context).dispatch({ type: 'app:ready' });
+
+    await vi.waitFor(() => expect(resolve).toHaveBeenCalledWith({ type: 'app:ready' }, context));
+  });
+});
+
 describe('WebviewCommandDispatcher: a message nobody resolves', () => {
   it('says so rather than passing it over in silence', async () => {
-    new WebviewCommandDispatcher({}).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
+    new WebviewCommandDispatcher({}, { store: {} as never, bridge: {} as never }).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
 
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(
-      'Command "app:status" failed:',
-      expect.objectContaining({ message: 'No resolver for command "app:status".' }),
+      'Command: "app:status" failed:',
+      expect.objectContaining({ message: 'Command: nothing resolves "app:status".' }),
     ));
   });
 });
