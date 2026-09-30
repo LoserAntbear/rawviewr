@@ -1,38 +1,13 @@
+import { MessageDispatcher } from '../../messaging';
+import type { WebviewDisposable } from '../../disposable/types';
 import type { WebviewHostMessage } from '../types';
-import type { WebviewHostMessageResolver, WebviewHostMessageResolverMap } from './types';
-import type { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
-import { WebviewDisposable } from '@features/webview/disposable/types';
 
-export class WebviewHostMessageDispatcher {
-  constructor(
-    private readonly resolvers: WebviewHostMessageResolverMap,
-    private readonly bridge: WebviewSessionCommunicationBridge,
-  ) {}
-
-  public dispatch(message: WebviewHostMessage): Promise<void> {
-    try {
-      const resolver = this.resolvers[message.type] as WebviewHostMessageResolver | undefined;
-
-      if (!resolver) {
-        throw new Error(`No resolver found for message type ${message.type}`);
-      }
-
-      return Promise.resolve(resolver(message));
-    } catch (error) {
-      console.error(`Failed to dispatch message ${message.type}:`, error);
-
-      return Promise.reject(error);
-    }
+export class WebviewHostMessageDispatcher extends MessageDispatcher<WebviewHostMessage> {
+  protected get channelId(): string {
+    return 'Host message';
   }
 
   public listen(target?: EventTarget): WebviewDisposable {
-    return this.bridge.listenToWebviewHost(this.handleMessage.bind(this), target);
-  }
-
-  private handleMessage(message: WebviewHostMessage): void {
-    this.dispatch(message)
-      .catch(
-        (error) => console.error(`Error handling message ${message.type}:`, error),
-      );
+    return this.context.bridge.listenToWebviewHost((message) => this.dispatch(message), target);
   }
 }
