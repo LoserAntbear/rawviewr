@@ -29,7 +29,8 @@ beforeEach(() => {
   }
 
   store.get(StoreSliceId.Images).clear();
-  store.get(StoreSliceId.View).setMode('single');
+  // Back to single at 1:1: the view slice holds both, and both steer what the bar says.
+  store.get(StoreSliceId.View).reset();
   store.get(StoreSliceId.DecodeOptions).setOptions({ ...DEFAULT_DECODE_OPTIONS, format: PixelFormatPresets.getPreset('rgba4444'), width: 4, height: 3 });
 
   bar = document.createElement(RIVStatusBar.tagName) as RIVStatusBar;
@@ -78,7 +79,22 @@ describe('riv-status-bar', () => {
   it('lays segments out start, spacer, end', () => {
     const children = [...(bar.shadowRoot?.getElementById('status-bar')?.children ?? [])] as HTMLElement[];
 
-    expect(children.map((child) => child.dataset.segmentId ?? child.className)).toEqual(['summary', 'spacer', 'notes']);
+    expect(children.map((child) => child.dataset.segmentId ?? child.className)).toEqual(['summary', 'spacer', 'zoom', 'notes']);
+  });
+
+  it('follows the view: the zoom reading appears only while the image is magnified', () => {
+    show(decoded(24));
+
+    expect(segment('zoom').hidden).toBe(true);
+
+    store.get(StoreSliceId.View).setZoom('in');
+
+    expect(segment('zoom').hidden).toBe(false);
+    expect(segment('zoom').textContent).toBe('200%');
+
+    store.get(StoreSliceId.View).setZoom('reset');
+
+    expect(segment('zoom').hidden).toBe(true);
   });
 
   it('follows the store: a decoded image fills the summary', () => {

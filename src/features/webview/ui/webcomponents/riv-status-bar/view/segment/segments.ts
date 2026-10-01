@@ -8,5 +8,8 @@ export const STATUS_SEGMENTS: StatusSegmentsMap = new Map<
   StatusSegment[]
 >([
   ['start', [{ id: 'summary', resolve: SEGMENT_RESOLVERS.summary }]],
-  ['end', [{ id: 'notes', mode: SlotLifecycleMode.LiveUpdate, indicator: true, resolve: SEGMENT_RESOLVERS.notes }]],
+  ['end', [
+    { id: 'zoom', resolve: SEGMENT_RESOLVERS.zoom },
+    { id: 'notes', mode: SlotLifecycleMode.LiveUpdate, indicator: true, resolve: SEGMENT_RESOLVERS.notes },
+  ]],
 ]);

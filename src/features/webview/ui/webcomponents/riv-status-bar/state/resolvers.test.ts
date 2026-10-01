@@ -59,7 +59,11 @@ function status(images: ImageItem[]) {
 
   const context = selectStatusBarContext(store.state, registry);
 
-  return { summary: SEGMENT_RESOLVERS.summary(context), notes: SEGMENT_RESOLVERS.notes(context) };
+  return {
+    zoom: SEGMENT_RESOLVERS.zoom(context),
+    notes: SEGMENT_RESOLVERS.notes(context),
+    summary: SEGMENT_RESOLVERS.summary(context),
+  };
 }
 
 describe('status bar: single view', () => {
@@ -115,7 +119,29 @@ describe('status bar: images that cannot be summarised', () => {
   });
 
   it('shows nothing when there is no image at all', () => {
-    expect(status([])).toEqual({ summary: null, notes: null });
+    expect(status([])).toEqual({ summary: null, notes: null, zoom: null });
+  });
+});
+
+describe('status bar: zoom', () => {
+  it('stays quiet at 1:1, so the corner only speaks when something is magnified', () => {
+    expect(status([ready('a')]).zoom).toBeNull();
+  });
+
+  it.each([
+    ['in', '200%'],
+    ['out', '50%'],
+  ] as const)('reads the factor as a percentage after zooming %s', (direction, text) => {
+    store.get(StoreSliceId.View).setZoom(direction);
+
+    expect(status([ready('a')]).zoom).toEqual({ text, level: 'info' });
+  });
+
+  it('reads the same in gallery mode, where the tiles scale too', () => {
+    store.get(StoreSliceId.View).setMode('gallery');
+    store.get(StoreSliceId.View).setZoom('out');
+
+    expect(status([ready('a')]).zoom?.text).toBe('50%');
   });
 });
 
