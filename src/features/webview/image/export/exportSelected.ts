@@ -1,6 +1,6 @@
 import { attemptAsync } from '@utils/attempt';
 import { ExportError } from './ExportError';
-import type { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
+import type { MessagePoster } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
 import type { WebviewMessage } from '../../webviewHost/types';
@@ -73,7 +73,7 @@ function reportFailure(error: unknown): WebviewMessage {
 
 export async function exportSelected(
   store: AppStore,
-  bridge: WebviewSessionCommunicationBridge,
+  bridge: MessagePoster,
 ): Promise<void> {
   bridge.postToWebviewHost(await attemptAsync(() => resolveExportMessage(store), reportFailure));
 }

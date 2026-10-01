@@ -32,7 +32,7 @@ function dispatcherWith(exportRequest: WebviewCommandResolver<'export:request'>)
     'gallery:openItem': vi.fn(),
   };
 
-  return new WebviewCommandDispatcher(resolvers, { store: {} as never, bridge: {} as never });
+  return new WebviewCommandDispatcher(resolvers, { postToWebviewHost: vi.fn() }, { store: {} as never });
 }
 
 describe('WebviewCommandDispatcher: the last-resort boundary', () => {
@@ -82,7 +82,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     const post = vi.fn();
     const target = new EventTarget();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { store, bridge: { postToWebviewHost: post } as never }).listen(target);
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store }).listen(target);
     target.dispatchEvent(new CustomEvent(RIV_COMMAND_EVENT_ID, { detail: { type: 'export:request' } }));
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -97,7 +97,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     vi.stubGlobal('OffscreenCanvas', ContextlessOffscreenCanvas);
     const post = vi.fn();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { store, bridge: { postToWebviewHost: post } as never })
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store })
       .dispatch({ type: 'export:request' });
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -109,17 +109,19 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
 describe('WebviewCommandDispatcher: the context', () => {
   it('hands each resolver what it acts through, so a table needs no constructing', async () => {
     const resolve = vi.fn();
-    const context = { store: { marker: 'store' } as never, bridge: { marker: 'bridge' } as never };
+    const bridge = { postToWebviewHost: vi.fn() };
+    const store = { marker: 'store' } as never;
 
-    new WebviewCommandDispatcher({ 'app:ready': resolve }, context).dispatch({ type: 'app:ready' });
+    new WebviewCommandDispatcher({ 'app:ready': resolve }, bridge, { store }).dispatch({ type: 'app:ready' });
 
-    await vi.waitFor(() => expect(resolve).toHaveBeenCalledWith({ type: 'app:ready' }, context));
+    // The channel assembled it: itself, plus what it was handed.
+    await vi.waitFor(() => expect(resolve).toHaveBeenCalledWith({ type: 'app:ready' }, { bridge, store }));
   });
 });
 
 describe('WebviewCommandDispatcher: a message nobody resolves', () => {
   it('says so rather than passing it over in silence', async () => {
-    new WebviewCommandDispatcher({}, { store: {} as never, bridge: {} as never }).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
+    new WebviewCommandDispatcher({}, { postToWebviewHost: vi.fn() }, { store: {} as never }).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
 
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(
       'Command: "app:status" failed:',
