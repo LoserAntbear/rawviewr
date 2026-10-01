@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
@@ -7,6 +7,7 @@ import { RIV_COMMAND_EVENT_ID } from '@features/webview/commands/definitions';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
+import { ZOOM } from '@features/webview/store/slice/ViewSlice';
 import type { AppStore } from '@features/webview/store/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
@@ -34,6 +35,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   store.get(StoreSliceId.DecodeOptions).reset();
+  store.get(StoreSliceId.View).reset();
 
   toolbar = document.createElement(RIVToolbar.tagName) as RIVToolbar;
   document.body.replaceChildren(toolbar);
@@ -149,6 +151,72 @@ describe('riv-toolbar: the store writes to the controls', () => {
 
     expect(control<HTMLInputElement>('width').disabled).toBe(false);
     expect(control<HTMLInputElement>('width').placeholder).toBe('auto');
+  });
+});
+
+describe('riv-toolbar: the zoom dial', () => {
+  /** The buttons raise a command; moving the view is the resolver's job, not theirs. */
+  function emitted(): WebviewMessage[] {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { once: false, signal: controller.signal });
+
+    return commands;
+  }
+
+  let controller: AbortController;
+
+  beforeEach(() => {
+    controller = new AbortController();
+  });
+
+  afterEach(() => {
+    controller.abort();
+  });
+
+  const zoom = () => store.get(StoreSliceId.View).zoom;
+
+  it.each([
+    ['zoomIn', 'in'],
+    ['zoomOut', 'out'],
+    ['zoomReset', 'reset'],
+  ])('%s asks the view to zoom %s, and leaves the decode alone', (id, direction) => {
+    // Off 1:1, where all three buttons are live — at rest, `1:1` is inert by design.
+    store.get(StoreSliceId.View).setZoom('in');
+
+    const commands = emitted();
+    const before = options();
+
+    control<HTMLButtonElement>(id).click();
+
+    expect(commands).toEqual([{ type: 'view:zoom', direction }]);
+    expect(options()).toBe(before);
+  });
+
+  it('reads as inert at the far end of the dial, in the direction that cannot move', () => {
+    while (zoom() < ZOOM.max) {
+      store.get(StoreSliceId.View).setZoom('in');
+    }
+
+    expect(control<HTMLButtonElement>('zoomIn').disabled).toBe(true);
+    expect(control<HTMLButtonElement>('zoomOut').disabled).toBe(false);
+
+    while (zoom() > ZOOM.min) {
+      store.get(StoreSliceId.View).setZoom('out');
+    }
+
+    expect(control<HTMLButtonElement>('zoomOut').disabled).toBe(true);
+    expect(control<HTMLButtonElement>('zoomIn').disabled).toBe(false);
+  });
+
+  it('offers 1:1 only when the view is not already there', () => {
+    expect(control<HTMLButtonElement>('zoomReset').disabled).toBe(true);
+
+    store.get(StoreSliceId.View).setZoom('in');
+
+    expect(control<HTMLButtonElement>('zoomReset').disabled).toBe(false);
   });
 });
 
