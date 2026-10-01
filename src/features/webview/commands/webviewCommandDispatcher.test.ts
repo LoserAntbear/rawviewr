@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 
+import { createWebviewStore } from '../store/createWebviewStore';
+import { StoreSliceId } from '../store/definitions';
 import type { ImageItem } from '../store/slice/ImagesSlice';
 import type { AppStore } from '../store/types';
 import { RIV_COMMAND_EVENT_ID } from './definitions';
@@ -103,6 +105,19 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
     expect(consoleError).toHaveBeenCalledOnce();
     expect(consoleError).toHaveBeenCalledWith('Raw Image Viewer: export failed', expect.any(Error));
+  });
+});
+
+describe('WebviewCommandDispatcher: a command the host never hears about', () => {
+  it('a zoom moves the view and posts nothing, since zoom is this webview\'s layout', () => {
+    const post = vi.fn();
+    const { store } = createWebviewStore();
+    const dispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store });
+
+    dispatcher.dispatch({ type: 'view:zoom', direction: 'in' });
+
+    expect(store.get(StoreSliceId.View).zoom).toBe(2);
+    expect(post).not.toHaveBeenCalled();
   });
 });
 
