@@ -1,7 +1,11 @@
+import type { DecodedImage } from '@features/image/imageDecoder/types';
+
 import { RIVView } from '../RIVView';
 import type { RIVImageCaption } from './types';
 
 export class RIVImageView extends RIVView {
+  private paintToken: symbol = Symbol('paint');
+
   public renderCaption(caption: RIVImageCaption): void {
     const name = this.ref('name');
     const meta = this.ref('meta');
@@ -37,7 +41,7 @@ export class RIVImageView extends RIVView {
     }
   }
 
-  public paint(bitmap: ImageBitmap): void {
+  public async paint(image: DecodedImage): Promise<void> {
     const canvas = this.ref<HTMLCanvasElement>('canvas');
     const ctx = canvas?.getContext('2d');
 
@@ -45,14 +49,40 @@ export class RIVImageView extends RIVView {
       throw new Error('Failed to get canvas or its context');
     }
 
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
+    const sessionToken = this.startPaintSession();
+    const bitmap = await createImageBitmap(new ImageData(image.data, image.width, image.height));
 
-    // The canvas keeps its own copy from here; retiring the bitmap is the state's job.
-    ctx.drawImage(bitmap, 0, 0);
+    try {
+      // A newer paint started while this one was being made: that one wins.
+      if (this.isPaintSession(sessionToken)) {
+        canvas.width = image.width;
+        canvas.height = image.height;
 
-    this.clearStatus();
-    this.handleCanvasVisibility(true);
+        ctx.drawImage(bitmap, 0, 0);
+
+        this.clearStatus();
+        this.handleCanvasVisibility(true);
+      }
+    } finally {
+      this.clearPaintSession();
+      bitmap.close();
+    }
+  }
+
+  private startPaintSession(): symbol {
+    const token = Symbol('paint');
+
+    this.paintToken = token;
+
+    return token;
+  }
+
+  private isPaintSession(token: symbol): boolean {
+    return this.paintToken === token;
+  }
+
+  private clearPaintSession(): void {
+    this.paintToken = Symbol('paint');
   }
 
   private clearStatus(): void {
