@@ -3,8 +3,13 @@ import { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ToolbarStateTransition } from './definitions';
 
 export type ToolbarAvailability = Readonly<Record<string, ToolbarControlStatus>>;
+
+export type ToolbarSyncPayload = {
+  readonly zoom: number;
+  readonly options: DecodeOptions;
+};
 export type ToolbarTransitionPayloads = {
-  [ToolbarStateTransition.Synced]: { options: DecodeOptions };
+  [ToolbarStateTransition.Synced]: ToolbarSyncPayload;
 };
 
 export type ToolbarState = {
