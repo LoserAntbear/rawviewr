@@ -1,3 +1,4 @@
+import { StoreSliceId } from '../store/definitions';
 import { exportSelected } from '../image/export/exportSelected';
 import type { WebviewCommandResolversMap } from './types';
 
@@ -10,4 +11,5 @@ export const WEBVIEW_COMMAND_RESOLVERS: WebviewCommandResolversMap = {
   'app:ready': (message, { bridge }) => bridge.postToWebviewHost(message),
   'gallery:openItem': (message, { bridge }) => bridge.postToWebviewHost(message),
   'sources:request:decode': (message, { bridge }) => bridge.postToWebviewHost(message),
+  'view:zoom': ({ direction }, { store }) => store.get(StoreSliceId.View).setZoom(direction),
 };
