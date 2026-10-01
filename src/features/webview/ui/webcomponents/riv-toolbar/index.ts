@@ -28,9 +28,15 @@ export class RIVToolbar extends RIVHTMLElement {
 
     this.observe(this.view.rootRef, 'change', this.handleControlChange.bind(this));
     this.observe(this.view.rootRef, 'click', this.handleControlClick.bind(this));
+    // Decode options fill the fields; the view's zoom decides which zoom buttons still bite.
     this.observe(
       WebviewContextProvider.context.store.bus,
       "decodeOptions:change",
+      this.sync.bind(this),
+    );
+    this.observe(
+      WebviewContextProvider.context.store.bus,
+      "view:change",
       this.sync.bind(this),
     );
 
@@ -61,10 +67,12 @@ export class RIVToolbar extends RIVHTMLElement {
 
   private sync(): void {
     const { store } = WebviewContextProvider.context;
-    const options = store.get(StoreSliceId.DecodeOptions).options;
 
     this.view.render(
-      this.viewState.updateState(ToolbarStateTransition.Synced, { options }),
+      this.viewState.updateState(ToolbarStateTransition.Synced, {
+        zoom: store.get(StoreSliceId.View).zoom,
+        options: store.get(StoreSliceId.DecodeOptions).options,
+      }),
     );
   }
 }
