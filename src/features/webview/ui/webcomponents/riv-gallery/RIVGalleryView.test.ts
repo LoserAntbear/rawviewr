@@ -20,8 +20,14 @@ beforeEach(() => {
   view = new RIVGalleryView(root);
 });
 
-const state = (visibleIds: string[], selectedId: string | null = null, mode: GalleryState['mode'] = 'gallery'): GalleryState => ({
+const state = (
+  visibleIds: string[],
+  selectedId: string | null = null,
+  mode: GalleryState['mode'] = 'gallery',
+  zoom = 1,
+): GalleryState => ({
   mode,
+  zoom,
   selectedId,
   visibleIds,
 });
@@ -70,6 +76,20 @@ describe('RIVGalleryView', () => {
     view.render(state(['a', 'b', 'c'], 'b'));
 
     expect([...list.children].map((entry) => entry.classList.contains('selected'))).toEqual([false, true, false]);
+  });
+
+  /**
+   * The tiles keep their own shadow roots, so an inherited custom property is the only way
+   * a zoom reaches their canvases. It goes on the list once, not on each entry.
+   */
+  it('hands the zoom factor down the list, and updates it in place', () => {
+    view.render(state(['a', 'b'], null, 'single', 4));
+
+    expect(list.style.getPropertyValue('--riv-image-scale')).toBe('4');
+
+    view.render(state(['a', 'b'], null, 'single', 0.5));
+
+    expect(list.style.getPropertyValue('--riv-image-scale')).toBe('0.5');
   });
 
   it('resolves an event target to its entry, including from inside the entry', () => {

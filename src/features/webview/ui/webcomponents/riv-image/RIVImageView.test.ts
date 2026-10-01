@@ -22,7 +22,7 @@ const image = (width = 2, height = 2): DecodedImage => ({
 
 /** A bitmap the test hands over when it chooses, so two paints can overlap. */
 function heldBitmap() {
-  let hand = (_bitmap: FakeBitmap): void => undefined;
+  let hand: (bitmap: FakeBitmap) => void = () => undefined;
   const promise = new Promise<FakeBitmap>((resolve) => {
     hand = resolve;
   });
