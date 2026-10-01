@@ -61,6 +61,7 @@ implementation or work parked mid-port (see [Shipping a first version](#shipping
 - Handle canvas dimension limits (~16384px per side plus a total-area cap) for large sensor dumps — long term this means drawing only the visible region via `ctx.setTransform` rather than sizing a canvas to the image. Ties into the existing frame-tiles option.
 - Add toolbar or the whole UI caching to avoid redundant recalculations and avoid flickering during switching views.
 - Add tests
+- Add YUV format support
 
 ### General refactor
 
@@ -277,31 +278,65 @@ code under `happy-dom`, extension-host code under plain Node, so host code canno
 ### The decode chain
 
 ```
-host                                   │ webview
-sources (uri, name)  ──sources:update──▶ SourcesSlice
-                     ◀──sources:request─ SourceLoader  (marks each pending)
-reads the file, checks the size
-                     ──source:send:array-buffer────▶ ImagesSlice.decode  ──▶ ImageItem: ready | failed
+host                                     │ webview
+sources + options  ──session:start───────▶ ViewSlice, DecodeOptionsSlice
+                   ──sources:update──────▶ SourcesSlice
+reads, validates, decodes
+                   ──images:decode:ready─▶ ImagesSlice.upsert  ──▶ ImageItem: ready | failed
+
+                   ◀─sources:request:decode── bridge.forwardFrom ◀── images:decode:requested
 ```
 
-- **The host owns the file system.** The webview has no `vscode` API, so it asks for the
-  bytes of the ids it needs and the host answers per id with `source:send:array-buffer` or
-  `source:failed`. Reading is sequential: a gallery's worth of buffers is not read at once.
-- **Bytes are never stored.** They arrive, they are decoded, and only the `ImageItem`
-  (bitmap + geometry + name) is kept. That is also why a change to the decode options
-  re-asks the host: there is nothing left to decode a second time.
-- **`ImagesSlice` owns every `ImageBitmap`** and closes what it displaces or drops.
-- **`SourceLoader`** (session layer) decides *when* to ask. It is not a store reaction: the
-  store knows no transport.
+- **The host owns the file system, and decodes.** `SourcesDecoder` reads a source, checks
+  its size and decodes it; the webview receives results, never paths.
+- **A first load asks for nothing.** On `app:ready` the host already holds the sources and
+  the options, so it posts the session, the sources, and then the decoded images.
+- **The store announces; the bridge translates.** `ImagesSlice` declares its own
+  `images:decode:requested` event, a reaction emits it when the options move (nothing kept
+  the bytes to re-decode from), and `STORE_EVENT_FORWARDS` turns that into one
+  `sources:request:decode`. The store knows no transport; the table returns a message
+  rather than posting one, so it tests without a channel.
+- **Bytes are never stored.** Only the `ImageItem` is kept, and `ImagesSlice` closes every
+  `ImageBitmap` it displaces or drops.
+
+### The two channels
+
+Both are tables of resolvers over one `MessageDispatcher` worth of machinery:
+
+| | raised by | wired by | dispatch |
+| --- | --- | --- | --- |
+| Commands | components, as `riv:command` DOM events | `WebviewCommandDispatcher` | looks the type up; an unclaimed type is an error |
+| Host messages | the extension host, over `postMessage` | `bridge.subscribeResolvers` | the bridge re-emits by type, so there is nothing to look up |
+
+- **Commands are messages.** There is no separate `WebviewCommand` union: a component
+  raises a `WebviewMessage`, and a resolver either forwards it to the host or answers it
+  here (`export:request` is the only one answered locally).
+- **Each channel assembles the context** its resolvers get — itself, plus the extras it is
+  handed (`{ store }`). A resolver table is a constant, never a factory.
+- **The bus carries its own `BusEvent`,** not a `CustomEvent`: that is only an unflagged
+  global in Node from v19, and the extension host of VS Code 1.85 runs Node 18.15.
 - **A lint rule keeps the sides apart.** `vscode`, `BufferItem`, `FileValidator`,
   `InfoMessageController` and the app context are restricted imports under
   `src/features/webview/**` (except `WebviewHost.ts`, which is host code living there).
-  Reaching across used to fail at build time with `Could not resolve "vscode"`, or worse, at
-  runtime when a host-only singleton throws inside the webview.
 
-**Still open — virtualisation.** `SourceLoader.requestMissing` treats every source as
-visible, so a folder gallery asks for everything at once. The measurements that set the
-budget (2026-09-21, `ImageDecoder` over `samples/`, 3,931 files / 122.7 MB raw):
+**Parked — the host cannot make a bitmap.** `SourcesDecoder` ends in
+`createImageBitmap(new ImageData(...))`, and neither global exists in Node (checked on 20
+and 23), so every decode currently fails with `ReferenceError: createImageBitmap is not
+defined` — caught and shown, but nothing paints. `lib` cannot fix it: it supplies types, not
+implementations, and the single tsconfig carrying `DOM` is why host code compiles against
+APIs it will never have. The fix is to decide what crosses the bridge:
+
+| | wire cost for ~24 tiles |
+| --- | --- |
+| Host sends decoded RGBA, webview wraps it in a bitmap | ~25 MB (RGBA is 1x-32x the raw) |
+| Host sends raw bytes, webview decodes | ~768 KB |
+| Host PNG-encodes first | small, but adds an encoder and CPU per image |
+
+A host-only tsconfig without `DOM` would catch this class of mistake at compile time.
+
+**Still open — virtualisation.** Every source is treated as visible, so a folder gallery
+decodes all at once. The measurements that set the budget (2026-09-21, `ImageDecoder` over
+`samples/`, 3,931 files / 122.7 MB raw):
 
 | | cost |
 | --- | --- |
@@ -309,8 +344,7 @@ budget (2026-09-21, `ImageDecoder` over `samples/`, 3,931 files / 122.7 MB raw):
 | Decoding the ~24 tiles on screen | 6.9 ms, 1.5 MB |
 | One probe pixel from the source bytes | 1.1 us |
 
-Decoded RGBA is 1x-32x the raw bytes, worst for the formats this tool exists for. So the
-gallery needs to ask for what is on screen and drop what is not
+The gallery needs to ask for what is on screen and drop what is not
 (`ImagesSlice.clearAllExcept`), which is the same input both halves need.
 
 ### Async discipline
