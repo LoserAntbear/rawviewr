@@ -42,13 +42,13 @@ export type DecodedFileSource = {
   readonly name: string;
   readonly byteLength: number;
   readonly geometry: Geometry;
-  readonly bitmap: ImageBitmap;
+  readonly image: DecodedImage;
   readonly detail: string | null;
 } | { readonly status: 'failure'; readonly id: string; readonly message: string; };
 
 export type DecodedArrayBuffer = {
   geometry: Geometry;
-  bitmap: ImageBitmap;
+  image: DecodedImage;
 };
 
 
