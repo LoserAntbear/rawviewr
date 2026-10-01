@@ -1,4 +1,5 @@
 export enum ToolbarGroup {
+  View = 'view',
   Alpha = 'alpha',
   Format = 'format',
   Layout = 'layout',
