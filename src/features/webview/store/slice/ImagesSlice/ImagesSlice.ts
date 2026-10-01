@@ -1,12 +1,13 @@
+import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
-import type { ImageItem, ImagesState } from './types';
-import { retireImageBitmap } from './utils';
+import type { ImageItem, ImagesSlicePayloads, ImagesState } from './types';
+import { toImageItem } from './utils';
 
 /**
  * Keeps and handles the data about PROCESSED images.
  */
-export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
+export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, ImagesSlicePayloads> {
   public get selectedId(): string | null {
     return this.getState().selectedId;
   }
@@ -36,6 +37,10 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     this.patch({ byId });
   }
 
+  public upsert(decoded: readonly DecodedFileSource[]): void {
+    this.put(decoded.map((item) => [item.id, toImageItem(item)] as [string, ImageItem]));
+  }
+
   public clearAllExcept(ids: readonly string[]): void {
     const idsToKeep = new Set(ids);
     const currentState = this.getState();
@@ -43,8 +48,6 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
     const entriesToDrop = currentEntries.filter(([id]) => !idsToKeep.has(id));
 
     if (entriesToDrop.length > 0) {
-      entriesToDrop.forEach(([, image]) => retireImageBitmap(image));
-
       this.patch({ byId: new Map(currentEntries.filter(([id]) => idsToKeep.has(id))) });
     }
   }
@@ -58,8 +61,6 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState> {
   }
 
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
-    retireImageBitmap(byId.get(id), image);
-
     byId.set(id, image);
   }
 }
