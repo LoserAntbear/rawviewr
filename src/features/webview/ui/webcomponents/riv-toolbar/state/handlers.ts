@@ -3,5 +3,5 @@ import { resolveToolbarState } from './resolvers';
 import type { ToolbarStateHandlers } from './types';
 
 export const TOOLBAR_STATE_HANDLERS: ToolbarStateHandlers = {
-  [ToolbarStateTransition.Synced]: (_prev, { options }) => resolveToolbarState(options),
+  [ToolbarStateTransition.Synced]: (_prev, payload) => resolveToolbarState(payload),
 };
