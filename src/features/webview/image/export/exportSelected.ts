@@ -5,7 +5,7 @@ import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
 import type { WebviewMessage } from '../../webviewHost/types';
 
-import { encodeBitmapToPng } from '../encodePng';
+import { encodeImageToPng } from '../encodePng';
 import { ImageItem } from '@features/webview/store/slice/ImagesSlice/types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
@@ -31,18 +31,11 @@ function requireItem(store: AppStore, id: string): ImageItem {
 }
 
 async function encodeExport(item: ImageItem): Promise<WebviewMessage> {
-  try {
-    if (!isReadyImageItem(item)) {
-      throw new ExportError('warn', 'Raw Image Viewer: image is not ready for export.');
-    }
-
-    return { type: 'export:png', name: `${item.name}.png`, data: await encodeBitmapToPng(item.bitmap) };
-  } finally {
-    // The canvas took its own copy; these pixels are off-heap. Closed on failure too.
-    if (isReadyImageItem(item)) {
-      item.bitmap.close();
-    }
+  if (!isReadyImageItem(item)) {
+    throw new ExportError('warn', 'Raw Image Viewer: image is not ready for export.');
   }
+
+  return { type: 'export:png', name: `${item.name}.png`, data: await encodeImageToPng(item.image) };
 }
 
 function resolveExportError(error: unknown): WebviewMessage {
