@@ -12,13 +12,14 @@
 }
 
 /*
- * Three properties are the whole contract with whatever lays this component out.
+ * Four properties are the whole contract with whatever lays this component out.
  * They are custom properties rather than attributes because inherited properties are
  * the only styling that crosses a shadow boundary:
  *
  *   --riv-image-viewport  fixed viewport height   (default: sizes to the image)
  *   --riv-image-fit       canvas max-width/height (default: intrinsic size, no scaling)
  *   --riv-image-caption   caption display         (default: shown)
+ *   --riv-image-scale     zoom factor             (default: 1, one screen pixel per pixel)
  */
 #viewport {
   display: flex;
@@ -49,6 +50,15 @@ canvas {
   max-width: var(--riv-image-fit, none);
   max-height: var(--riv-image-fit, none);
   object-fit: contain;
+
+  /*
+   * `zoom` and not `transform: scale()`: a transform paints bigger without taking up more
+   * room, so the viewport would never gain the scroll area a magnified image needs. `zoom`
+   * grows the layout box and leaves the backing store alone — no re-decode, no second
+   * bitmap, nothing for the component to recompute. Inside a fitted tile the `max-width`
+   * above still caps it, so a thumbnail grows to its tile and stops there.
+   */
+  zoom: var(--riv-image-scale, 1);
 
   /* The whole point of the viewer: never interpolate a pixel the user is inspecting. */
   image-rendering: pixelated;

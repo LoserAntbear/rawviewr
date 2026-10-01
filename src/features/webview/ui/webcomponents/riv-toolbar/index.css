@@ -67,6 +67,15 @@ input:focus-visible {
   cursor: not-allowed;
 }
 
+/* ---------------------------------------------------------------------- view */
+
+/* Three stops on one dial: even widths so the row does not shuffle as the label changes. */
+.group[data-group='view'] button {
+  min-width: 32px;
+  padding: 3px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ------------------------------------------------------------------- actions */
 
 .group[data-group='actions'] {
