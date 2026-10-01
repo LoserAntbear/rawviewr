@@ -21,6 +21,10 @@ export class RIVGalleryView extends RIVView {
 
     list.dataset.viewMode = state.mode;
 
+    // Set once on the list: every tile inherits it, which is the only way into their roots.
+    // I do not use transform: scale() on the list itself because it would also scale the scrollbars.
+    list.style.setProperty('--riv-image-scale', String(state.zoom));
+
     this.removeStaleEntries(state.visibleIds);
 
     state.visibleIds.forEach((id, index) => {
