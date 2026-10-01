@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
@@ -71,7 +71,7 @@ const decoded = (bytes: number): ImageItem => ({
   detail: null,
   byteLength: bytes,
   geometry: geometry(bytes),
-  bitmap: { width: 4, height: 3, close: vi.fn() } as unknown as ImageBitmap,
+  image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
 });
 
 describe('riv-status-bar', () => {

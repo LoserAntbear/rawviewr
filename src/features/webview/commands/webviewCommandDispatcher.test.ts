@@ -70,7 +70,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     detail: null,
     byteLength: 24,
     geometry: { width: 2, height: 2 } as never,
-    bitmap: { width: 2, height: 2, close: vi.fn() } as unknown as ImageBitmap,
+    image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
   };
   const store = {
     selectors: { selectedId: () => image.id },

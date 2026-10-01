@@ -6,14 +6,13 @@ import { exportSelected, resolveExportMessage } from './exportSelected';
 
 /**
  * happy-dom has `OffscreenCanvas` but no 2D rendering behind it, so encoding is stubbed.
- * Everything upstream of the encoder — the chain, its halts, the bitmap's lifetime — is
- * what these tests are about.
+ * Everything upstream of the encoder — the chain and its halts — is what these are about.
  */
 let encodeFails: boolean;
 
 class FakeOffscreenCanvas {
-  public getContext(): Pick<CanvasRenderingContext2D, 'drawImage'> {
-    return { drawImage: () => undefined };
+  public getContext(): Pick<CanvasRenderingContext2D, 'putImageData'> {
+    return { putImageData: () => undefined };
   }
 
   public async convertToBlob(): Promise<Pick<Blob, 'arrayBuffer'>> {
@@ -25,8 +24,6 @@ class FakeOffscreenCanvas {
   }
 }
 
-const close = vi.fn();
-
 const ready = (): ImageItem => ({
   id: 'a',
   kind: 'ready',
@@ -35,7 +32,7 @@ const ready = (): ImageItem => ({
   detail: null,
   byteLength: 24,
   geometry: { width: 2, height: 2 } as never,
-  bitmap: { width: 2, height: 2, close } as unknown as ImageBitmap,
+  image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
 });
 
 /** The export reads one thing: the image the store decoded for the id on screen. */
@@ -83,7 +80,6 @@ describe('resolveExportMessage: success', () => {
 
     expect(message).toMatchObject({ type: 'export:png', name: 'frame.raw.png' });
     expect(new Uint8Array((message as { data: ArrayBuffer }).data)[0]).toBe(0x89);
-    expect(close).toHaveBeenCalledOnce();
   });
 });
 
@@ -92,14 +88,6 @@ describe('resolveExportMessage: genuine failures', () => {
     encodeFails = true;
 
     await expect(resolveExportMessage(storeFor('a', ready()))).rejects.toThrow('encoder exploded');
-  });
-
-  it('still closes the bitmap when encoding throws', async () => {
-    encodeFails = true;
-
-    await resolveExportMessage(storeFor('a', ready())).catch(() => undefined);
-
-    expect(close).toHaveBeenCalledOnce();
   });
 
   it('turns a throw in the very first step into a rejection, not a synchronous throw', () => {

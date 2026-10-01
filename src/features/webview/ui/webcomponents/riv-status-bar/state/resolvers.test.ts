@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
@@ -33,8 +33,6 @@ const geometry = (overrides: Partial<Geometry> = {}): Geometry => ({
   ...overrides,
 });
 
-const bitmap = () => ({ width: 4, height: 3, close: vi.fn() }) as unknown as ImageBitmap;
-
 const ready = (id: string, overrides: Partial<Geometry> = {}, byteLength = 24): ImageItem => ({
   id,
   kind: 'ready',
@@ -43,7 +41,7 @@ const ready = (id: string, overrides: Partial<Geometry> = {}, byteLength = 24): 
   detail: null,
   byteLength,
   geometry: geometry(overrides),
-  bitmap: bitmap(),
+  image: { width: 4, height: 3, data: new Uint8ClampedArray(48) },
 });
 
 const source = (id: string): FileSource => ({ id, name: `${id}.raw`, uri: { path: `/${id}.raw` } as never });
