@@ -7,17 +7,8 @@ import type { ReactiveStore } from './ReactiveStore';
 import type { StoreSliceId } from './definitions';
 import type { STORE_SELECTORS } from './selectors';
 import { WebviewDisposable } from '../disposable';
-import { StoreSlice } from './slice/StoreSlice';
 
-type InferStoreSlicePayloads<TSlice extends StoreSlice<string, unknown>> = TSlice extends StoreSlice<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TName,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TState,
-  infer TPayloads,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TBus
->
+type InferStoreSlicePayloads<TSlice> = TSlice extends { attach(bus: TypedEventTarget<infer TPayloads>): void }
   ? TPayloads
   : never;
 
