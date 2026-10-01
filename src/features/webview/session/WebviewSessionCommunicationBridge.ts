@@ -3,8 +3,8 @@ import { attemptDetached } from '@utils/attempt';
 import type { WebviewHostMessage, WebviewHostMessageType, WebviewMessage } from '../webviewHost';
 import { listenTo } from '../disposable/listenTo';
 import type { WebviewDisposable } from '../disposable/types';
-import type { MessageResolverMap, ResolverContext } from '../messaging/types';
-import { TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
+import type { MessageForwardMap, MessageResolverMap, ResolverContext } from '../messaging/types';
+import { TypedEventTarget, type EventMap } from '../messaging/TypedEventTarget/TypedEventTarget';
 import { VSCodeWebviewApi, WebviewHostMessageEvents } from './types';
 
 let acquiredApi: VSCodeWebviewApi | null = null;
@@ -36,7 +36,7 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   ): WebviewDisposable {
     const context = { bridge: this, ...extra } as ResolverContext & TExtra;
 
-    const stop = Object.entries(resolvers).map(([type, resolve]) => this.on(
+    const disposables = Object.entries(resolvers).map(([type, resolve]) => this.on(
       type as WebviewHostMessageType,
       (event) => attemptDetached(
         () => resolve(event.detail as never, context as never),
@@ -44,7 +44,26 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
       ),
     ));
 
-    return { dispose: () => stop.forEach((off) => off()) };
+    return { dispose: () => disposables.forEach((dispose) => dispose()) };
+  }
+
+  // TODO: Uninfy with subscribeResolvers
+  public forwardFrom<TEvents extends EventMap, TExtra extends object = object>(
+    bus: TypedEventTarget<TEvents>,
+    forwards: MessageForwardMap<TEvents, ResolverContext & TExtra>,
+    extra: TExtra = {} as TExtra,
+  ): WebviewDisposable {
+    const context = { bridge: this, ...extra } as ResolverContext & TExtra;
+
+    const disposables = Object.entries(forwards).map(([type, forward]) => bus.on(
+      type as keyof TEvents & string,
+      (event) => attemptDetached(
+        () => this.postForwarded(forward(event.detail as never, context as never)),
+        (error) => console.error(`${this.CHANNEL_ID}: forwarding "${type}" failed:`, error),
+      ),
+    ));
+
+    return { dispose: () => disposables.forEach((dispose) => dispose()) };
   }
 
   // WARNING: Do not forget to dispose to stop re-emitting.
@@ -54,5 +73,12 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
 
       this.emit(message.type, message);
     });
+  }
+
+  /** A forward that has nothing to say returns `null`, and nothing is sent. */
+  private postForwarded(message: WebviewMessage | null): void {
+    if (message) {
+      this.postToWebviewHost(message);
+    }
   }
 }

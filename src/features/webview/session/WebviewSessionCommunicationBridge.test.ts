@@ -6,6 +6,7 @@ import type { AppStore } from '../store/types';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from '../webviewHost/messageDispatcher';
 import type { WebviewHostMessage } from '../webviewHost/types';
 import type { WebviewDisposable } from '../disposable/types';
+import { TypedEventTarget } from '../messaging';
 import { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
 
 /**
@@ -129,5 +130,71 @@ describe('the host channel, end to end', () => {
     });
 
     expect(store.get(StoreSliceId.Sources).getSource('a')).toMatchObject({ name: 'a.raw' });
+  });
+});
+
+describe('WebviewSessionCommunicationBridge.forwardFrom', () => {
+  type Events = { 'thing:happened': { value: number } };
+
+  const bus = () => new TypedEventTarget<Events>();
+
+  it('sends what the table makes of the event', () => {
+    const announcing = bus();
+
+    bridge.forwardFrom(announcing, {
+      'thing:happened': ({ value }) => ({ type: 'gallery:openItem', id: String(value) }),
+    }, { store });
+
+    announcing.emit('thing:happened', { value: 7 });
+
+    expect(post).toHaveBeenCalledWith({ type: 'gallery:openItem', id: '7' });
+  });
+
+  it('hands the table the context, the channel included', () => {
+    const announcing = bus();
+    const forward = vi.fn(() => null);
+
+    bridge.forwardFrom(announcing, { 'thing:happened': forward }, { store });
+    announcing.emit('thing:happened', { value: 7 });
+
+    expect(forward).toHaveBeenCalledWith({ value: 7 }, { bridge, store });
+  });
+
+  it('sends nothing for an event the table has nothing to say about', () => {
+    const announcing = bus();
+
+    bridge.forwardFrom(announcing, { 'thing:happened': () => null }, { store });
+    announcing.emit('thing:happened', { value: 7 });
+
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it('catches and reports a forward that throws, rather than breaking the emitter', async () => {
+    const announcing = bus();
+
+    bridge.forwardFrom(announcing, {
+      'thing:happened': () => {
+        throw new Error('forward blew up');
+      },
+    }, { store });
+
+    expect(() => announcing.emit('thing:happened', { value: 7 })).not.toThrow();
+
+    await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(
+      'Host message: forwarding "thing:happened" failed:',
+      expect.objectContaining({ message: 'forward blew up' }),
+    ));
+  });
+
+  it('stops forwarding once disposed', () => {
+    const announcing = bus();
+
+    bridge.forwardFrom(announcing, {
+      'thing:happened': () => ({ type: 'app:ready' }),
+    }, { store }).dispose();
+
+    announcing.emit('thing:happened', { value: 7 });
+
+    expect(post).not.toHaveBeenCalled();
   });
 });
