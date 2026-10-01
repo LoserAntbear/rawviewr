@@ -3,6 +3,7 @@ import type * as vscode from 'vscode';
 import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { GalleryViewMode } from '../ui/webcomponents/types';
+import type { ZoomDirection } from '../store/slice/ViewSlice/types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { FileSource } from '../types';
 
@@ -19,6 +20,7 @@ export type WebviewMessage =
   | { type: 'app:ready' }
   | { type: 'export:request' }
   | { type: 'gallery:openItem'; id: string }
+  | { type: 'view:zoom'; direction: ZoomDirection }
   | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string }
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions };
