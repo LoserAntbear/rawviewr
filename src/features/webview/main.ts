@@ -4,7 +4,7 @@ import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';
 import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVStatusBar, RIVAppComponent } from './ui/webcomponents';
-import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/messageDispatcher';
+import { STORE_EVENT_FORWARDS, WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/messageDispatcher';
 import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { StyleSheets } from './ui/styleSheets';
@@ -49,6 +49,7 @@ function launchSession(): void {
     // The bridge re-emits what the host sends; the resolvers are subscriptions to it.
     bridge.listen(window),
     bridge.subscribeResolvers(WEBVIEW_HOST_MESSAGE_RESOLVERS, { store }),
+    bridge.forwardFrom(store.bus, STORE_EVENT_FORWARDS, { store }),
   ]);
 }
 
