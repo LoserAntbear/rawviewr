@@ -18,6 +18,7 @@ const ORDERED_TOOLBAR_GROUPS: readonly ToolbarGroup[] = [
   ToolbarGroup.Layout,
   ToolbarGroup.Alpha,
   ToolbarGroup.Header,
+  ToolbarGroup.View,
   ToolbarGroup.Actions,
 ];
 
