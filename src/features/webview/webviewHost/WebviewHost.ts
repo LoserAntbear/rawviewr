@@ -116,8 +116,12 @@ export class WebviewHost extends DisposableStore {
 
   private async handleAppReady(): Promise<void> {
     try {
-      await this.initializeSession(this.viewMode);
+      const decodeOptions = this.settingsController.readDefaultDecodeOptions();
+
+      await this.initializeSession(this.viewMode, decodeOptions);
       await this.postSources();
+      // Nothing to ask for on a first load: the sources and the options are both here.
+      await this.handleRequestDecode(this.sources, decodeOptions);
     } catch (error) {
       InfoMessageController.handleMessage({
         level: 'error',
@@ -126,12 +130,12 @@ export class WebviewHost extends DisposableStore {
     }
   }
 
-  private initializeSession(viewMode: GalleryViewMode): Promise<void> {
+  private initializeSession(viewMode: GalleryViewMode, decodeOptions: DecodeOptions): Promise<void> {
     // TODO: Should it include the ID? No use for it as I see, but MAYBE?
     return this.post({
       viewMode,
+      decodeOptions,
       type: 'session:start',
-      decodeOptions: this.settingsController.readDefaultDecodeOptions(),
     });
   }
 
