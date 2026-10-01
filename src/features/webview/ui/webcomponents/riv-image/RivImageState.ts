@@ -23,14 +23,14 @@ function resolveCaption(item: ImageItem): RIVImageCaption {
   return {
     name: item.name,
     title: item.detail ?? item.name,
-    meta: `${item.bitmap.width}×${item.bitmap.height} · ${StringFormat.bytes(item.byteLength)}`,
+    meta: `${item.image.width}×${item.image.height} · ${StringFormat.bytes(item.byteLength)}`,
   };
 }
 
 const STATE_BY_IMAGE: KindStrategies<ImageItem, [caption: RIVImageCaption], RIVImageState> = {
   empty: (_image, caption) => ({ kind: RIVImageStateKind.Empty, caption }),
   pending: (_image, caption) => ({ kind: RIVImageStateKind.Loading, caption }),
-  ready: ({ bitmap }, caption) => ({ kind: RIVImageStateKind.Paint, caption, bitmap }),
+  ready: ({ image }, caption) => ({ kind: RIVImageStateKind.Paint, caption, image }),
   failed: ({ message }, caption) => ({ kind: RIVImageStateKind.Error, caption, message }),
 };
 

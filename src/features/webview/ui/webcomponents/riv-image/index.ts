@@ -1,3 +1,5 @@
+import { attemptDetached } from '@utils/attempt';
+
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
 
@@ -27,7 +29,7 @@ export class RIVImage extends RIVHTMLElement {
   protected readonly view = new RIVImageView(this.mount(template, styles));
 
   private readonly renderers: RIVImageRendererMap = {
-    [RIVImageStateKind.Paint]: ({ bitmap }) => this.view.paint(bitmap),
+    [RIVImageStateKind.Paint]: ({ image }) => this.view.paint(image),
     [RIVImageStateKind.Loading]: () => this.view.showStatus('loading…'),
     [RIVImageStateKind.Empty]: () => this.view.showStatus('nothing to decode'),
     [RIVImageStateKind.Error]: ({ message }) => this.view.showStatus(message, 'error'),
@@ -69,6 +71,10 @@ export class RIVImage extends RIVHTMLElement {
 
     const renderer = this.renderers[state.kind] as RIVImageRenderer;
 
-    renderer(state);
+    // Painting is async, and a render is a sync edge: the boundary ends here.
+    attemptDetached(
+      () => renderer(state),
+      (error) => console.error(`${this.localName}: painting "${this.itemId}" failed`, error),
+    );
   }
 }
