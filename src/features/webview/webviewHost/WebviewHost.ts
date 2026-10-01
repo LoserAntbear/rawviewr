@@ -14,6 +14,7 @@ import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { attemptDetached } from '@utils/attempt';
 
+// TODO: Extract webview posting and handlers into a separate messaging layer
 export class WebviewHost extends DisposableStore {
   constructor(
     private readonly context: vscode.ExtensionContext,

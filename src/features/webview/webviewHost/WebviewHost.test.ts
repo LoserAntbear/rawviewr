@@ -19,7 +19,12 @@ afterEach(() => {
 
 const source: FileSource = { id: 'a', name: 'frame.raw', uri: Uri.file('/frame.raw') as never };
 
-function mount(postMessage: () => Promise<boolean>, itemOpener?: ItemOpener, sources: FileSource[] = []) {
+function mount(
+  postMessage: (message: WebviewHostMessage) => Promise<boolean>,
+  itemOpener?: ItemOpener,
+  sources: FileSource[] = [],
+  sourcesDecoder: unknown = { decodeFromSource: async () => [] },
+) {
   let receive: (message: WebviewMessage) => void = () => undefined;
 
   const webview = {
@@ -41,7 +46,7 @@ function mount(postMessage: () => Promise<boolean>, itemOpener?: ItemOpener, sou
     sources,
     'gallery' as never,
     { readDefaultDecodeOptions: () => DEFAULT_DECODE_OPTIONS } as never,
-    { decodeFromSource: async () => [] } as never,
+    sourcesDecoder as never,
     itemOpener,
   );
 
@@ -77,5 +82,29 @@ describe('WebviewHost: failures end handled', () => {
 
     await vi.waitFor(() => expect(window.showErrorMessage)
       .toHaveBeenCalledWith('Failed to handle app ready: gone'));
+  });
+});
+
+describe('WebviewHost: a first load needs no request', () => {
+  it('decodes the sources it already holds and sends the images back', async () => {
+    const posted = vi.fn();
+    const decodeFromSource = vi.fn(async () => [{ status: 'failure', id: 'a', message: 'stubbed' }]);
+    const { receive } = mount(
+      async (message) => {
+        posted(message.type);
+
+        return true;
+      },
+      undefined,
+      [source],
+      { decodeFromSource },
+    );
+
+    receive({ type: 'app:ready' });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('images:decode:ready'));
+    expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS);
+    expect(posted.mock.calls.map(([type]) => type))
+      .toEqual(['session:start', 'sources:update', 'images:decode:ready']);
   });
 });
