@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext): void {
     settingsController,
     sourcesDecoder,
   );
-  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController, sourcesDecoder);
+  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController, sourcesDecoder, windowController);
 
   AppContextProvider.create({
     workspaceConfig: configController,

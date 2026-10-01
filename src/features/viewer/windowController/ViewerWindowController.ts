@@ -44,6 +44,7 @@ export class ViewerWindowController {
       'gallery',
       this.settingsController,
       this.sourcesDecoder,
+      this,
     );
 
     this.viewerRegistry.register({ panel, viewer });
