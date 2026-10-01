@@ -6,11 +6,12 @@ import type { GalleryState } from './types';
 
 // Simple for now, no need for complex ceremony logic
 export function resolveGalleryState(state: AppStoreState): GalleryState {
-  const { mode } = state[StoreSliceId.View];
+  const { mode, zoom } = state[StoreSliceId.View];
   const { selectedId } = state[StoreSliceId.Images];
 
   return {
     mode,
+    zoom,
     selectedId,
     visibleIds: STORE_SELECTORS.visibleIds(state),
   };
