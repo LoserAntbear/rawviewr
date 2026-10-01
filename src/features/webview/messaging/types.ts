@@ -1,5 +1,6 @@
 import type { AppStore } from '../store/types';
 import type { WebviewMessage } from '../webviewHost/types';
+import type { EventMap } from './TypedEventTarget';
 
 export interface MessagePoster {
   postToWebviewHost(message: WebviewMessage): void;
@@ -14,6 +15,17 @@ export type WebviewResolverContext = ResolverContext & {
 };
 
 export type MessageLike = { readonly type: string };
+
+export type MessageForward<TDetail, TContext extends ResolverContext = WebviewResolverContext> = (
+  detail: TDetail,
+  context: TContext,
+) => WebviewMessage | null;
+export type MessageForwardMap<
+  TEvents extends EventMap,
+  TContext extends ResolverContext = WebviewResolverContext,
+> = {
+  readonly [K in keyof TEvents & string]?: MessageForward<TEvents[K], TContext>;
+};
 
 export type MessageResolver<
   TMessage extends MessageLike,
