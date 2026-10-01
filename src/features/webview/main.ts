@@ -4,14 +4,13 @@ import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';
 import { RIVImage, RIVMainView, RIVToolbar, RIVGallery, RIVStatusBar, RIVAppComponent } from './ui/webcomponents';
-import { WebviewHostMessageDispatcher, WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/messageDispatcher';
+import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './webviewHost/messageDispatcher';
 import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-import { ResolverContext } from './messaging';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.
@@ -42,17 +41,15 @@ function launchSession(): void {
   WebviewContextProvider.create({ store, formatRegistry });
 
   const bridge = new WebviewSessionCommunicationBridge();
-  // What every resolver acts through, handed to it at dispatch time.
-  const context: ResolverContext = { store, bridge };
+  // Each channel assembles the context its resolvers get: itself, plus what it is handed.
+  const commandDispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, bridge, { store });
 
-  const commandDispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, context);
-  const hostMessageDispatcher = new WebviewHostMessageDispatcher(WEBVIEW_HOST_MESSAGE_RESOLVERS, context);
-
-  new WebviewSession(
-    commandDispatcher,
-    hostMessageDispatcher,
-    document
-  );
+  new WebviewSession([
+    commandDispatcher.listen(document),
+    // The bridge re-emits what the host sends; the resolvers are subscriptions to it.
+    bridge.listen(window),
+    bridge.subscribeResolvers(WEBVIEW_HOST_MESSAGE_RESOLVERS, { store }),
+  ]);
 }
 
 // The document's own sheet: everything below `riv-app-component` styles itself inside
