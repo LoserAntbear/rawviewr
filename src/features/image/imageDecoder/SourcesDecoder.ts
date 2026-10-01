@@ -1,7 +1,7 @@
 import { FileSource } from '@features/webview/types';
-import type { DecodeOptions, DecodedImage } from '@features/image/imageDecoder/types';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
-import { withAbortSignalCheck } from '@utils/abort';
+import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
 
 import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
@@ -56,7 +56,7 @@ export class SourcesDecoder {
         throw new Error('Decode options are required.');
       }
 
-      const image = await withAbortSignalCheck(
+      const image = withAbortSignalCheckSync(
         abortSignal,
         () => this.decodeArrayBuffer(bufferItem.data, options),
       );
@@ -82,30 +82,14 @@ export class SourcesDecoder {
     }
   }
 
-  private async decodeArrayBuffer(
+  private decodeArrayBuffer(
     data: ArrayBuffer,
     options: DecodeOptions,
-    signal?: AbortSignal,
     geometry: Geometry = this.resolveGeometry(data, options),
-  ): Promise<DecodedArrayBuffer> {
-    signal?.throwIfAborted();
-
+  ): DecodedArrayBuffer {
     const { image } = this.decoder.decode(new Uint8Array(data), options, geometry);
 
-    // Decoding can take long
-    return withAbortSignalCheck(
-      signal,
-      async () => {
-        const bitmap = await createImageBitmap(this.toImageData(image));
-
-        return { geometry, bitmap };
-      },
-      ({ bitmap }) => bitmap.close(),
-    );
-  }
-
-  private toImageData(image: DecodedImage): ImageData {
-    return new ImageData(image.data, image.width, image.height);
+    return { geometry, image };
   }
 
   private resolveGeometry(data: ArrayBuffer, options: DecodeOptions): Geometry {
