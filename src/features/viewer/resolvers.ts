@@ -1,6 +1,7 @@
 import type { IntentResolverMap } from '@features/intent/types';
 import { findGalleryTargets, folderTitle, selectionTitle } from '@features/viewer/gallery/galleryTargets';
 import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
+import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { IntentKind } from '@definitions/intent';
 import { resolveUriTargets, resolveFolder } from '@features/vscode/utils/uri';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
@@ -49,6 +50,20 @@ export const VIEWER_INTENT_RESOLVERS = (
     } catch (error) {
       InfoMessageController.showError(
         `Failed to open folder gallery: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  },
+});
+
+export const VIEW_INTENT_RESOLVERS = (
+  viewerRegistry: ViewerRegistry,
+): Pick<IntentResolverMap, IntentKind.viewZoom> => ({
+  [IntentKind.viewZoom]: async ({ direction }) => {
+    try {
+      await viewerRegistry.activeViewer?.requestZoom(direction);
+    } catch (error) {
+      InfoMessageController.showError(
+        `Failed to zoom the view: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   },
