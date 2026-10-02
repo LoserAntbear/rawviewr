@@ -1,5 +1,6 @@
 import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
+import { FieldFocusTracker } from '@webview/_features/fieldFocus/FieldFocusTracker';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';
@@ -50,6 +51,8 @@ function launchSession(): void {
     bridge.listen(window),
     bridge.subscribeResolvers(WEBVIEW_HOST_MESSAGE_RESOLVERS, { store }),
     bridge.forwardFrom(store.bus, STORE_EVENT_FORWARDS, { store }),
+    // Keyboard shortcuts are resolved outside this frame, which cannot see what has focus.
+    new FieldFocusTracker(bridge).watch(window),
   ]);
 }
 
