@@ -6,6 +6,20 @@ import { getFocusElementDeep, isFormControlElement } from '../../utils/html';
 
 const FOCUS_EVENTS = ['focus', 'focusin', 'focusout'] as const;
 
+/**
+ * The idea here is simple:
+ * to track whether any `form control element` within the window has focus
+ * then report it to the webview host.
+ *
+ * Why:
+ * The webview host needs to know the focus state of form control elements to manage keyboard shortcuts and other UI interactions appropriately.
+ *
+ * Yes, this seems fragile, however will be using this method for now.
+ *
+ * The other option is to define a dedicated `KEYBOARD_SHORTCUTS_MODE` controller/
+ * Which will be triggered only for specific combination of control keys, e.g. `ctrl+alt`+key.
+ * Where pressed `ctrl+alt` === `KEYBOARD_SHORTCUTS_MODE_ACTIVE`
+ */
 export class FieldFocusTracker {
   private isAnyFieldFocused: boolean = false;
 
