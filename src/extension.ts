@@ -7,7 +7,7 @@ import { ExtensionHost } from '@features/extension/ExtensionHost';
 import { IntentDispatcher } from '@features/intent/IntentDispatcher';
 import { SETTINGS_INTENT_RESOLVERS } from '@features/settings/resolvers';
 import { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
-import { VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
+import { VIEW_INTENT_RESOLVERS, VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
 import { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
 import { SettingsController } from '@features/settings/SettingsController';
 import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
@@ -45,6 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   const dispatcher = new IntentDispatcher({
+    ...VIEW_INTENT_RESOLVERS(viewerRegistry),
     ...EXPORT_INTENT_RESOLVERS(viewerRegistry),
     ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
