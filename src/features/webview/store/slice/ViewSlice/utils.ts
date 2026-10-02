@@ -1,7 +1,7 @@
 import { byKey, type Strategies } from '@utils/strategy';
 
 import { ZOOM } from './definitions';
-import type { ZoomDirection } from './types';
+import type { ZoomDirection } from '@features/zoom';
 
 const ZOOM_STEPS: Strategies<ZoomDirection, [current: number], number> = {
   reset: () => ZOOM.default,

@@ -1,9 +1,11 @@
+import type { ZoomDirection } from '@features/zoom';
+
 import type { GalleryViewMode } from '../../../ui/webcomponents/types';
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 import { ZOOM } from './definitions';
-import { ViewState, ZoomDirection } from './types';
+import type { ViewState } from './types';
 import { resolveZoom } from './utils';
 
 /**
