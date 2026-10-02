@@ -2,6 +2,7 @@ import type * as vscode from 'vscode';
 
 import type { IntentKind } from '@definitions/intent';
 import type { ExportFormat } from '@definitions/exportFormats';
+import type { ZoomDirection } from '@features/zoom';
 
 export type IntentResolver<K extends IntentKind = IntentKind> = (
   intent: Extract<Intent, { kind: K }>,
@@ -9,16 +10,13 @@ export type IntentResolver<K extends IntentKind = IntentKind> = (
 
 export type IntentResolverMap = { readonly [K in IntentKind]: IntentResolver<K> };
 
-/**
- * Deliberately a discriminated union rather than a class hierarchy,
- * so that the compiler can exhaustively check intent handling and so that the intent vocabulary is fully visible in one place.
- */
 export type Intent =
+  | { readonly kind: IntentKind.settingsReset }
+  | { readonly kind: IntentKind.viewZoom; readonly direction: ZoomDirection }
+  | { readonly kind: IntentKind.fileExportRequest; readonly format: ExportFormat }
   | { readonly kind: IntentKind.viewerOpenSingle; readonly targets: readonly vscode.Uri[] }
   | { readonly kind: IntentKind.viewerOpenGallery; readonly targets: readonly vscode.Uri[] }
-  | { readonly kind: IntentKind.viewerOpenFolderGallery; readonly folder: vscode.Uri | null }
-  | { readonly kind: IntentKind.fileExportRequest; readonly format: ExportFormat }
-  | { readonly kind: IntentKind.settingsReset };
+  | { readonly kind: IntentKind.viewerOpenFolderGallery; readonly folder: vscode.Uri | null };
 
 export type IntentParserResult = Intent | null;
 /**
