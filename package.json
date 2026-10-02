@@ -117,6 +117,21 @@
         "category": "Raw Image"
       },
       {
+        "command": "rawImageViewer.zoomIn",
+        "title": "Zoom In",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.zoomOut",
+        "title": "Zoom Out",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.zoomReset",
+        "title": "Zoom to 1:1",
+        "category": "Raw Image"
+      },
+      {
         "command": "rawImageViewer.resetSettings",
         "title": "Reset Remembered Decode Settings",
         "category": "Raw Image"
@@ -144,9 +159,43 @@
         {
           "command": "rawImageViewer.exportPng",
           "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
+        },
+        {
+          "command": "rawImageViewer.zoomIn",
+          "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
+        },
+        {
+          "command": "rawImageViewer.zoomOut",
+          "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
+        },
+        {
+          "command": "rawImageViewer.zoomReset",
+          "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
         }
       ]
     },
+    "keybindings": [
+      {
+        "key": "=",
+        "command": "rawImageViewer.zoomIn",
+        "when": "(activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery') && !rawImageViewer.fieldFocus"
+      },
+      {
+        "key": "shift+=",
+        "command": "rawImageViewer.zoomIn",
+        "when": "(activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery') && !rawImageViewer.fieldFocus"
+      },
+      {
+        "key": "-",
+        "command": "rawImageViewer.zoomOut",
+        "when": "(activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery') && !rawImageViewer.fieldFocus"
+      },
+      {
+        "key": "0",
+        "command": "rawImageViewer.zoomReset",
+        "when": "(activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery') && !rawImageViewer.fieldFocus"
+      }
+    ],
     "configuration": {
       "title": "Raw Image Viewer",
       "properties": {
