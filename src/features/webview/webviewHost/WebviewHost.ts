@@ -4,6 +4,7 @@ import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
+import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
 import type { ZoomDirection } from '@features/zoom';
 
 import type { FileSource } from '../types';
@@ -38,6 +39,11 @@ export class WebviewHost extends DisposableStore {
         () => this.handleWebviewMessage(message),
         (error) => console.error(`WebviewHost: handling "${message.type}" failed:`, error),
       )),
+      // The context key is global: a view that goes away must not leave it set behind it.
+      { dispose: () => attemptDetached(
+        () => this.setFieldFocusContext(false),
+        (error) => console.error('WebviewHost: failed to release the field-focus context:', error),
+      ) },
     );
 
     this.updateWebviewHtml();
@@ -94,6 +100,9 @@ export class WebviewHost extends DisposableStore {
         case 'sources:request:decode':
           await this.handleRequestDecode(message.ids, message.options);
           break;
+        case 'view:fieldFocus':
+          await this.setFieldFocusContext(message.focused);
+          break;
         case 'app:status':
           InfoMessageController.handleMessage({
             level: message.level,
@@ -107,6 +116,11 @@ export class WebviewHost extends DisposableStore {
         message: 'Failed to handle webview message: ' + (error instanceof Error ? error.message : String(error)),
       });
     }
+  }
+
+  // TODO: Move out to the dedicated context controller.
+  private async setFieldFocusContext(focused: boolean): Promise<void> {
+    await vscode.commands.executeCommand(VSCodeCommands.SetContext, ContextKeys.FieldFocus, focused);
   }
 
   private async handleOpenItem(id: string): Promise<void> {

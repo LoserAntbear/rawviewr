@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
-import { Uri, window } from 'vscode';
+import { commands, Uri, window } from 'vscode';
 
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
@@ -73,6 +73,34 @@ describe('WebviewHost.requestZoom', () => {
 
     // The host decides nothing about where the zoom lands: that is the view's state.
     expect(postMessage).toHaveBeenCalledWith({ type: 'view:zoom', direction: 'out' });
+  });
+});
+
+/**
+ * VS Code resolves a keybinding outside the frame and cannot see what has focus inside it,
+ * so the webview says, and the host turns that into the context key the `when` clauses read.
+ */
+describe('WebviewHost: the field-focus context', () => {
+  it.each([true, false])('passes on what the webview reported: %s', async (focused) => {
+    const { receive } = mount(async () => true);
+
+    receive({ type: 'view:fieldFocus', focused });
+
+    await vi.waitFor(() => expect(commands.executeCommand)
+      .toHaveBeenCalledWith('setContext', 'rawImageViewer.fieldFocus', focused));
+  });
+
+  it('releases the key when the view goes away, since the key is global', async () => {
+    const { host, receive } = mount(async () => true);
+
+    receive({ type: 'view:fieldFocus', focused: true });
+    await vi.waitFor(() => expect(commands.executeCommand).toHaveBeenCalledTimes(1));
+
+    host.dispose();
+
+    // Otherwise a disposed view would hold the zoom keys hostage in the next one.
+    await vi.waitFor(() => expect(commands.executeCommand)
+      .toHaveBeenLastCalledWith('setContext', 'rawImageViewer.fieldFocus', false));
   });
 });
 
