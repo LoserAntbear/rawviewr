@@ -23,5 +23,10 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
 
   "images:decode:ready": (message, { store }) => {
     store.get(StoreSliceId.Images).upsert(message.images);
-  }
+  },
+
+  // Basically a keystroke redirected through the host.
+  "view:zoom": ({ direction }, { store }) => {
+    store.get(StoreSliceId.View).setZoom(direction);
+  },
 };
