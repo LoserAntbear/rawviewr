@@ -1,9 +1,9 @@
 import type * as vscode from 'vscode';
 
+import type { ZoomDirection } from '@features/zoom';
 import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { GalleryViewMode } from '../ui/webcomponents/types';
-import type { ZoomDirection } from '../store/slice/ViewSlice/types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { FileSource } from '../types';
 
@@ -11,6 +11,7 @@ export type WebviewHostMessageType = WebviewHostMessage['type'];
 export type WebviewHostMessage =
   | { type: 'export'; format: ExportFormat; }
   | { type: 'status:error'; message: string; }
+  | { type: 'view:zoom'; direction: ZoomDirection; }
   | { type: 'sources:update'; sources: FileSource[]; }
   | { type: 'images:decode:ready'; images: DecodedFileSource[]; }
   | { type: 'session:start'; viewMode: GalleryViewMode; decodeOptions: DecodeOptions; };
