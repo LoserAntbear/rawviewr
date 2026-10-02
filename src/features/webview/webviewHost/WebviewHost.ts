@@ -4,6 +4,8 @@ import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
+import type { ZoomDirection } from '@features/zoom';
+
 import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import appShellHtml from './app-shell.html';
@@ -43,6 +45,10 @@ export class WebviewHost extends DisposableStore {
 
   public requestExport(format: ExportFormat): Promise<void> {
     return this.post({ type: 'export', format });
+  }
+
+  public requestZoom(direction: ZoomDirection): Promise<void> {
+    return this.post({ type: 'view:zoom', direction });
   }
 
   public async post(message: WebviewHostMessage): Promise<void> {

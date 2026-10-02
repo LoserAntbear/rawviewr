@@ -64,6 +64,18 @@ describe('WebviewHost.post', () => {
   });
 });
 
+describe('WebviewHost.requestZoom', () => {
+  it('carries the direction to its own webview and nothing else', async () => {
+    const postMessage = vi.fn(async () => true);
+    const { host } = mount(postMessage);
+
+    await host.requestZoom('out');
+
+    // The host decides nothing about where the zoom lands: that is the view's state.
+    expect(postMessage).toHaveBeenCalledWith({ type: 'view:zoom', direction: 'out' });
+  });
+});
+
 describe('WebviewHost: failures end handled', () => {
   const failure = new Error('gone');
 
