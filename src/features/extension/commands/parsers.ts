@@ -5,6 +5,7 @@ import { IntentParser } from '@features/intent/types';
 import { IntentKind } from '@definitions/intent';
 import { asLocalAllowedUri, asLocalUris, dedupeUris } from '@features/vscode/guards/uri';
 import { asEnumMember } from '@utils/enum';
+import type { ZoomDirection } from '@features/zoom';
 
 function parseTargets(args: readonly unknown[]): readonly vscode.Uri[] {
   const [first, second] = args;
@@ -35,3 +36,12 @@ export const parseExport: IntentParser = (...args) => {
 };
 
 export const parseResetSettings: IntentParser = () => ({ kind: IntentKind.settingsReset });
+
+const parseZoom = (direction: ZoomDirection): IntentParser => () => ({
+  direction,
+  kind: IntentKind.viewZoom,
+});
+
+export const parseZoomIn = parseZoom('in');
+export const parseZoomOut = parseZoom('out');
+export const parseZoomReset = parseZoom('reset');
