@@ -55,11 +55,11 @@ afterEach(() => {
   }
 });
 
-describe('FieldFocusReporter', () => {
-  it('says where the session starts, rather than leaving the key as the last view left it', () => {
+describe('FieldFocusTracker', () => {
+  it('says nothing until a field takes focus: an unset key already reads as "no field"', () => {
     watch();
 
-    expect(focusState()).toEqual([false]);
+    expect(focusState()).toEqual([]);
   });
 
   it('reports a control that takes focus inside a shadow root', () => {
@@ -67,7 +67,7 @@ describe('FieldFocusReporter', () => {
 
     input.focus();
 
-    expect(focusState()).toEqual([false, true]);
+    expect(focusState()).toEqual([true]);
   });
 
   it('reports again once the control gives focus up', () => {
@@ -76,7 +76,7 @@ describe('FieldFocusReporter', () => {
     input.focus();
     input.blur();
 
-    expect(focusState()).toEqual([false, true, false]);
+    expect(focusState()).toEqual([true, false]);
   });
 
   it('says nothing when focus moves between things that are not controls', () => {
@@ -86,7 +86,7 @@ describe('FieldFocusReporter', () => {
     button.blur();
 
     // Both are "no field has focus": a keystroke is a shortcut either way.
-    expect(focusState()).toEqual([false]);
+    expect(focusState()).toEqual([]);
   });
 
   it('stands down when the window loses focus, though the control still holds it', () => {
@@ -97,7 +97,7 @@ describe('FieldFocusReporter', () => {
 
     // Chromium leaves `activeElement` in place, so a hidden view would otherwise hold the
     // key true for whichever view the user moved to.
-    expect(focusState()).toEqual([false, true, false]);
+    expect(focusState()).toEqual([true, false]);
     expect(document.activeElement).not.toBe(document.body);
   });
 
@@ -108,7 +108,7 @@ describe('FieldFocusReporter', () => {
     window.dispatchEvent(new Event('blur'));
     window.dispatchEvent(new Event('focus'));
 
-    expect(focusState()).toEqual([false, true, false, true]);
+    expect(focusState()).toEqual([true, false, true]);
   });
 
   it('stops reporting once disposed', () => {
@@ -116,7 +116,7 @@ describe('FieldFocusReporter', () => {
 
     input.focus();
 
-    expect(focusState()).toEqual([false]);
+    expect(focusState()).toEqual([]);
   });
 
   it('posts nothing else: the host hears about focus and nothing more', () => {
@@ -128,20 +128,20 @@ describe('FieldFocusReporter', () => {
   });
 });
 
-describe('FieldFocusReporter: a selection of controls', () => {
+describe('FieldFocusTracker: a selection of controls', () => {
   it.each(['select', 'textarea'])('counts a focused <%s> as a field', (tag) => {
     const control = document.createElement(tag) as HTMLElement;
 
-    (document.body.firstElementChild?.shadowRoot as ShadowRoot).append(control);
+    root.append(control);
     watch();
 
     control.focus();
 
-    expect(focusState()).toEqual([false, true]);
+    expect(focusState()).toEqual([true]);
   });
 });
 
-describe('FieldFocusReporter: the dedupe', () => {
+describe('FieldFocusTracker: the dedupe', () => {
   it('says nothing when the same field is focused twice over', () => {
     const spy = vi.spyOn(bridge, 'postToWebviewHost');
 
@@ -149,7 +149,7 @@ describe('FieldFocusReporter: the dedupe', () => {
     input.focus();
     input.focus();
 
-    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenCalledTimes(1);
 
     spy.mockRestore();
   });
@@ -170,6 +170,6 @@ describe('FieldFocusReporter: the dedupe', () => {
     input.focus();
     second.focus();
 
-    expect(focusState()).toEqual([false, true, false, true]);
+    expect(focusState()).toEqual([true, false, true]);
   });
 });
