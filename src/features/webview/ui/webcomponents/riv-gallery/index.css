@@ -1,14 +1,18 @@
 :host {
-  display: block;
+  flex: 1 1 0%;
+  display: flex;
+  min-width: 100%;
   min-height: 100%;
+  align-self: flex-start;
 }
 
 #gallery {
-  box-sizing: border-box;
-  min-height: 100%;
   margin: 0;
-  padding: var(--riv-pad);
+  min-width: 100%;
+  min-height: 100%;
   list-style: none;
+  box-sizing: border-box;
+  padding: var(--riv-pad);
 }
 
 /*

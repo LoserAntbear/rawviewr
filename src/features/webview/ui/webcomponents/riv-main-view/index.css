@@ -1,11 +1,19 @@
 :host {
-  display: block;
   height: 100%;
+  display: flex;
   min-height: 0;
 }
 
 /* The scroll container. Everything below it lays out against a fixed box. */
 #main-view {
-  height: 100%;
+  display: flex;
   overflow: auto;
+  min-width: 100%;
+  padding-bottom: 48px;
 }
+
+riv-main-view-component {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+

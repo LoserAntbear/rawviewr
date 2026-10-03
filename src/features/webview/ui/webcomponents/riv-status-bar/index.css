@@ -1,5 +1,5 @@
 :host {
-  display: block;
+  display: flex;
   border-top: 1px solid var(--riv-border);
   background: var(--riv-surface);
 }
@@ -7,6 +7,7 @@
 #status-bar {
   display: flex;
   align-items: center;
+  flex: 1;
   gap: 16px;
   min-width: 0;
   padding: 4px 10px;
@@ -86,4 +87,8 @@
   to {
     transform: rotate(1turn);
   }
+}
+
+riv-status-bar-component {
+  flex: 0 0 auto;
 }

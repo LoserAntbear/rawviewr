@@ -84,6 +84,10 @@ input:focus-visible {
   border-right: none;
 }
 
+riv-toolbar-component {
+  flex: 0 0 auto;
+}
+
 button {
   font: inherit;
   color: var(--vscode-button-foreground, inherit);

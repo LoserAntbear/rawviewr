@@ -39,6 +39,6 @@ body {
 }
 
 riv-app-component {
-  display: block;
+  display: flex;
   height: 100%;
 }
