@@ -13,6 +13,7 @@ import template from './index.html';
 import styles from './index.css';
 import { ImagesState } from '@features/webview/store/slice/ImagesSlice';
 import type { BusEvent } from '@features/webview/messaging';
+import { ProbeInputHandler } from '@webview/_features/input/pointerInput/ProbeInputHandler';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
@@ -28,6 +29,7 @@ export class RIVImage extends RIVHTMLElement {
 
   protected readonly view = new RIVImageView(this.mount(template, styles));
 
+  private readonly probeInputHandler = new ProbeInputHandler(this);
   private readonly renderers: RIVImageRendererMap = {
     [RIVImageStateKind.Paint]: ({ image }) => this.view.paint(image),
     [RIVImageStateKind.Loading]: () => this.view.showStatus('loading…'),
@@ -45,7 +47,19 @@ export class RIVImage extends RIVHTMLElement {
     this.observe(store.bus, "images:change", this.handleItemsChange.bind(this));
     this.observe(store.bus, "decodeOptions:change", this.render.bind(this));
 
+    this.observeProbeInput();
     this.render();
+  }
+
+  private observeProbeInput(): void {
+    const canvas = this.ref<HTMLCanvasElement>('canvas');
+
+    if (!canvas) {
+      throw new Error(`${this.localName}: template is missing #canvas`);
+    }
+
+    this.observe(canvas, 'pointermove', this.probeInputHandler.handlePointerMove.bind(this.probeInputHandler));
+    this.observe(canvas, 'pointerleave', this.probeInputHandler.handlePointerLeave.bind(this.probeInputHandler));
   }
 
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
