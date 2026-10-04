@@ -1,5 +1,5 @@
 import type { Vector2 } from '@definitions/geometry';
-import type { SourceBytes, SourceLocation } from '@features/image/sourceReader/types';
+import type { SourceLocation } from '@features/image/sourceReader/types';
 
 export type Rgba = {
   r: number;
@@ -8,7 +8,8 @@ export type Rgba = {
   a: number;
 };
 
-export type PixelSample = SourceLocation & SourceBytes & {
-  rgba: Rgba;
-  position: Vector2;
+export type PixelSample = {
+  readonly rgba: Rgba;
+  readonly position: Vector2;
+  readonly location: SourceLocation;
 };
