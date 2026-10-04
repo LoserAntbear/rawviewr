@@ -159,3 +159,49 @@ describe('status bar: gallery view', () => {
     expect(notes?.text).toBe('double-click a tile to open it on its own');
   });
 });
+
+/**
+ * The reading that ties a pixel back to the file. Built straight from the slice, since the
+ * probe's own arithmetic is covered where it lives.
+ */
+describe('status bar: the pixel probe', () => {
+  const probeSegment = () => SEGMENT_RESOLVERS.probe(selectStatusBarContext(store.state, registry));
+
+  it('says nothing until the pointer is over a pixel', () => {
+    expect(probeSegment()).toBeNull();
+  });
+
+  it('reads out the position, the colour and the byte it came from', () => {
+    store.get(StoreSliceId.Probe).setActiveSample({
+      id: 'a',
+      position: { x: 12, y: 7 },
+      rgba: { r: 255, g: 0, b: 170, a: 255 },
+      location: { bits: 16, bitOffset: 0, byteOffset: 6699 },
+    });
+
+    expect(probeSegment()).toEqual({ text: '12,7 · #ff00aaff · @0x1a2b', level: 'info' });
+  });
+
+  it('names the bit as well, where a byte holds more than one pixel', () => {
+    store.get(StoreSliceId.Probe).setActiveSample({
+      id: 'a',
+      position: { x: 2, y: 0 },
+      rgba: { r: 85, g: 85, b: 85, a: 255 },
+      location: { bits: 2, bitOffset: 4, byteOffset: 0 },
+    });
+
+    // Four pixels share byte 0, so the byte alone would not say which.
+    expect(probeSegment()?.text).toBe('2,0 · #555555ff · @0x0000+4');
+  });
+
+  it('pads a short offset, so the readings line up as the pointer moves', () => {
+    store.get(StoreSliceId.Probe).setActiveSample({
+      id: 'a',
+      position: { x: 0, y: 0 },
+      rgba: { r: 0, g: 0, b: 0, a: 0 },
+      location: { bits: 32, bitOffset: 0, byteOffset: 16 },
+    });
+
+    expect(probeSegment()?.text).toBe('0,0 · #00000000 · @0x0010');
+  });
+});
