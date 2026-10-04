@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { throttle } from './throttle';
+import { throttle, withThrottle } from './throttle';
 
 /**
  * Leading edge is what makes this usable for input: the first call answers at once, so a
@@ -85,5 +85,62 @@ describe('throttle', () => {
     throttled();
 
     expect(action).toHaveBeenCalledTimes(2);
+  });
+});
+
+/**
+ * A decorator replaces the method on the prototype, so one function serves every instance.
+ * What must not be shared is the window — these pin that, because sharing it would mean one
+ * view's gesture silencing another's, and nothing in the types would say so.
+ */
+describe('withThrottle', () => {
+  class View {
+    public readonly seen: string[] = [];
+
+    constructor(private readonly name = 'view') {}
+
+    @withThrottle(100)
+    public zoom(direction: string): void {
+      // Pushed through `this`, so a mis-bound method shows up here as a crash.
+      this.seen.push(`${this.name}:${direction}`);
+    }
+  }
+
+  it('lets the first call through and drops the rest of the burst', () => {
+    const view = new View();
+
+    view.zoom('in');
+    view.zoom('in');
+    view.zoom('in');
+
+    expect(view.seen).toEqual(['view:in']);
+  });
+
+  it('keeps a window per instance, so one view cannot silence another', () => {
+    const first = new View('first');
+    const second = new View('second');
+
+    first.zoom('in');
+    second.zoom('out');
+
+    expect([first.seen, second.seen]).toEqual([['first:in'], ['second:out']]);
+  });
+
+  it('opens the window again once the interval has passed', () => {
+    const view = new View();
+
+    view.zoom('in');
+    vi.advanceTimersByTime(100);
+    view.zoom('out');
+
+    expect(view.seen).toEqual(['view:in', 'view:out']);
+  });
+
+  it('shares one function across instances, as a prototype method does', () => {
+    expect(new View().zoom).toBe(new View().zoom);
+  });
+
+  it('gives nothing back: a dropped call has no value to return', () => {
+    expect(new View().zoom('in')).toBeUndefined();
   });
 });
