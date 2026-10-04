@@ -1,8 +1,9 @@
-import { Vector2 } from '@definitions/geometry';
+import type { Vector2 } from '@definitions/geometry';
 import { PixelLocator } from '@features/image/pixelLocator/PixelLocator';
-import { SourceReader } from '@features/image/sourceReader/SourceReader';
-import { DecodedImage, DecodeOptions, DecodeResult } from '@features/image/imageDecoder/types';
-import { PixelSample, Rgba } from './types';
+import type { DecodedImage, DecodeOptions } from '@features/image/imageDecoder/types';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+
+import type { PixelSample, Rgba } from './types';
 
 function readRgba({ data, width }: DecodedImage, { x, y }: Vector2): Rgba {
   const index = (y * width + x) * 4;
@@ -15,24 +16,13 @@ function readRgba({ data, width }: DecodedImage, { x, y }: Vector2): Rgba {
   };
 }
 
-export class PixelProbe {
-  constructor(
-    private readonly sourceReader: SourceReader = new SourceReader(),
-  ) {}
+export function probePixel(
+  image: DecodedImage,
+  geometry: Geometry,
+  options: DecodeOptions,
+  position: Vector2,
+): PixelSample {
+  const location = new PixelLocator(geometry, options, options.format.bpp).locate(position);
 
-  public probe(
-    decoded: DecodeResult,
-    options: DecodeOptions,
-    position: Vector2,
-  ): PixelSample | null {
-    const { source, geometry, image } = decoded;
-    const location = new PixelLocator(geometry, options, options.format.bpp).locate(position);
-
-    return location ? {
-      ...location,
-      position,
-      rgba: readRgba(image, position),
-      ...this.sourceReader.read(source, location, options.endian),
-    } : null;
-  }
+  return { position, location, rgba: readRgba(image, position) };
 }
