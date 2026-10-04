@@ -29,7 +29,7 @@ export class ProbeInputHandler {
       const sample = this.resolveSampleFromEvent(event);
 
       if (sample) {
-        this.store.get(StoreSliceId.Probe).setHovered(sample);
+        this.store.get(StoreSliceId.Probe).setActiveSample(sample);
       }
     } catch (error) {
       console.error('Failed to handle pointer move event:', error);
@@ -37,7 +37,7 @@ export class ProbeInputHandler {
   }
 
   public handlePointerLeave(): void {
-    this.store.get(StoreSliceId.Probe).clearHovered();
+    this.store.get(StoreSliceId.Probe).clearActiveSample();
   }
 
   // private resolveSampleFromEvent(event: Event): ProbeSample | null {

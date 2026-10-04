@@ -94,7 +94,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const hovered = () => store.get(StoreSliceId.Probe).hovered;
+const hovered = () => store.get(StoreSliceId.Probe).activeSample;
 
 describe('ProbeInputHandler', () => {
   it('reads the pixel under the pointer into the store', () => {
