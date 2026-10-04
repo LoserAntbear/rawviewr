@@ -1,6 +1,7 @@
 import type { EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice } from './slice/ViewSlice';
+import type { ProbeSlice } from './slice/ProbeSlice';
 import type { ImagesSlice } from './slice/ImagesSlice';
 import type { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
 import type { ReactiveStore } from './ReactiveStore';
@@ -23,6 +24,7 @@ export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSlice
 // TODO: Replace explicit StoreSlices mapping with a more generic approach, inferring from store creation
 export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
+  readonly [StoreSliceId.Probe]: ProbeSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
   readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
