@@ -1,10 +1,14 @@
 import { WebviewMessage } from '@features/webview/webviewHost';
 import { RIV_COMMAND_EVENT_ID } from '@webview/commands/definitions';
 import { resolveWheelZoomDirection } from './utils';
+import { ZoomDirection } from '@features/zoom/types';
+import { withThrottle } from '@utils/throttle';
+
+const WHEEL_ZOOM_INTERVAL_MS = 100 as const;
 
 export class WheelInputHandler {
   constructor(
-    private readonly target: EventTarget
+    private readonly target: EventTarget,
   ) {}
 
   public handleWheelAsZoom(event: Event): void {
@@ -19,8 +23,13 @@ export class WheelInputHandler {
     const direction = resolveWheelZoomDirection(wheel.deltaY);
 
     if (direction) {
-      this.emitCommand({ type: 'view:zoom', direction });
+      this.handleDirectionEmitted(direction);
     }
+  }
+
+  @withThrottle(WHEEL_ZOOM_INTERVAL_MS)
+  private handleDirectionEmitted(direction: ZoomDirection): void {
+    this.emitCommand({ type: 'view:zoom', direction });
   }
 
   protected emitCommand(command: WebviewMessage): void {

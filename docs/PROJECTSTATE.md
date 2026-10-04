@@ -27,7 +27,7 @@ The webview rewrite is past its midpoint. The new pipeline decodes end to end �
 file, posts an `ArrayBuffer`, the items slice fans it out, `riv-image` decodes to an
 `ImageBitmap` and blits it — and the toolbar drives every decode option through
 `DecodeSlice`. What remains in `main.refactor.ts` is the interactive layer: pixel probe,
-PNG export, zoom, frame tiles and the dimension-guess picker.
+PNG export, frame tiles and the dimension-guess picker.
 
 Both bundles build. `tsc` is still red in five files, all of them either the reference
 implementation or work parked mid-port (see [Shipping a first version](#shipping-a-first-version)).
@@ -226,11 +226,60 @@ Each item names what it depends on. Nothing below is started.
    zoom, probe and frame position each add one entry. Geometry is re-derived per render
    from the shown buffer and the options, and a header preset the bytes cannot satisfy
    shows as an error note rather than throwing.
-2. **Zoom controller** — fit, 1:1, step in and out. Single mode renders at intrinsic size
-   and scrolls today; that stays the default, zoom is the way in. Reports into the status
-   bar.
-3. **Keyboard shortcuts.** `-` `+` `f` `0` for zoom, `←` `→` for frames. The manifest
-   declares no keybindings, and the reference drove these from one `keydown` handler.
+2. ~~**Zoom controller**~~ **Landed, except fit.** Step in, step out and 1:1, capped at
+   `[0.25, 16]` by factor 2 (`ViewSlice`, `ZOOM`). The factor lives in view state and
+   reaches the canvas as `--riv-image-scale`, which `riv-image` applies as CSS `zoom` —
+   `zoom` rather than `transform: scale()` because a transform paints bigger without
+   claiming the room, so the viewport would never gain the scroll area the magnified image
+   needs. The backing store is untouched, so no step costs a decode or a bitmap. Measured
+   in headless Chrome: 50px canvas at 4× occupies 200px, `scrollWidth` grows with it,
+   `image-rendering: pixelated` survives, and in a gallery tile the existing
+   `--riv-image-fit` cap still wins, so a tile can never overflow.
+
+   Buttons raise `view:zoom` with a direction and the webview's own resolver moves the
+   slice — the host never hears about it, because zoom is this window's layout. The caps
+   show as disabled buttons (toolbar availability now reads zoom as well as the options),
+   and the bar reads the percentage, silent at 1:1.
+
+   **Fit is not done**: it needs the viewport measured, which means an element asking its
+   own box rather than a number in the store. That is the one piece with a new dependency,
+   so it waits for a reason to exist.
+3. ~~**Keyboard shortcuts**~~ **Landed for zoom** — `=` `shift+=` `-` `0`, plus ctrl/⌘+wheel
+   and trackpad pinch. `f` waits for fit; `←` `→` wait for frames.
+
+   There is no raw-key API in the extension API, so chords are VS Code keybindings and
+   nothing else: `contributes.keybindings` → command → `CommandNames` → parser → intent →
+   `ViewerRegistry.activeViewer.requestZoom` → a `view:zoom` host message → the same
+   `ViewSlice.setZoom` the toolbar calls. Users get the Keyboard Shortcuts UI, reassignment
+   and conflict handling for free, and we keep one vocabulary.
+
+   Verified in the installed app rather than assumed: a webview forwards **every** keydown
+   to the workbench (`postMessage('did-keydown')` in the webview preamble, re-dispatched by
+   `handleKeyEvent`, guarded only by `isTrusted` and the webview being the active element),
+   so keybindings resolve while the view is focused — *and* the frame keeps the keystroke.
+   A bare `0` would therefore reset the zoom and type a zero into Width, which is why every
+   chord carries `!rawImageViewer.fieldFocus` and `FieldFocusTracker` keeps that key through
+   `setContext`. This is the same guard `markdown-language-features` uses for its own
+   bare-key bindings (`markdownEditorFocus`). The key is negative on purpose: unset reads as
+   false, so a view that never reports is permissive rather than dead.
+
+   The wheel cannot go that way at all — there is no mouse API in the host, so no keybinding
+   can express it. `riv-main-view` owns it: a non-passive listener on the scroll container,
+   `preventDefault` on every event of the gesture (Chromium would zoom the page), the
+   direction read straight off the sign of `deltaY`, and the firing throttled to one step
+   per 150 ms. Rate, not distance: a wheel says which way just as plainly at one pixel as at
+   a hundred, and the two devices differ only in how often they say it — a notch is one
+   event and goes straight through, a pinch is tens a second and needs limiting. The earlier
+   version accumulated 100px per step, which measured the wrong thing and favoured the
+   trackpad. `throttle` (`@utils/throttle`) is leading-edge with no trailing call, so the
+   first notch answers at once and a dropped event is a step not taken, never a deferred
+   one. It raises
+   the same `view:zoom` command the toolbar buttons do.
+
+   **Blind spot:** happy-dom neither enforces passive listeners nor fills in a `WheelEvent`'s
+   modifier keys, so `{ passive: false }` is unproven by tests and `ctrlKey` is stubbed per
+   event. The listener is on a shadow-root `div`, not window/document/body, so Chromium's
+   passive-by-default intervention does not apply to it either way.
 4. **Pixel probe** — needs the status bar. `PixelProbe` and `PixelLocator` exist and are
    unwired. Does *not* need zoom: the reference maps mouse to pixel through
    `getBoundingClientRect()`, which is scale-independent.
@@ -375,8 +424,6 @@ The gallery needs to ask for what is on screen and drop what is not
   under `samples/raw/`. Also shipping: `.claude/settings.local.json` (machine-local config
   that should not be public), `docs/`, `eslint.config.mjs` and `.gitignore`.
   `.vscodeignore` needs a pass; the test harness files are already excluded.
-- Nothing has run in a real VS Code webview yet. The harness closes most of that gap but
-  not all — canvas rendering and the `ArrayBuffer` export transfer still need a real run.
 
 ### Explicitly not in v1
 
@@ -386,12 +433,13 @@ The gallery needs to ask for what is on screen and drop what is not
 - webview serialization (`WebviewPanelSerializer`)
 - custom header presets
 
-0. Real-DOM test harness →
-1. Status bar →
-2. Zoom →
-3. Keyboard Shortcuts →
+0. Real-DOM test harness → V
+1. Status bar → V
+2. Zoom → V (fit still open)
+3. Keyboard Shortcuts → V (zoom; `f` and frame arrows pending their features)
 4. Probe →
 5. Frames →
 6. Backdrop + tile size →
 7. Guess picker →
-8. Remember options.
+8. Remember options ->
+9. Parallel HEX view (pixel-to-byte mapping)
