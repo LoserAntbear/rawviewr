@@ -35,9 +35,9 @@ export class PixelLocator {
     return this.frameOffset + sourceRow * this.bytesPerRow;
   }
 
-  public locate(position: Vector2): SourceLocation | null {
+  public locate(position: Vector2): SourceLocation {
     if (!this.contains(position)) {
-      return null;
+      throw new Error('Position out of bounds');
     }
 
     const rowStart = this.locateRow(position.y);
