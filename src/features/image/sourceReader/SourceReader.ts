@@ -13,6 +13,9 @@ function nothingToRead(): SourceBytes {
  * Reads whatever a {@link SourceLocation} points at.
  * Stateless, so a caller can hold one and use it repeatedly on different buffers.
  */
+/**
+ * TODO: Retire, since looks look not needed anymore.
+ */
 export class SourceReader {
   public read(source: Uint8Array, location: SourceLocation, endian: Endian): SourceBytes {
     const { bits, byteOffset, bitOffset } = location;
