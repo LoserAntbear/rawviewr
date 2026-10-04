@@ -57,6 +57,13 @@ export class ProbeInputHandler {
       // Seems like due to it being a css var
       Number.parseFloat(canvas.computedStyleMap()?.get('zoom')?.toString() ?? '1'),
     );
+    /**
+     * TODO: Refactor into PixelProve instantiation?
+     * Seems like no need to recreate prober from scratch eax time:
+     * It has pixelLocator underneath, which should be recreated for new image/or decode options.
+     *
+     * Then we can probe by position respectively.
+     */
     const sample = probePixel(
       item.image,
       item.geometry,
