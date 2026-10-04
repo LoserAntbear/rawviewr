@@ -10,6 +10,7 @@ import { selectStatusBarContext } from './state/selectors';
 
 const STATUS_BAR_EVENTS = [
   "view:change",
+  "probe:change",
   "images:change",
   "sources:change",
   "decodeOptions:change",
