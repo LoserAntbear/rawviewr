@@ -2,7 +2,8 @@ import { BITS_PER_BYTE } from '@features/image/format/definitions';
 import type { Rgba } from '@features/image/pixelProbe/types';
 import type { SourceBytes, SourceLocation } from '@features/image/sourceReader/types';
 import { StoreSliceId } from '@features/webview/store/definitions';
-import type { PinnedProbeSample, ProbeSample } from '@features/webview/store/slice/ProbeSlice';
+import type { PinnedProbeSample, PinnedSourceBytes, ProbeSample } from '@features/webview/store/slice/ProbeSlice';
+import { byKind, type KindStrategies } from '@utils/strategy';
 
 import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
@@ -51,6 +52,13 @@ function formatBytes({ bytes, value }: SourceBytes, bits: number): string {
     : `${read} = 0x${toHex(value, Math.ceil(bits / 4))}`;
 }
 
+/** Waiting says nothing of its own: the spinner is what tells the reader it is coming. */
+const PINNED_BYTES: KindStrategies<PinnedSourceBytes, [bits: number], string | null> = {
+  pending: () => null,
+  failed: ({ message }) => message,
+  received: ({ bytes }, bits) => formatBytes(bytes, bits),
+};
+
 export function resolvePinnedProbe({ appState }: StatusBarStateContext): StatusBarEntry | null {
   const pinned: PinnedProbeSample | null = appState[StoreSliceId.Probe].pinnedSample;
 
@@ -58,12 +66,12 @@ export function resolvePinnedProbe({ appState }: StatusBarStateContext): StatusB
     return null;
   }
 
-  const read = pinned.sourceFileBytes === null ? null : formatBytes(pinned.sourceFileBytes, pinned.location.bits);
+  const read = byKind(PINNED_BYTES, pinned.sourceFileBytes, pinned.location.bits);
 
   return {
-    level: 'info',
     sample: formatRgba(pinned.rgba),
-    loading: pinned.sourceFileBytes === null,
+    loading: pinned.sourceFileBytes.kind === 'pending',
+    level: pinned.sourceFileBytes.kind === 'failed' ? 'error' : 'info',
     text: [formatSample(pinned), ...(read === null ? [] : [read])].join(' · '),
   };
 }
