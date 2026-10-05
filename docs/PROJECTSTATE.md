@@ -310,6 +310,13 @@ Each item names what it depends on. Nothing below is started.
    file API has no range read, and keeping buffers alive for a click that may never come is
    what the store refuses to do in the first place.
 
+   A read opens the file, which on a large buffer is not instant and can fail outright, so a
+   pinned reading carries its state: `pending` while the host is opening, then `received` or
+   `failed`. Waiting is the webview's own state and never travels — the wire only ever says
+   what came back. The failure case is the one that earns the machinery: without it a read
+   that threw left the bar spinning on a reply that was never coming, and raised a message
+   box at the user for a pixel they merely clicked.
+
    A read is a round trip, so the answer is matched against what is pinned by id and offset
    before it is taken: pin, re-pin elsewhere, and the first answer is dropped rather than
    shown under the wrong pixel. The pin asks once — a sweep over the image while the read is
