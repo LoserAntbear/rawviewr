@@ -27,7 +27,7 @@ const requestSourceFileBytesOnPin: StoreReaction = (store) => ({
     const pinned = next.pinnedSample;
 
     if (pinned && pinned !== prev.pinnedSample && pinned.sourceFileBytes === null) {
-      store.bus.emit('probe:bytes:requested', { id: pinned.id, location: pinned.location });
+      store.bus.emit('probe:receive:source-bytes:requested', { id: pinned.id, location: pinned.location });
     }
   }),
 });
