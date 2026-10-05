@@ -36,11 +36,18 @@ export class ProbeInputHandler {
     }
   }
 
+  public handlePointerClick(event: Event): void {
+    try {
+      this.store.get(StoreSliceId.Probe).togglePin(this.resolveSampleFromEvent(event));
+    } catch (error) {
+      console.error('Failed to handle pointer click event:', error);
+    }
+  }
+
   public handlePointerLeave(): void {
     this.store.get(StoreSliceId.Probe).clearActiveSample();
   }
 
-  // private resolveSampleFromEvent(event: Event): ProbeSample | null {
   private resolveSampleFromEvent(event: Event): ProbeSample {
     const canvas = event.target;
     const item = this.store.get(StoreSliceId.Images).getImage(this.target.itemId);

@@ -62,6 +62,13 @@ function stubZoom(zoom: number): void {
   });
 }
 
+function click(x = 2.5, y = 1.5): void {
+  const event = new PointerEvent('click', { clientX: x, clientY: y });
+
+  Object.defineProperty(event, 'target', { value: canvas });
+  handler.handlePointerClick(event);
+}
+
 /** A pointer over the centre of image pixel (2,1), with the canvas at its intrinsic size. */
 function move(x = 2.5, y = 1.5): void {
   const event = new PointerEvent('pointermove', { clientX: x, clientY: y });
@@ -175,5 +182,44 @@ describe('ProbeInputHandler', () => {
     handler.handlePointerMove(event);
 
     expect(activeSample()).toBeNull();
+  });
+});
+
+describe('ProbeInputHandler: pinning', () => {
+  const pinned = () => store.get(StoreSliceId.Probe).pinnedSample;
+
+  it('holds the pixel that was clicked', () => {
+    store.get(StoreSliceId.Images).put('a', ready());
+
+    click();
+
+    expect(pinned()).toMatchObject({ id: 'a', position: { x: 2, y: 1 }, bytes: null });
+  });
+
+  it('lets go when the same pixel is clicked again', () => {
+    store.get(StoreSliceId.Images).put('a', ready());
+
+    click();
+    click();
+
+    expect(pinned()).toBeNull();
+  });
+
+  it('is not throttled: a click is a decision, not a sweep', () => {
+    store.get(StoreSliceId.Images).put('a', ready());
+
+    // Two clicks inside one frame still mean pin and unpin.
+    click(2.5, 1.5);
+    click(0.5, 0.5);
+
+    expect(pinned()?.position).toEqual({ x: 0, y: 0 });
+  });
+
+  it('pins nothing it cannot read', () => {
+    store.get(StoreSliceId.Images).put('a', { id: 'a', kind: 'pending' });
+
+    click();
+
+    expect(pinned()).toBeNull();
   });
 });
