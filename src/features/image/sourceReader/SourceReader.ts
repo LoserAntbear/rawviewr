@@ -1,6 +1,8 @@
 import { Endian } from '@definitions/bits';
 import { BITS_PER_BYTE } from '@features/image/format/definitions';
 import { readWord } from '@utils/bits';
+import { BufferItem } from '@features/buffer/BufferItem';
+import { FileSource } from '@features/webview/types';
 
 import { SourceBytes, SourceLocation } from './types';
 
@@ -9,13 +11,6 @@ function nothingToRead(): SourceBytes {
   return { bytes: [], value: null };
 }
 
-/**
- * Reads whatever a {@link SourceLocation} points at.
- * Stateless, so a caller can hold one and use it repeatedly on different buffers.
- */
-/**
- * TODO: Retire, since looks look not needed anymore.
- */
 export class SourceReader {
   public read(source: Uint8Array, location: SourceLocation, endian: Endian): SourceBytes {
     const { bits, byteOffset, bitOffset } = location;
@@ -23,6 +18,16 @@ export class SourceReader {
     return bits < BITS_PER_BYTE
       ? this.readWithinByte(source, byteOffset, bitOffset, bits)
       : this.readWholeBytes(source, byteOffset, bits / BITS_PER_BYTE, endian);
+  }
+
+  public async readFromFileSource(
+    source: FileSource,
+    location: SourceLocation,
+    endian: Endian,
+  ): Promise<SourceBytes> {
+    const item = await BufferItem.fromFileSource(source);
+
+    return this.read(new Uint8Array(item.data), location, endian);
   }
 
   /** Sub-byte formats share a byte between pixels, so only some bits are ours. */
@@ -56,4 +61,5 @@ export class SourceReader {
       value: readWord(source, byteOffset, byteCount, endian),
     };
   }
+
 }
