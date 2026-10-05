@@ -114,6 +114,12 @@ describe('riv-image: the pixel probe', () => {
     expect(activeSample()).toBeNull();
   });
 
+  it('pins the pixel that was clicked on its canvas', () => {
+    pointer('click');
+
+    expect(store.get(StoreSliceId.Probe).pinnedSample).toMatchObject({ id: 'a', position: { x: 2, y: 1 } });
+  });
+
   it('stops reading once it is off the page', () => {
     element.remove();
 

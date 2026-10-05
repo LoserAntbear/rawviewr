@@ -60,6 +60,7 @@ export class RIVImage extends RIVHTMLElement {
 
     this.observe(canvas, 'pointermove', this.probeInputHandler.handlePointerMove.bind(this.probeInputHandler));
     this.observe(canvas, 'pointerleave', this.probeInputHandler.handlePointerLeave.bind(this.probeInputHandler));
+    this.observe(canvas, 'click', this.probeInputHandler.handlePointerClick.bind(this.probeInputHandler));
   }
 
   // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
