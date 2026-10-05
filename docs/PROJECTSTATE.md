@@ -297,10 +297,23 @@ Each item names what it depends on. Nothing below is started.
    the box is divided by itself and multiplied by `canvas.width` to undo the gallery's fit.
    Both are engine-visible behaviour: re-measure after an Electron bump.
 
-   **Still to come:** the pin. Clicking freezes a reading and asks the host for the source
-   bytes behind the offset — the one half the webview cannot answer, since it keeps no
-   buffers. One round trip per click rather than sixty a second, which is also the only rate
-   a hex word can be read at.
+   **The pin landed too.** Clicking holds a reading still in its own bar segment, so a frozen
+   pixel and the live one under the pointer can be read side by side; clicking it again lets
+   go. A held reading is the only one that carries the raw bytes — `3c 1f = 0x1f3c`, the word
+   the decoded colour hides — because those need the source buffer, which the webview does
+   not keep. One round trip per click, never per move.
+
+   The request goes the way `images:decode:requested` does: a reaction notices a fresh pin,
+   the forward table turns it into `probe:request` and adds the byte order from the options,
+   and the host reads the file through `SourceBytesReader` and answers with `probe:receive:source-bytes`.
+   Nothing new was built for it. The file is read per request and let go again — the VS Code
+   file API has no range read, and keeping buffers alive for a click that may never come is
+   what the store refuses to do in the first place.
+
+   A read is a round trip, so the answer is matched against what is pinned by id and offset
+   before it is taken: pin, re-pin elsewhere, and the first answer is dropped rather than
+   shown under the wrong pixel. The pin asks once — a sweep over the image while the read is
+   in flight does not ask again.
 5. **Frame navigation and frame tiles** — README feature. `DecodeOptions.frame` and
    `Geometry.frameCount` decode correctly; nothing steps through frames or lays them out.
 6. **Backdrop choice and tile size** — needs the config emitter exposed. `background` and
@@ -455,7 +468,7 @@ The gallery needs to ask for what is on screen and drop what is not
 1. Status bar → V
 2. Zoom → V (fit still open)
 3. Keyboard Shortcuts → V (zoom; `f` and frame arrows pending their features)
-4. Probe → V (hover + chip; pin and raw bytes pending)
+4. Probe → V
 5. Frames →
 6. Backdrop + tile size →
 7. Guess picker →
