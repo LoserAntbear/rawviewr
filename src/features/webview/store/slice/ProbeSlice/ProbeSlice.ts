@@ -1,4 +1,4 @@
-import type { SourceBytes, SourceLocation } from '@features/image/sourceReader/types';
+import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
@@ -36,7 +36,7 @@ export class ProbeSlice extends StoreSlice<StoreSliceId.Probe, ProbeState, Probe
 
   public togglePinnedSample(sample: ProbeSample): void {
     this.patch({
-      pinnedSample: isSamePixel(this.pinnedSample, sample) ? null : { ...sample, sourceFileBytes: null },
+      pinnedSample: isSamePixel(this.pinnedSample, sample) ? null : { ...sample, sourceFileBytes: { kind: 'pending' } },
     });
   }
 
@@ -44,13 +44,13 @@ export class ProbeSlice extends StoreSlice<StoreSliceId.Probe, ProbeState, Probe
     this.patch({ pinnedSample: null });
   }
 
-  public setSourceBytesForPinnedSample(id: string, location: SourceLocation, bytes: SourceBytes): void {
+  public setSourceBytesForPinnedSample(id: string, location: SourceLocation, result: SourceBytesResult): void {
     const pinnedSample = this.pinnedSample;
 
     if (!isSameSample(pinnedSample, id, location)) {
       return;
     }
 
-    this.patch({ pinnedSample: { ...pinnedSample as PinnedProbeSample, sourceFileBytes: bytes } });
+    this.patch({ pinnedSample: { ...pinnedSample as PinnedProbeSample, sourceFileBytes: result } });
   }
 }
