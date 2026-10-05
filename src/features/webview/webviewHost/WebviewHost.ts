@@ -6,7 +6,7 @@ import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
 import type { Endian } from '@definitions/bits';
-import type { SourceLocation } from '@features/image/sourceReader/types';
+import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import type { ZoomDirection } from '@features/zoom';
 
 import type { FileSource } from '../types';
@@ -17,7 +17,7 @@ import { getNonce } from '../utils';
 import { GalleryViewMode } from '../ui/webcomponents/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import { attemptDetached } from '@utils/attempt';
+import { attemptAsync, attemptDetached } from '@utils/attempt';
 import { SourceReader } from '@features/image/sourceReader/SourceReader';
 
 // TODO: Extract webview posting and handlers into a separate messaging layer
@@ -146,7 +146,11 @@ export class WebviewHost extends DisposableStore {
       id,
       location,
       type: 'probe:receive:source-bytes',
-      bytes: await this.sourceReader.readFromFileSource(source, location, endian),
+      // A failed read is an answer too: without one the view waits on a reply never coming.
+      result: await attemptAsync<SourceBytesResult>(
+        async () => ({ kind: 'received', bytes: await this.sourceReader.readFromFileSource(source, location, endian) }),
+        (error) => ({ kind: 'failed', message: error instanceof Error ? error.message : String(error) }),
+      ),
     });
   }
 
