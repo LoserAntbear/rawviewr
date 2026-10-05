@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
-import { commands, Uri, window } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
+import { Endian } from '@definitions/bits';
 
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
@@ -101,6 +102,68 @@ describe('WebviewHost: the field-focus context', () => {
     // Otherwise a disposed view would hold the zoom keys hostage in the next one.
     await vi.waitFor(() => expect(commands.executeCommand)
       .toHaveBeenLastCalledWith('setContext', 'rawImageViewer.fieldFocus', false));
+  });
+});
+
+/**
+ * The half of a reading the webview cannot take. It keeps no buffers — that is what makes a
+ * gallery of thousands affordable — so a pinned offset is read here, from the file.
+ */
+describe('WebviewHost: the probe read', () => {
+  const location = { bits: 16, bitOffset: 0, byteOffset: 2 } as const;
+
+  it('reads the bytes that offset points at and sends them back', async () => {
+    const posted = vi.fn();
+
+    // 0x1f3c sits at byte 2, little endian.
+    vi.mocked(workspace.fs.readFile).mockResolvedValue(new Uint8Array([0, 0, 0x3c, 0x1f, 0]));
+
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    }, undefined, [source]);
+
+    receive({ type: 'probe:request', id: 'a', location, endian: Endian.Little });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith({
+      location,
+      id: 'a',
+      type: 'probe:receive:source-bytes',
+      bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c },
+    }));
+  });
+
+  it('reads the same bytes the other way round when the options say so', async () => {
+    const posted = vi.fn();
+
+    vi.mocked(workspace.fs.readFile).mockResolvedValue(new Uint8Array([0, 0, 0x3c, 0x1f, 0]));
+
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    }, undefined, [source]);
+
+    receive({ type: 'probe:request', id: 'a', location, endian: Endian.Big });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith(expect.objectContaining({
+      bytes: { bytes: [0x3c, 0x1f], value: 0x3c1f },
+    })));
+  });
+
+  it('says nothing for a source it does not hold, rather than failing the view', async () => {
+    const posted = vi.fn();
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    }, undefined, [source]);
+
+    receive({ type: 'probe:request', id: 'gone', location, endian: Endian.Little });
+
+    await vi.waitFor(() => expect(workspace.fs.readFile).not.toHaveBeenCalled());
+    expect(posted).not.toHaveBeenCalled();
   });
 });
 

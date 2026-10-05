@@ -5,6 +5,8 @@ import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
+import type { Endian } from '@definitions/bits';
+import type { SourceLocation } from '@features/image/sourceReader/types';
 import type { ZoomDirection } from '@features/zoom';
 
 import type { FileSource } from '../types';
@@ -16,6 +18,7 @@ import { GalleryViewMode } from '../ui/webcomponents/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { attemptDetached } from '@utils/attempt';
+import { SourceReader } from '@features/image/sourceReader/SourceReader';
 
 // TODO: Extract webview posting and handlers into a separate messaging layer
 export class WebviewHost extends DisposableStore {
@@ -28,6 +31,7 @@ export class WebviewHost extends DisposableStore {
     private readonly sourcesDecoder: SourcesDecoder,
     private readonly itemOpener?: ItemOpener,
     private readonly exporter: ImageExporter = new ImageExporter(),
+    private readonly sourceReader: SourceReader = new SourceReader(),
   ) {
     super();
 
@@ -100,6 +104,9 @@ export class WebviewHost extends DisposableStore {
         case 'sources:request:decode':
           await this.handleRequestDecode(message.ids, message.options);
           break;
+        case 'probe:request':
+          await this.handleProbeRequest(message.id, message.location, message.endian);
+          break;
         case 'view:fieldFocus':
           await this.setFieldFocusContext(message.focused);
           break;
@@ -121,6 +128,26 @@ export class WebviewHost extends DisposableStore {
   // TODO: Move out to the dedicated context controller.
   private async setFieldFocusContext(focused: boolean): Promise<void> {
     await vscode.commands.executeCommand(VSCodeCommands.SetContext, ContextKeys.FieldFocus, focused);
+  }
+
+  /**
+   * The half of a reading the webview cannot take: it keeps no buffers, so the bytes behind
+   * a pinned offset are read here. Silent on an unknown id — a view that outlived its source
+   * is not worth a message box.
+   */
+  private async handleProbeRequest(id: string, location: SourceLocation, endian: Endian): Promise<void> {
+    const source = this.sources.find((candidate) => candidate.id === id);
+
+    if (!source) {
+      return;
+    }
+
+    await this.post({
+      id,
+      location,
+      type: 'probe:receive:source-bytes',
+      bytes: await this.sourceReader.readFromFileSource(source, location, endian),
+    });
   }
 
   private async handleOpenItem(id: string): Promise<void> {
