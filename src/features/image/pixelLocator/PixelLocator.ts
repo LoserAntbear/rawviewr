@@ -7,7 +7,7 @@ import { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { SourceLocation } from '@features/image/sourceReader/types';
 
 export class PixelLocator {
-  public readonly bits: Bits;
+  public readonly bpp: Bits;
   public readonly rowOptions: RowOptions; /** --- How the bytes at a location are to be read once found. */
 
   private readonly width: number;
@@ -16,10 +16,10 @@ export class PixelLocator {
   private readonly bytesPerRow: number;
   private readonly frameOffset: number;
 
-  constructor(geometry: Geometry, options: DecodeOptions, bits: Bits) {
+  constructor(geometry: Geometry, options: DecodeOptions, bpp: Bits) {
     const frame = clamp(Math.floor(options.frame), 0, geometry.frameCount - 1);
 
-    this.bits = bits;
+    this.bpp = bpp;
     this.rowOptions = { endian: options.endian, bitOrderMsb: options.bitOrderMsb };
 
     this.flipY = options.flipY;
@@ -42,23 +42,23 @@ export class PixelLocator {
 
     const rowStart = this.locateRow(position.y);
 
-    if (this.bits >= BITS_PER_BYTE) {
+    if (this.bpp >= BITS_PER_BYTE) {
       return {
-        bits: this.bits,
         bitOffset: 0,
-        byteOffset: rowStart + position.x * (this.bits / BITS_PER_BYTE),
+        bits: this.bpp,
+        byteOffset: rowStart + position.x * (this.bpp / BITS_PER_BYTE),
       };
     }
 
-    const pixelsPerByte = BITS_PER_BYTE / this.bits;
+    const pixelsPerByte = BITS_PER_BYTE / this.bpp;
     const subPixel = position.x % pixelsPerByte;
 
     return {
-      bits: this.bits,
+      bits: this.bpp,
       byteOffset: rowStart + Math.floor(position.x / pixelsPerByte),
       bitOffset: this.rowOptions.bitOrderMsb
-        ? BITS_PER_BYTE - this.bits - subPixel * this.bits
-        : subPixel * this.bits,
+        ? BITS_PER_BYTE - this.bpp - subPixel * this.bpp
+        : subPixel * this.bpp,
     };
   }
 
