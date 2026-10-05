@@ -280,9 +280,27 @@ Each item names what it depends on. Nothing below is started.
    modifier keys, so `{ passive: false }` is unproven by tests and `ctrlKey` is stubbed per
    event. The listener is on a shadow-root `div`, not window/document/body, so Chromium's
    passive-by-default intervention does not apply to it either way.
-4. **Pixel probe** — needs the status bar. `PixelProbe` and `PixelLocator` exist and are
-   unwired. Does *not* need zoom: the reference maps mouse to pixel through
-   `getBoundingClientRect()`, which is scale-independent.
+4. ~~**Pixel probe**~~ **Landed for hover.** Moving over a canvas reads
+   `12,7 · #ff00aaff · @0x1a2b` into the bar, with a colour chip beside it. Every part of
+   that is computable in the webview — the pixels from the decoded image, the offset from
+   `PixelLocator`, which needs only geometry and options — so a sweep costs no round trip.
+   `ProbeInputHandler` writes to a `ProbeSlice` of its own: `view:change` is what the gallery
+   reconciles on, and a reading moves at pointer rate. Two separate limits keep that cheap —
+   the handler is throttled to a frame, and the slice drops a reading that names the pixel
+   already shown, because at 16x one pixel is a 16px square.
+
+   **The mapping is not scale-free, contrary to what this file said before.** The claim came
+   from a standalone Chrome probe; in the webview the client rect comes back *without* the
+   CSS zoom folded in, and `currentCSSZoom` does not report it either (measured in VS Code
+   1.140, Chromium 150 — while a standalone Chrome 154 does fold it into the rect). So the
+   zoom is read explicitly through the Typed OM (`resolveEffectiveZoom`) and divided out, and
+   the box is divided by itself and multiplied by `canvas.width` to undo the gallery's fit.
+   Both are engine-visible behaviour: re-measure after an Electron bump.
+
+   **Still to come:** the pin. Clicking freezes a reading and asks the host for the source
+   bytes behind the offset — the one half the webview cannot answer, since it keeps no
+   buffers. One round trip per click rather than sixty a second, which is also the only rate
+   a hex word can be read at.
 5. **Frame navigation and frame tiles** — README feature. `DecodeOptions.frame` and
    `Geometry.frameCount` decode correctly; nothing steps through frames or lays them out.
 6. **Backdrop choice and tile size** — needs the config emitter exposed. `background` and
@@ -437,9 +455,11 @@ The gallery needs to ask for what is on screen and drop what is not
 1. Status bar → V
 2. Zoom → V (fit still open)
 3. Keyboard Shortcuts → V (zoom; `f` and frame arrows pending their features)
-4. Probe →
+4. Probe → V (hover + chip; pin and raw bytes pending)
 5. Frames →
 6. Backdrop + tile size →
 7. Guess picker →
 8. Remember options ->
-9. Parallel HEX view (pixel-to-byte mapping)
+9. Parallel HEX view (pixel-to-byte mapping) ->
+10. Gallery virtualization ->
+11. Image dynamic streaming.
