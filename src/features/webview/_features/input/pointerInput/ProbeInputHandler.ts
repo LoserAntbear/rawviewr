@@ -38,7 +38,7 @@ export class ProbeInputHandler {
 
   public handlePointerClick(event: Event): void {
     try {
-      this.store.get(StoreSliceId.Probe).togglePin(this.resolveSampleFromEvent(event));
+      this.store.get(StoreSliceId.Probe).togglePinnedSample(this.resolveSampleFromEvent(event));
     } catch (error) {
       console.error('Failed to handle pointer click event:', error);
     }
