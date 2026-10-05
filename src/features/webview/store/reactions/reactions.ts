@@ -26,7 +26,7 @@ const requestSourceFileBytesOnPin: StoreReaction = (store) => ({
   dispose: store.bus.on('probe:change', ({ detail: { prev, next } }) => {
     const pinned = next.pinnedSample;
 
-    if (pinned && pinned !== prev.pinnedSample && pinned.sourceFileBytes === null) {
+    if (pinned && pinned !== prev.pinnedSample && pinned.sourceFileBytes.kind === 'pending') {
       store.bus.emit('probe:receive:source-bytes:requested', { id: pinned.id, location: pinned.location });
     }
   }),
