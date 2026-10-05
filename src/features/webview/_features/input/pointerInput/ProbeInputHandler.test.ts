@@ -49,16 +49,24 @@ function ready(id = 'a'): ImageItem {
   };
 }
 
+/**
+ * happy-dom has no Typed OM, and `computedStyleMap` is how the effective zoom is read.
+ * Defined on the prototype, as the real API is, so the code under test finds it the usual
+ * way rather than on an instance it was handed.
+ */
+function stubZoom(zoom: number): void {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'computedStyleMap', {
+    configurable: true,
+    writable: true,
+    value: () => ({ get: () => ({ toString: () => String(zoom) }) }),
+  });
+}
+
 /** A pointer over the centre of image pixel (2,1), with the canvas at its intrinsic size. */
 function move(x = 2.5, y = 1.5): void {
-  const event = new Event('pointermove');
+  const event = new PointerEvent('pointermove', { clientX: x, clientY: y });
 
-  Object.defineProperties(event, {
-    target: { value: canvas },
-    clientX: { value: x },
-    clientY: { value: y },
-  });
-
+  Object.defineProperty(event, 'target', { value: canvas });
   handler.handlePointerMove(event);
 }
 
@@ -81,10 +89,11 @@ beforeEach(() => {
     height: 3,
   });
 
+  stubZoom(1);
   canvas = document.createElement('canvas');
   canvas.width = 4;
   canvas.height = 3;
-  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, width: 4, height: 3 } as DOMRect);
+  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ x: 0, y: 0, left: 0, top: 0, width: 4, height: 3 } as DOMRect);
 
   handler = new ProbeInputHandler({ itemId: 'a' });
 });
@@ -94,7 +103,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const hovered = () => store.get(StoreSliceId.Probe).activeSample;
+const activeSample = () => store.get(StoreSliceId.Probe).activeSample;
 
 describe('ProbeInputHandler', () => {
   it('reads the pixel under the pointer into the store', () => {
@@ -102,7 +111,7 @@ describe('ProbeInputHandler', () => {
 
     move();
 
-    expect(hovered()).toMatchObject({
+    expect(activeSample()).toMatchObject({
       id: 'a',
       position: { x: 2, y: 1 },
       rgba: { r: 10, g: 20, b: 30, a: 255 },
@@ -115,13 +124,13 @@ describe('ProbeInputHandler', () => {
 
     move();
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 
   it('reports nothing for an item the store has never heard of', () => {
     move();
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 
   it('clears the reading when the pointer leaves', () => {
@@ -130,7 +139,7 @@ describe('ProbeInputHandler', () => {
     move();
     handler.handlePointerLeave();
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 
   it('holds the reading to one a frame, and takes the next after it', () => {
@@ -139,27 +148,32 @@ describe('ProbeInputHandler', () => {
     move(2.5, 1.5);
     move(0.5, 0.5);
 
-    expect(hovered()?.position).toEqual({ x: 2, y: 1 });
+    expect(activeSample()?.position).toEqual({ x: 2, y: 1 });
 
     vi.advanceTimersByTime(16);
     move(0.5, 0.5);
 
-    expect(hovered()?.position).toEqual({ x: 0, y: 0 });
+    expect(activeSample()?.position).toEqual({ x: 0, y: 0 });
+  });
+
+  it('divides out the zoom, which the rect comes back without', () => {
+    store.get(StoreSliceId.Images).put('a', ready());
+    stubZoom(4);
+
+    // The canvas paints 4x, so pixel (2,1) sits four times further from the origin.
+    move(10, 6);
+
+    expect(activeSample()?.position).toEqual({ x: 2, y: 1 });
   });
 
   it('ignores a move that did not come from a canvas', () => {
     store.get(StoreSliceId.Images).put('a', ready());
 
-    const event = new Event('pointermove');
+    const event = new PointerEvent('pointermove', { clientX: 2, clientY: 1 });
 
-    Object.defineProperties(event, {
-      target: { value: document.createElement('div') },
-      clientX: { value: 2 },
-      clientY: { value: 1 },
-    });
-
+    Object.defineProperty(event, 'target', { value: document.createElement('div') });
     handler.handlePointerMove(event);
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 });

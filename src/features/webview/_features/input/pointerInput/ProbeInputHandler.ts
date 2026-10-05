@@ -6,7 +6,7 @@ import { WebviewContextProvider } from '@webview/webviewContext/WebviewContextPr
 import { validateCanvas, validatePointerEvent, validateImageItem } from '@webview/guards';
 import { withThrottle } from '@utils/throttle';
 
-import { resolveProbePosition } from './utils';
+import { resolveEffectiveZoom, resolveProbePosition } from './utils';
 
 interface ProbeTarget { readonly itemId: string };
 
@@ -50,12 +50,10 @@ export class ProbeInputHandler {
     validatePointerEvent(event);
 
     const position = resolveProbePosition(
-      event,
+      { x: event.clientX, y: event.clientY },
       canvas.getBoundingClientRect(),
-      // Have to resolve the effective scale of the canvas element like that,
-      // since `currentCSSZoom` does not return correct value
-      // Seems like due to it being a css var
-      Number.parseFloat(canvas.computedStyleMap()?.get('zoom')?.toString() ?? '1'),
+      { width: canvas.width, height: canvas.height },
+      resolveEffectiveZoom(canvas),
     );
     /**
      * TODO: Refactor into PixelProve instantiation?

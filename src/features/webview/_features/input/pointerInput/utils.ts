@@ -1,13 +1,21 @@
-  import type { Vector2 } from '@definitions/geometry';
+import type { Vector2 } from '@definitions/geometry';
 import { VectorUtils } from '@utils/vector/vector';
 import { CanvasUtils } from '@utils/canvas';
 
 type ProbeRect = Vector2 & { readonly width: number; readonly height: number };
+type ProbeSize = { readonly width: number; readonly height: number };
 type ProbePointer = Vector2;
+
+export function resolveEffectiveZoom(element: Element): number {
+  const zoom = Number.parseFloat(element.computedStyleMap?.().get('zoom')?.toString() ?? '1');
+
+  return Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+}
 
 export function resolveProbePosition(
   pointer: ProbePointer,
   rect: ProbeRect,
+  size: ProbeSize,
   scale: number = 1,
 ): Vector2 {
   CanvasUtils.validateRect(rect);
@@ -18,8 +26,12 @@ export function resolveProbePosition(
   );
 
   return VectorUtils.floor(VectorUtils.clamp(
-    effectivePointer,
+    {
+      x: effectivePointer.x / rect.width * size.width,
+      y: effectivePointer.y / rect.height * size.height,
+    },
     { x: 0, y: 0 },
-    { x: rect.width, y: rect.height },
+    // The far edge belongs to the last pixel, not to the one past it.
+    { x: size.width - 1, y: size.height - 1 },
   ));
 }

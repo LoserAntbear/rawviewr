@@ -50,10 +50,7 @@ function pointer(type: string, clientX = 2.5, clientY = 1.5): void {
     throw new Error('riv-image mounted without a canvas');
   }
 
-  const event = new Event(type, { bubbles: true });
-
-  Object.defineProperties(event, { clientX: { value: clientX }, clientY: { value: clientY } });
-  canvas.dispatchEvent(event);
+  canvas.dispatchEvent(new PointerEvent(type, { clientX, clientY, bubbles: true }));
 }
 
 beforeAll(() => {
@@ -71,8 +68,14 @@ beforeEach(() => {
   vi.stubGlobal('ImageData', class {});
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockReturnValue({ drawImage: () => undefined } as unknown as CanvasRenderingContext2D);
+  // happy-dom has no Typed OM; the zoom is read through it.
+  Object.defineProperty(HTMLCanvasElement.prototype, 'computedStyleMap', {
+    configurable: true,
+    writable: true,
+    value: () => ({ get: () => ({ toString: () => '1' }) }),
+  });
   vi.spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
-    .mockReturnValue({ left: 0, top: 0, width: 4, height: 3 } as DOMRect);
+    .mockReturnValue({ x: 0, y: 0, left: 0, top: 0, width: 4, height: 3 } as DOMRect);
 
   store.get(StoreSliceId.Images).clear();
   store.get(StoreSliceId.Probe).reset();
@@ -95,20 +98,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const hovered = () => store.get(StoreSliceId.Probe).activeSample;
+const activeSample = () => store.get(StoreSliceId.Probe).activeSample;
 
 describe('riv-image: the pixel probe', () => {
   it('reads a pointer over its canvas, through the shadow boundary', () => {
     pointer('pointermove');
 
-    expect(hovered()).toMatchObject({ id: 'a', position: { x: 2, y: 1 } });
+    expect(activeSample()).toMatchObject({ id: 'a', position: { x: 2, y: 1 } });
   });
 
   it('clears the reading when the pointer leaves the canvas', () => {
     pointer('pointermove');
     pointer('pointerleave');
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 
   it('stops reading once it is off the page', () => {
@@ -116,6 +119,6 @@ describe('riv-image: the pixel probe', () => {
 
     pointer('pointermove');
 
-    expect(hovered()).toBeNull();
+    expect(activeSample()).toBeNull();
   });
 });

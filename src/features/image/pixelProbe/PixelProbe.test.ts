@@ -85,11 +85,16 @@ describe('probePixel', () => {
     expect(probePixel(image(), geometry(), options(), { x: 2, y: 1 })?.position).toEqual({ x: 2, y: 1 });
   });
 
+  /**
+   * Reachable even though the pointer is clamped into the canvas: an options change moves
+   * the geometry before the newly decoded image arrives, so a position valid a frame ago can
+   * fall outside the one being measured against.
+   */
   it.each([
     [{ x: 4, y: 0 }],
     [{ x: 0, y: 3 }],
     [{ x: -1, y: 0 }],
-  ])('has nothing to report outside the image, at %o', (position) => {
-    expect(probePixel(image(), geometry(), options(), position)).toBeNull();
+  ])('refuses a position outside the image, at %o', (position) => {
+    expect(() => probePixel(image(), geometry(), options(), position)).toThrow('Position out of bounds');
   });
 });
