@@ -80,7 +80,7 @@ describe('riv-status-bar', () => {
   it('lays segments out start, spacer, end', () => {
     const children = [...(bar.shadowRoot?.getElementById('status-bar')?.children ?? [])] as HTMLElement[];
 
-    expect(children.map((child) => child.dataset.segmentId ?? child.className)).toEqual(['summary', 'spacer', 'probe', 'zoom', 'notes']);
+    expect(children.map((child) => child.dataset.segmentId ?? child.className)).toEqual(['summary', 'spacer', 'probe', 'pin', 'zoom', 'notes']);
   });
 
   it('follows the view: the zoom reading appears only while the image is magnified', () => {

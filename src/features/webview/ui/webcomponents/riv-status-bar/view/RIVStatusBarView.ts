@@ -63,8 +63,8 @@ export class RIVStatusBarView extends RIVView {
   private applySample(element: HTMLElement, entry: StatusBarEntry | null): void {
     element.toggleAttribute('data-sample', entry?.sample !== undefined);
 
+    // Cleaning empty entries to avoid it being displayed with stale colors.
     if (entry?.sample === undefined) {
-      // Removed, not blanked: a colour left behind would show on the next entry.
       element.style.removeProperty('--sample-color');
 
       return;

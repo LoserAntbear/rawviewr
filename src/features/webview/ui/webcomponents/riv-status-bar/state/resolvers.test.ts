@@ -221,3 +221,62 @@ describe('status bar: the pixel probe', () => {
     expect(probeSegment()?.text).toBe('0,0 · #00000000 · @0x0010');
   });
 });
+
+/**
+ * The pinned reading, which is the only one that carries the raw bytes: those are a round
+ * trip away, so a sweep never asks for them and a held reading asks once.
+ */
+describe('status bar: the pinned probe', () => {
+  const pinSegment = () => SEGMENT_RESOLVERS.pin(selectStatusBarContext(store.state, registry));
+  const pin = (bits = 16, byteOffset = 6) => store.get(StoreSliceId.Probe).togglePinnedSample({
+    id: 'a',
+    position: { x: 3, y: 4 },
+    rgba: { r: 255, g: 0, b: 170, a: 255 },
+    location: { bits, bitOffset: 0, byteOffset } as never,
+  });
+
+  it('says nothing while nothing is held', () => {
+    expect(pinSegment()).toBeNull();
+  });
+
+  it('shows what it knows and spins while the bytes are on their way', () => {
+    pin();
+
+    expect(pinSegment()).toMatchObject({
+      loading: true,
+      sample: '#ff00aaff',
+      text: '3,4 · #ff00aaff · @0x0006',
+    });
+  });
+
+  it('adds the bytes and what they assemble to, once they land', () => {
+    pin();
+    store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
+      bytes: [0x3c, 0x1f],
+      value: 0x1f3c,
+    });
+
+    // The word the decoded colour hides, which is the reason a raw viewer has a probe.
+    expect(pinSegment()).toMatchObject({ loading: false, text: '3,4 · #ff00aaff · @0x0006 · 3c 1f = 0x1f3c' });
+  });
+
+  it('sizes the assembled value to the format, not to the byte count', () => {
+    pin(2, 0);
+    store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
+      bytes: [0xa7],
+      value: 0x2,
+    });
+
+    expect(pinSegment()?.text).toBe('3,4 · #ff00aaff · @0x0000+0 · a7 = 0x2');
+  });
+
+  it('says so when the offset points past the end of the file', () => {
+    pin();
+    store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
+      bytes: [],
+      value: null,
+    });
+
+    expect(pinSegment()?.text).toBe('3,4 · #ff00aaff · @0x0006 · unreadable');
+  });
+});

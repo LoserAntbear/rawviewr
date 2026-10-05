@@ -11,6 +11,7 @@ export const STATUS_SEGMENTS: StatusSegmentsMap = new Map<
   ['start', [{ id: 'summary', resolve: SEGMENT_RESOLVERS.summary }]],
   ['end', [
     { id: 'probe', resolve: SEGMENT_RESOLVERS.probe },
+    { id: 'pin', resolve: SEGMENT_RESOLVERS.pin },
     { id: 'zoom', resolve: SEGMENT_RESOLVERS.zoom },
     { id: 'notes', mode: SlotLifecycleMode.LiveUpdate, indicator: true, resolve: SEGMENT_RESOLVERS.notes },
   ]],
