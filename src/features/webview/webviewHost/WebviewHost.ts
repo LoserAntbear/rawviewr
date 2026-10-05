@@ -130,11 +130,6 @@ export class WebviewHost extends DisposableStore {
     await vscode.commands.executeCommand(VSCodeCommands.SetContext, ContextKeys.FieldFocus, focused);
   }
 
-  /**
-   * The half of a reading the webview cannot take: it keeps no buffers, so the bytes behind
-   * a pinned offset are read here. Silent on an unknown id — a view that outlived its source
-   * is not worth a message box.
-   */
   private async handleProbeRequest(id: string, location: SourceLocation, endian: Endian): Promise<void> {
     const source = this.sources.find((candidate) => candidate.id === id);
 
