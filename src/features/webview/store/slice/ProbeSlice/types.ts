@@ -1,11 +1,13 @@
 import type { PixelSample } from '@features/image/pixelProbe/types';
-import type { SourceBytes, SourceLocation } from '@features/image/sourceReader/types';
+import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 
 import type { StoreSliceId } from '../../definitions';
 import type { StoreSliceEventPayloads } from '../SliceEvents/types';
 
 export type ProbeSample = PixelSample & { readonly id: string };
-export type PinnedProbeSample = ProbeSample & { readonly sourceFileBytes: SourceBytes | null };
+export type PinnedSourceBytes = { readonly kind: 'pending' } | SourceBytesResult;
+
+export type PinnedProbeSample = ProbeSample & { readonly sourceFileBytes: PinnedSourceBytes };
 
 export type ProbeState = {
   readonly activeSample: ProbeSample | null;
