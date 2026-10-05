@@ -10,3 +10,7 @@ export type SourceBytes = {
   bytes: number[];
   value: number | null; /** --- The bytes assembled into one value, respects byte order. */
 };
+
+export type SourceBytesResult =
+  | { readonly kind: 'received'; readonly bytes: SourceBytes }
+  | { readonly kind: 'failed'; readonly message: string };
