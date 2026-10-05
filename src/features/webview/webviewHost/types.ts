@@ -1,6 +1,8 @@
 import type * as vscode from 'vscode';
 
+import type { Endian } from '@definitions/bits';
 import type { ZoomDirection } from '@features/zoom';
+import type { SourceBytes, SourceLocation } from '@features/image/sourceReader/types';
 import type { DecodedFileSource } from '@features/image/imageDecoder/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { GalleryViewMode } from '../ui/webcomponents/types';
@@ -14,6 +16,7 @@ export type WebviewHostMessage =
   | { type: 'view:zoom'; direction: ZoomDirection; }
   | { type: 'sources:update'; sources: FileSource[]; }
   | { type: 'images:decode:ready'; images: DecodedFileSource[]; }
+  | { type: 'probe:receive:source-bytes'; id: string; location: SourceLocation; bytes: SourceBytes; }
   | { type: 'session:start'; viewMode: GalleryViewMode; decodeOptions: DecodeOptions; };
 
 export type WebviewMessageType = WebviewMessage['type'];
@@ -25,7 +28,8 @@ export type WebviewMessage =
   | { type: 'view:zoom'; direction: ZoomDirection }
   | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string }
-  | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions };
+  | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
+  | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
 
 export interface ItemOpener {
   openSingle(targets: readonly vscode.Uri[]): Promise<void>;
