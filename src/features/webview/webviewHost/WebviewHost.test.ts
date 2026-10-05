@@ -130,7 +130,7 @@ describe('WebviewHost: the probe read', () => {
       location,
       id: 'a',
       type: 'probe:receive:source-bytes',
-      bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c },
+      result: { kind: 'received', bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c } },
     }));
   });
 
@@ -148,7 +148,7 @@ describe('WebviewHost: the probe read', () => {
     receive({ type: 'probe:request', id: 'a', location, endian: Endian.Big });
 
     await vi.waitFor(() => expect(posted).toHaveBeenCalledWith(expect.objectContaining({
-      bytes: { bytes: [0x3c, 0x1f], value: 0x3c1f },
+      result: { kind: 'received', bytes: { bytes: [0x3c, 0x1f], value: 0x3c1f } },
     })));
   });
 
@@ -209,5 +209,39 @@ describe('WebviewHost: a first load needs no request', () => {
     expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS);
     expect(posted.mock.calls.map(([type]) => type))
       .toEqual(['session:start', 'sources:update', 'images:decode:ready']);
+  });
+});
+
+describe('WebviewHost: a probe read that fails', () => {
+  const location = { bits: 16, bitOffset: 0, byteOffset: 2 } as const;
+
+  it('answers with the failure instead of leaving the view waiting', async () => {
+    const posted = vi.fn();
+
+    vi.mocked(workspace.fs.readFile).mockRejectedValue(new Error('EACCES'));
+
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    }, undefined, [source]);
+
+    receive({ type: 'probe:request', id: 'a', location, endian: Endian.Little });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'probe:receive:source-bytes',
+      result: { kind: 'failed', message: expect.stringContaining('EACCES') },
+    })));
+  });
+
+  it('keeps the failure to the reading, rather than raising it to the user', async () => {
+    vi.mocked(workspace.fs.readFile).mockRejectedValue(new Error('EACCES'));
+
+    const { receive } = mount(async () => true, undefined, [source]);
+
+    receive({ type: 'probe:request', id: 'a', location, endian: Endian.Little });
+
+    // A pixel that could not be read is the bar's business, not a message box's.
+    await vi.waitFor(() => expect(window.showErrorMessage).not.toHaveBeenCalled());
   });
 });

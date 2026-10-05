@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { SourceBytesResult } from '@features/image/sourceReader/types';
+
 import { createWebviewStore } from '../../store/createWebviewStore';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
@@ -53,9 +55,9 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: probe:receive:source-bytes', () => {
   const location = { bits: 16, bitOffset: 0, byteOffset: 6 } as const;
   const sample = { id: 'a', position: { x: 3, y: 4 }, rgba: { r: 1, g: 2, b: 3, a: 255 }, location };
 
-  const answer = async (bytes = { bytes: [0x3c, 0x1f], value: 0x1f3c }) =>
+  const answer = async (result: SourceBytesResult = { kind: 'received', bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c } }) =>
     WEBVIEW_HOST_MESSAGE_RESOLVERS['probe:receive:source-bytes'](
-      { type: 'probe:receive:source-bytes', id: 'a', location, bytes },
+      { type: 'probe:receive:source-bytes', id: 'a', location, result },
       { store, bridge: { postToWebviewHost: () => undefined } },
     );
 
@@ -64,7 +66,8 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: probe:receive:source-bytes', () => {
 
     await answer();
 
-    expect(store.get(StoreSliceId.Probe).pinnedSample?.sourceFileBytes).toEqual({ bytes: [0x3c, 0x1f], value: 0x1f3c });
+    expect(store.get(StoreSliceId.Probe).pinnedSample?.sourceFileBytes)
+      .toEqual({ kind: 'received', bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c } });
   });
 
   it('drops an answer that no longer matches what is pinned', async () => {

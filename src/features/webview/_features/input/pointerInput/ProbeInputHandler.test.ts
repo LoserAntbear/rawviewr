@@ -193,7 +193,7 @@ describe('ProbeInputHandler: pinning', () => {
 
     click();
 
-    expect(pinned()).toMatchObject({ id: 'a', position: { x: 2, y: 1 }, bytes: null });
+    expect(pinned()).toMatchObject({ id: 'a', position: { x: 2, y: 1 }, sourceFileBytes: { kind: 'pending' } });
   });
 
   it('lets go when the same pixel is clicked again', () => {

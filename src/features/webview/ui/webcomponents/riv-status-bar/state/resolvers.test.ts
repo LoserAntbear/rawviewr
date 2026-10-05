@@ -252,8 +252,8 @@ describe('status bar: the pinned probe', () => {
   it('adds the bytes and what they assemble to, once they land', () => {
     pin();
     store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
-      bytes: [0x3c, 0x1f],
-      value: 0x1f3c,
+      kind: 'received',
+      bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c },
     });
 
     // The word the decoded colour hides, which is the reason a raw viewer has a probe.
@@ -263,8 +263,8 @@ describe('status bar: the pinned probe', () => {
   it('sizes the assembled value to the format, not to the byte count', () => {
     pin(2, 0);
     store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
-      bytes: [0xa7],
-      value: 0x2,
+      kind: 'received',
+      bytes: { bytes: [0xa7], value: 0x2 },
     });
 
     expect(pinSegment()?.text).toBe('3,4 · #ff00aaff · @0x0000+0 · a7 = 0x2');
@@ -273,10 +273,56 @@ describe('status bar: the pinned probe', () => {
   it('says so when the offset points past the end of the file', () => {
     pin();
     store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample('a', store.get(StoreSliceId.Probe).pinnedSample!.location, {
-      bytes: [],
-      value: null,
+      kind: 'received',
+      bytes: { bytes: [], value: null },
     });
 
     expect(pinSegment()?.text).toBe('3,4 · #ff00aaff · @0x0006 · unreadable');
+  });
+});
+
+/**
+ * A read opens the file, which on a large buffer is not instant and can fail outright. The
+ * three states are what the bar says meanwhile: waiting, the bytes, or why there are none.
+ */
+describe('status bar: a pinned reading through its states', () => {
+  const pinSegment = () => SEGMENT_RESOLVERS.pin(selectStatusBarContext(store.state, registry));
+  const probeSlice = () => store.get(StoreSliceId.Probe);
+  const pin = () => probeSlice().togglePinnedSample({
+    id: 'a',
+    position: { x: 3, y: 4 },
+    rgba: { r: 255, g: 0, b: 170, a: 255 },
+    location: { bits: 16, bitOffset: 0, byteOffset: 6 } as never,
+  });
+
+  it('asks for a spinner while the file is being opened', () => {
+    pin();
+
+    expect(pinSegment()).toMatchObject({ loading: true, level: 'info', text: '3,4 · #ff00aaff · @0x0006' });
+  });
+
+  it('stops spinning and says why, when the read fails', () => {
+    pin();
+    probeSlice().setSourceBytesForPinnedSample('a', probeSlice().pinnedSample!.location, {
+      kind: 'failed',
+      message: 'file is gone',
+    });
+
+    // Without a failed state the spinner would run forever on a reply never coming.
+    expect(pinSegment()).toMatchObject({
+      loading: false,
+      level: 'error',
+      text: '3,4 · #ff00aaff · @0x0006 · file is gone',
+    });
+  });
+
+  it('keeps its colour chip whatever the read did', () => {
+    pin();
+    probeSlice().setSourceBytesForPinnedSample('a', probeSlice().pinnedSample!.location, {
+      kind: 'failed',
+      message: 'nope',
+    });
+
+    expect(pinSegment()?.sample).toBe('#ff00aaff');
   });
 });

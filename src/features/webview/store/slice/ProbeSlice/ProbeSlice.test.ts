@@ -99,6 +99,7 @@ describe('ProbeSlice', () => {
 describe('ProbeSlice: the pin', () => {
   const location = { bits: 16, bitOffset: 0, byteOffset: 6 } as const;
   const bytes = { bytes: [0x3c, 0x1f], value: 0x1f3c };
+  const received = { kind: 'received', bytes } as const;
 
   it('starts with nothing held', () => {
     expect(probe().pinnedSample).toBeNull();
@@ -107,7 +108,7 @@ describe('ProbeSlice: the pin', () => {
   it('holds the pixel it was given, with its bytes still to come', () => {
     probe().togglePinnedSample(sample(3, 4));
 
-    expect(probe().pinnedSample).toMatchObject({ id: 'a', position: { x: 3, y: 4 }, bytes: null });
+    expect(probe().pinnedSample).toMatchObject({ id: 'a', position: { x: 3, y: 4 }, sourceFileBytes: { kind: 'pending' } });
   });
 
   it('lets go when the same pixel is clicked again', () => {
@@ -135,9 +136,9 @@ describe('ProbeSlice: the pin', () => {
 
   it('takes the bytes that answer what it asked about', () => {
     probe().togglePinnedSample(sample(3, 4));
-    probe().setSourceBytesForPinnedSample('a', probe().pinnedSample!.location, bytes);
+    probe().setSourceBytesForPinnedSample('a', probe().pinnedSample!.location, received);
 
-    expect(probe().pinnedSample?.sourceFileBytes).toEqual(bytes);
+    expect(probe().pinnedSample?.sourceFileBytes).toEqual(received);
   });
 
   it('ignores an answer the pin has already moved on from', () => {
@@ -146,10 +147,10 @@ describe('ProbeSlice: the pin', () => {
     const asked = probe().pinnedSample!.location;
 
     probe().togglePinnedSample(sample(5, 6));
-    probe().setSourceBytesForPinnedSample('a', asked, bytes);
+    probe().setSourceBytesForPinnedSample('a', asked, received);
 
     // The reply is for a pixel nobody is looking at any more.
-    expect(probe().pinnedSample?.sourceFileBytes).toBeNull();
+    expect(probe().pinnedSample?.sourceFileBytes).toEqual({ kind: 'pending' });
   });
 
   it('ignores an answer that arrives after the pin is let go', () => {
@@ -157,17 +158,17 @@ describe('ProbeSlice: the pin', () => {
 
     const asked = probe().pinnedSample!.location;
 
-    probe().resetActiveSample();
-    probe().setSourceBytesForPinnedSample('a', asked, bytes);
+    probe().resetPinnedSample();
+    probe().setSourceBytesForPinnedSample('a', asked, received);
 
     expect(probe().pinnedSample).toBeNull();
   });
 
   it('ignores an answer for another tile at the same offset', () => {
     probe().togglePinnedSample(sample(3, 4, 'a'));
-    probe().setSourceBytesForPinnedSample('b', { ...location, byteOffset: 6 }, bytes);
+    probe().setSourceBytesForPinnedSample('b', { ...location, byteOffset: 6 }, received);
 
-    expect(probe().pinnedSample?.sourceFileBytes).toBeNull();
+    expect(probe().pinnedSample?.sourceFileBytes).toEqual({ kind: 'pending' });
   });
 });
 
@@ -187,7 +188,7 @@ describe('ProbeSlice: asking for the bytes', () => {
     const asked = vi.fn();
 
     store.bus.on('probe:receive:source-bytes:requested', asked);
-    probe().setSourceBytesForPinnedSample('a', probe().pinnedSample!.location, { bytes: [1], value: 1 });
+    probe().setSourceBytesForPinnedSample('a', probe().pinnedSample!.location, { kind: 'received', bytes: { bytes: [1], value: 1 } });
 
     expect(asked).not.toHaveBeenCalled();
   });
@@ -211,7 +212,7 @@ describe('ProbeSlice: asking for the bytes', () => {
     const asked = vi.fn();
 
     store.bus.on('probe:receive:source-bytes:requested', asked);
-    probe().resetActiveSample();
+    probe().resetPinnedSample();
 
     expect(asked).not.toHaveBeenCalled();
   });
