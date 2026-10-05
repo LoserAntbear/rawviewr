@@ -48,3 +48,29 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: view:zoom', () => {
     expect(store.get(StoreSliceId.View).zoom).toBe(ZOOM.default);
   });
 });
+
+describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: probe:receive:source-bytes', () => {
+  const location = { bits: 16, bitOffset: 0, byteOffset: 6 } as const;
+  const sample = { id: 'a', position: { x: 3, y: 4 }, rgba: { r: 1, g: 2, b: 3, a: 255 }, location };
+
+  const answer = async (bytes = { bytes: [0x3c, 0x1f], value: 0x1f3c }) =>
+    WEBVIEW_HOST_MESSAGE_RESOLVERS['probe:receive:source-bytes'](
+      { type: 'probe:receive:source-bytes', id: 'a', location, bytes },
+      { store, bridge: { postToWebviewHost: () => undefined } },
+    );
+
+  it('fills in the bytes the webview could not read for itself', async () => {
+    store.get(StoreSliceId.Probe).togglePinnedSample(sample);
+
+    await answer();
+
+    expect(store.get(StoreSliceId.Probe).pinnedSample?.sourceFileBytes).toEqual({ bytes: [0x3c, 0x1f], value: 0x1f3c });
+  });
+
+  it('drops an answer that no longer matches what is pinned', async () => {
+    await answer();
+
+    // Nothing was pinned, so there is nothing the answer belongs to.
+    expect(store.get(StoreSliceId.Probe).pinnedSample).toBeNull();
+  });
+});

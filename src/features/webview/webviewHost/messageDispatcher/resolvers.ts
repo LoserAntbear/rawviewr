@@ -25,6 +25,10 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
     store.get(StoreSliceId.Images).upsert(message.images);
   },
 
+  "probe:receive:source-bytes": ({ id, location, bytes }, { store }) => {
+    store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample(id, location, bytes);
+  },
+
   // Basically a keystroke redirected through the host.
   "view:zoom": ({ direction }, { store }) => {
     store.get(StoreSliceId.View).setZoom(direction);
