@@ -175,7 +175,7 @@ describe('ProbeSlice: asking for the bytes', () => {
   it('asks once, when a pin is made', () => {
     const asked = vi.fn();
 
-    store.bus.on('probe:bytes:requested', (event) => asked(event.detail));
+    store.bus.on('probe:receive:source-bytes:requested', (event) => asked(event.detail));
     probe().togglePinnedSample(sample(3, 4));
 
     expect(asked).toHaveBeenCalledWith({ id: 'a', location: { bits: 16, bitOffset: 0, byteOffset: 6 } });
@@ -186,7 +186,7 @@ describe('ProbeSlice: asking for the bytes', () => {
 
     const asked = vi.fn();
 
-    store.bus.on('probe:bytes:requested', asked);
+    store.bus.on('probe:receive:source-bytes:requested', asked);
     probe().setSourceBytesForPinnedSample('a', probe().pinnedSample!.location, { bytes: [1], value: 1 });
 
     expect(asked).not.toHaveBeenCalled();
@@ -197,7 +197,7 @@ describe('ProbeSlice: asking for the bytes', () => {
 
     const asked = vi.fn();
 
-    store.bus.on('probe:bytes:requested', asked);
+    store.bus.on('probe:receive:source-bytes:requested', asked);
     probe().setActiveSample(sample(9, 9));
     probe().setActiveSample(sample(8, 8));
 
@@ -210,7 +210,7 @@ describe('ProbeSlice: asking for the bytes', () => {
 
     const asked = vi.fn();
 
-    store.bus.on('probe:bytes:requested', asked);
+    store.bus.on('probe:receive:source-bytes:requested', asked);
     probe().resetActiveSample();
 
     expect(asked).not.toHaveBeenCalled();
