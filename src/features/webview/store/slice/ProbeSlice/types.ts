@@ -13,5 +13,5 @@ export type ProbeState = {
 };
 
 export type ProbeSlicePayloads = StoreSliceEventPayloads<StoreSliceId.Probe, ProbeState> & {
-  'probe:bytes:requested': { readonly id: string; readonly location: SourceLocation };
+  'probe:receive:source-bytes:requested': { readonly id: string; readonly location: SourceLocation };
 };
