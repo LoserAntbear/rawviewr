@@ -7,6 +7,7 @@ import type { Geometry } from '@features/image/imageDecoder/imagePreparation/typ
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
+import type { ProbeSample } from '@features/webview/store/slice/ProbeSlice';
 import type { AppStore } from '@features/webview/store/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
@@ -168,5 +169,35 @@ describe('riv-status-bar: indicators', () => {
 
     expect(segment('summary').textContent).not.toBe('');
     expect(lit('summary')).toBe(false);
+  });
+});
+
+describe('riv-status-bar: the probe chip', () => {
+  const sample = (a: number): ProbeSample => ({
+    id: 'a',
+    position: { x: 1, y: 2 },
+    rgba: { r: 255, g: 0, b: 170, a },
+    location: { bits: 16, bitOffset: 0, byteOffset: 8 },
+  });
+
+  it('carries the colour as a custom property, and says it has one', () => {
+    store.get(StoreSliceId.Probe).setActiveSample(sample(255));
+
+    expect(segment('probe').hasAttribute('data-sample')).toBe(true);
+    expect(segment('probe').style.getPropertyValue('--sample-color')).toBe('#ff00aaff');
+  });
+
+  it('takes the colour away with the reading, rather than leaving it behind', () => {
+    store.get(StoreSliceId.Probe).setActiveSample(sample(255));
+    store.get(StoreSliceId.Probe).clearActiveSample();
+
+    expect(segment('probe').hasAttribute('data-sample')).toBe(false);
+    expect(segment('probe').style.getPropertyValue('--sample-color')).toBe('');
+  });
+
+  it('shows no chip on a segment that names no colour', () => {
+    store.get(StoreSliceId.View).setZoom('in');
+
+    expect(segment('zoom').hasAttribute('data-sample')).toBe(false);
   });
 });

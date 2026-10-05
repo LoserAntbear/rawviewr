@@ -32,7 +32,14 @@ function formatSample({ position, rgba, location }: ProbeSample): string {
 }
 
 export function resolveProbe({ appState }: StatusBarStateContext): StatusBarEntry | null {
-  const { activeSample: hovered } = appState[StoreSliceId.Probe];
+  const { activeSample } = appState[StoreSliceId.Probe];
 
-  return hovered === null ? null : { text: formatSample(hovered), level: 'info' };
+  return activeSample === null
+    ? null
+    : {
+      level: 'info',
+      text: formatSample(activeSample),
+      // The same colour the text spells out, for the eye rather than for reading.
+      sample: formatRgba(activeSample.rgba),
+    };
 }

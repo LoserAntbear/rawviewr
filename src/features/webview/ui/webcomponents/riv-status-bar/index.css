@@ -42,6 +42,26 @@
   mask: var(--indicator-glyph) center / contain no-repeat;
 }
 
+.segment[data-sample]::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.4em;
+  vertical-align: -0.15em;
+  border: 1px solid var(--riv-border);
+  border-radius: 2px;
+  background-color: #808080;
+  background-image:
+    linear-gradient(var(--sample-color, transparent), var(--sample-color, transparent)),
+    linear-gradient(45deg, rgba(0, 0, 0, 0.22) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.22) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.22) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.22) 75%);
+  background-size: auto, 6px 6px, 6px 6px, 6px 6px, 6px 6px;
+  background-position: 0 0, 0 0, 0 3px, 3px -3px, -3px 0;
+}
+
 /* Blue "i" in a circle: worth knowing. */
 .segment[data-level='info'] {
   --indicator-color: var(--riv-info);

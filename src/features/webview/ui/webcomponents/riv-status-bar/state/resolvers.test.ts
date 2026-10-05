@@ -179,7 +179,11 @@ describe('status bar: the pixel probe', () => {
       location: { bits: 16, bitOffset: 0, byteOffset: 6699 },
     });
 
-    expect(probeSegment()).toEqual({ text: '12,7 · #ff00aaff · @0x1a2b', level: 'info' });
+    expect(probeSegment()).toEqual({
+      level: 'info',
+      sample: '#ff00aaff',
+      text: '12,7 · #ff00aaff · @0x1a2b',
+    });
   });
 
   it('names the bit as well, where a byte holds more than one pixel', () => {
@@ -192,6 +196,18 @@ describe('status bar: the pixel probe', () => {
 
     // Four pixels share byte 0, so the byte alone would not say which.
     expect(probeSegment()?.text).toBe('2,0 · #555555ff · @0x0000+4');
+  });
+
+  it('hands the colour over for the chip, alpha and all', () => {
+    store.get(StoreSliceId.Probe).setActiveSample({
+      id: 'a',
+      position: { x: 0, y: 0 },
+      rgba: { r: 0, g: 0, b: 0, a: 0 },
+      location: { bits: 32, bitOffset: 0, byteOffset: 0 },
+    });
+
+    // Fully transparent, which the chip shows as bare checkerboard.
+    expect(probeSegment()?.sample).toBe('#00000000');
   });
 
   it('pads a short offset, so the readings line up as the pointer moves', () => {

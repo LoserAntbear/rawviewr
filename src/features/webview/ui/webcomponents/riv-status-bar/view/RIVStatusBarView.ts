@@ -47,6 +47,9 @@ export class RIVStatusBarView extends RIVView {
     for (const [id, { element, mode }] of this.slots) {
       const entry = entries[id] ?? null;
 
+      // Ahead of the hide: a segment that is not showing carries no colour either.
+      this.applySample(element, entry);
+
       if(this.hideElementIfNeeded(element, entry, mode)) {
         continue;
       }
@@ -55,6 +58,19 @@ export class RIVStatusBarView extends RIVView {
       element.dataset.level = entry?.level ?? 'info';
       element.toggleAttribute('data-loading', entry?.loading === true);
     }
+  }
+
+  private applySample(element: HTMLElement, entry: StatusBarEntry | null): void {
+    element.toggleAttribute('data-sample', entry?.sample !== undefined);
+
+    if (entry?.sample === undefined) {
+      // Removed, not blanked: a colour left behind would show on the next entry.
+      element.style.removeProperty('--sample-color');
+
+      return;
+    }
+
+    element.style.setProperty('--sample-color', entry.sample);
   }
 
   private buildSlots(segments: StatusSegment[]): HTMLElement[] {
