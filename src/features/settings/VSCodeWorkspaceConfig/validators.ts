@@ -45,5 +45,5 @@ export const CONFIG_VALIDATORS: ConfigValidatorsMap = {
   defaultHeight: asClampedInt.bind(null, DIMENSION_LIMITS_PX),
   maxFileSizeMB: asClampedInt.bind(null, FILE_SIZE_LIMITS_MB),
   defaultAlphaMode: asEnumMember.bind(null, AlphaMode) as (raw: unknown) => AlphaMode | null,
-  background: asEnumMember.bind(null, ViewerBackground) as (raw: unknown) => ViewerBackground | null,
+  defaultBackground: asEnumMember.bind(null, ViewerBackground) as (raw: unknown) => ViewerBackground | null,
 };
