@@ -18,13 +18,14 @@ export const VIEWER_CONFIG_DEFAULT_KEYS = [
   'defaultHeight',
   'defaultOffset',
   'defaultAlphaMode',
+  'defaultBackground',
   'defaultLittleEndian',
 ] as const;
 /**
  * The keys we watch for changes that may affect an opened viewer.
  * There's also a set of keys that are consulted at open time ONLY.
  */
-const VIEWER_CONFIG_WATCHED_KEYS = ['background', 'tileSize'] as const;
+const VIEWER_CONFIG_WATCHED_KEYS = ['tileSize'] as const;
 /**
  * The keys we watch for changes ONLY while opening;
  * There's also a set of keys that we subscribe to for changes affecting an opened viewer and watch for.
@@ -36,7 +37,7 @@ export enum ConfigChangeKind {
   ViewerWatched = 'viewer:watched',
   ViewerDefaults = 'viewer:defaults',
 }
-export const VIEWER_CONFIG_KEYS: ViewerConfigKeySet = {
+export const VIEWER_CONFIG_KEYS = {
   all: [
     ...VIEWER_CONFIG_ON_OPEN_KEYS,
     ...VIEWER_CONFIG_WATCHED_KEYS,
@@ -45,4 +46,4 @@ export const VIEWER_CONFIG_KEYS: ViewerConfigKeySet = {
   [ConfigChangeKind.ViewerOnOpen]: [...VIEWER_CONFIG_ON_OPEN_KEYS],
   [ConfigChangeKind.ViewerWatched]: [...VIEWER_CONFIG_WATCHED_KEYS],
   [ConfigChangeKind.ViewerDefaults]: [...VIEWER_CONFIG_DEFAULT_KEYS],
-};
+} satisfies ViewerConfigKeySet;
