@@ -4,6 +4,7 @@ import type { ViewerBackground } from '@features/viewer/definitions';
 import {
   EXTENSION_CONFIGURATION_KEY,
   ConfigChangeKind,
+  VIEWER_CONFIG_KEYS,
 } from './definitions';
 
 type ManifestProps =
@@ -30,7 +31,7 @@ export type ViewerConfigSchema = {
   galleryIncludeGlob: string;
   defaultAlphaMode: AlphaMode;
   defaultLittleEndian: boolean;
-  background: ViewerBackground;
+  defaultBackground: ViewerBackground;
 }
 
 export type ConfigValidator<K extends ConfigKey> = (raw: unknown) => ViewerConfigSchema[K] | null;
@@ -41,10 +42,9 @@ export type ViewerConfigKeySet<
   Keys extends ConfigKey = ConfigKey,
 > = { all: Keys[]; } & { [K in Kinds]: Keys[] };
 
-/**
- * The subset that may be pushed into viewers that are already open.
- */
-export type ViewerConfiguration = Pick<ViewerConfigSchema, ViewerConfigKeySet[ConfigChangeKind.ViewerWatched][number]>;
+
+export type WatchedConfigKey = typeof VIEWER_CONFIG_KEYS[ConfigChangeKind.ViewerWatched][number];
+export type ViewerConfiguration = Pick<ViewerConfigSchema, WatchedConfigKey>;
 
 export type ConfigChangePayload = {
   kind: ConfigChangeKind;
