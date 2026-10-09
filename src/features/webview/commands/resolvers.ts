@@ -12,5 +12,6 @@ export const WEBVIEW_COMMAND_RESOLVERS: WebviewCommandResolversMap = {
   'export:request': (_message, { store, bridge }) => exportSelected(store, bridge),
   'sources:request:decode': (message, { bridge }) => bridge.postToWebviewHost(message),
   'view:zoom': ({ direction }, { store }) => store.get(StoreSliceId.View).setZoom(direction),
+  'decode:options:update': ({ options }, { store }) => store.get(StoreSliceId.DecodeOptions).setOptions(options),
   'view:background:update': ({ background }, { store }) => store.get(StoreSliceId.View).setBackground(background),
 };
