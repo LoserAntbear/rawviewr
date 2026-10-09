@@ -31,6 +31,7 @@ export type WebviewMessage =
   | { type: 'view:zoom'; direction: ZoomDirection }
   | { type: 'export:png'; name: string; data: ArrayBuffer }
   | { type: 'view:background:update'; background: ViewerBackground }
+  | { type: 'decode:options:update'; options: Partial<DecodeOptions> }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string }
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
   | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
