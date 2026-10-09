@@ -14,6 +14,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
 
   "session:start": (message, { store }) => {
     store.get(StoreSliceId.View).setMode(message.viewMode);
+    store.get(StoreSliceId.View).setBackground(message.background);
     store.get(StoreSliceId.DecodeOptions).setOptions(message.decodeOptions);
   },
 
@@ -27,6 +28,10 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
 
   "probe:receive:source-bytes": ({ id, location, result }, { store }) => {
     store.get(StoreSliceId.Probe).setSourceBytesForPinnedSample(id, location, result);
+  },
+
+  "view:config:update": ({ config }, { store }) => {
+    store.get(StoreSliceId.Config).setConfiguration(config);
   },
 
   // Basically a keystroke redirected through the host.
