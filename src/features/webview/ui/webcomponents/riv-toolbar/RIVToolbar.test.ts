@@ -8,6 +8,7 @@ import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { ZOOM } from '@features/webview/store/slice/ViewSlice';
+import { ViewerBackground } from '@features/viewer/definitions';
 import type { AppStore } from '@features/webview/store/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
@@ -233,5 +234,58 @@ describe('riv-toolbar: actions', () => {
 
     expect(emitted.filter(({ type }) => type === 'export:request')).toHaveLength(1);
     expect(options()).toBe(before);
+  });
+});
+
+/**
+ * A control the decoder has no opinion about. It reads the view rather than the options, and
+ * asks for its change as a command — the view owns the backdrop, and the setting only says
+ * which one a view opens with.
+ */
+describe('riv-toolbar: the backdrop', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it('shows what the view is painted with', () => {
+    store.get(StoreSliceId.View).setBackground(ViewerBackground.magenta);
+
+    expect(control<HTMLSelectElement>('background').value).toBe('magenta');
+  });
+
+  it.each([
+    [ViewerBackground.black],
+    [ViewerBackground.magenta],
+    [ViewerBackground.editor],
+  ])('asks the view for the %s it was given, and leaves the decode alone', (background) => {
+    const commands = emitted();
+    const before = options();
+
+    pick('background', background);
+
+    expect(commands).toEqual([{ type: 'view:background:update', background }]);
+    expect(options()).toBe(before);
+  });
+
+  it('offers every backdrop there is', () => {
+    const offered = [...control<HTMLSelectElement>('background').options].map((option) => option.value);
+
+    expect(new Set(offered)).toEqual(new Set(Object.values(ViewerBackground)));
   });
 });
