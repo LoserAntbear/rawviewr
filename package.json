@@ -306,7 +306,7 @@
           ],
           "description": "How the alpha channel is treated on first open."
         },
-        "rawImageViewer.background": {
+        "rawImageViewer.defaultBackground": {
           "type": "string",
           "default": "checker",
           "enum": [
@@ -316,7 +316,7 @@
             "magenta",
             "editor"
           ],
-          "description": "Backdrop drawn behind transparent pixels."
+          "description": "Backdrop a view starts with, behind transparent pixels. Change it per view from the toolbar."
         },
         "rawImageViewer.tileSize": {
           "type": "number",
