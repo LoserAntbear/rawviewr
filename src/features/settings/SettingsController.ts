@@ -5,6 +5,11 @@ import { DecodeOptions } from '@features/image/imageDecoder/types';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import { attempt } from '@utils/attempt';
+import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
+import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
+import type { ViewerBackground } from '@features/viewer/definitions';
+import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
 
@@ -38,6 +43,35 @@ export class SettingsController {
 
       return DEFAULT_DECODE_OPTIONS;
     }
+  }
+
+
+  public readViewerConfiguration(): ViewerConfiguration {
+    return attempt(
+      () => ({ tileSize: this.configController.read('tileSize') }),
+      (error) => {
+        InfoMessageController.showError(
+          `Raw Image Viewer: failed to read viewer settings. ${error instanceof Error ? error.message : String(error)}`,
+        );
+
+        return DEFAULT_VIEWER_CONFIGURATION;
+      },
+    );
+  }
+
+  public readDefaultBackground(): ViewerBackground {
+    return attempt(
+      () => this.configController.read('defaultBackground'),
+      () => DEFAULT_VIEWER_BACKGROUND,
+    );
+  }
+
+  public onViewerConfigurationChange(listen: (config: ViewerConfiguration) => void): vscode.Disposable {
+    return this.configController.onDidChange(({ kind }) => {
+      if (kind === ConfigChangeKind.ViewerWatched) {
+        listen(this.readViewerConfiguration());
+      }
+    });
   }
 
   public async resetSettings(): Promise<void> {
