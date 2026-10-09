@@ -1,5 +1,7 @@
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
+import type { AppStore } from '@features/webview/store/types';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVViewState } from '../RIVViewState';
@@ -12,6 +14,12 @@ import { readElementValue } from './ElementBuilder/utils';
 import { ToolbarState, ToolbarTransitionPayloads } from './state/types';
 import { EMPTY_TOOLBAR_STATE, ToolbarStateTransition } from './state/definitions';
 import { TOOLBAR_STATE_HANDLERS } from './state/handlers';
+
+function resolveAvailableBytes(store: AppStore): number {
+  const item = store.selectors.displayedItem();
+
+  return item && isReadyImageItem(item) ? item.geometry.availableBytes : 0;
+}
 
 export class RIVToolbar extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Toolbar;
@@ -40,6 +48,12 @@ export class RIVToolbar extends RIVHTMLElement {
       "view:change",
       this.sync.bind(this),
     );
+    // The candidates are derived from the image on show, so they move when it does.
+    this.observe(
+      WebviewContextProvider.context.store.bus,
+      "images:change",
+      this.sync.bind(this),
+    );
 
     this.sync();
   }
@@ -63,6 +77,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.view.render(
       this.viewState.updateState(ToolbarStateTransition.Synced, {
         zoom: store.get(StoreSliceId.View).zoom,
+        availableBytes: resolveAvailableBytes(store),
         background: store.get(StoreSliceId.View).background,
         options: store.get(StoreSliceId.DecodeOptions).options,
       }),
