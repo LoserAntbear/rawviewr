@@ -12,6 +12,7 @@ import { StoreSliceId } from '@features/webview/store/definitions';
 import { ZOOM } from '@features/webview/store/slice/ViewSlice';
 import { ViewerBackground } from '@features/viewer/definitions';
 import type { AppStore } from '@features/webview/store/types';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
 import { RIVToolbar } from './index';
@@ -352,5 +353,94 @@ describe('riv-toolbar: which interaction a control answers to', () => {
     pick('format', 'rgb565');
 
     expect(commands.map(({ type }) => type)).toEqual(['export:request', 'decode:options:update']);
+  });
+});
+
+/**
+ * The picker mounted for real: the candidate list is a function of what is decoded, so the
+ * options are filled per render rather than at build, and picking one fills Width and Height.
+ */
+describe('riv-toolbar: the dimension picker', () => {
+  const geometry = (availableBytes: number): Geometry => ({
+    width: 4,
+    height: 3,
+    frameCount: 1,
+    bytesPerRow: 8,
+    bytesPerFrame: 24,
+    availableBytes,
+    baseOffset: 0,
+    lockedByHeader: false,
+  });
+
+  const show = (availableBytes = 24) => {
+    store.get(StoreSliceId.Sources).upsert([{ id: 'a', name: 'a.raw', uri: { path: '/a.raw' } as never }]);
+    store.get(StoreSliceId.Images).put('a', {
+      id: 'a',
+      kind: 'ready',
+      status: 'success',
+      name: 'a.raw',
+      detail: null,
+      byteLength: availableBytes,
+      geometry: geometry(availableBytes),
+      image: { width: 4, height: 3, data: new Uint8ClampedArray(48) },
+    });
+  };
+
+  const offered = () => [...control<HTMLSelectElement>('dimensions').options].map((option) => option.value);
+
+  it('offers only auto until something is decoded to measure', () => {
+    expect(offered()).toEqual(['']);
+  });
+
+  it('offers the candidates once an image is on show', () => {
+    show();
+
+    expect(offered()).toContain('4x3');
+    expect(offered().length).toBeGreaterThan(2);
+  });
+
+  it('fills both dimensions from the one that was picked', () => {
+    show();
+    pick('dimensions', '4x3');
+
+    expect([options().width, options().height]).toEqual([4, 3]);
+  });
+
+  it('hands the decision back to the decoder on auto', () => {
+    show();
+    pick('dimensions', '4x3');
+    pick('dimensions', '');
+
+    expect([options().width, options().height]).toEqual([0, 0]);
+  });
+
+  it('stands down while a header dictates the geometry', () => {
+    show();
+    pick('headerPreset', HeaderPreset.U16LE);
+
+    expect(control<HTMLSelectElement>('dimensions').disabled).toBe(true);
+  });
+
+  /**
+   * Rebuilding a select's options throws away its nodes — which in a real window closes the
+   * dropdown under the user's cursor and loses the highlight.
+   */
+  it('leaves the options alone when the offer has not changed', () => {
+    const before = control<HTMLSelectElement>('format').options[0];
+
+    type('width', '7');
+
+    expect(control<HTMLSelectElement>('format').options[0]).toBe(before);
+  });
+
+  it('re-offers when the format changes the pixel count', () => {
+    show();
+
+    const before = offered();
+
+    pick('format', 'gray8');
+
+    // Half the bits a pixel means twice the pixels, and a different set of divisors.
+    expect(offered()).not.toEqual(before);
   });
 });

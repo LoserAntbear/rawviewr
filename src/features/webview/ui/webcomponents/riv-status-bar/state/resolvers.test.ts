@@ -326,3 +326,27 @@ describe('status bar: a pinned reading through its states', () => {
     expect(pinSegment()?.sample).toBe('#ff00aaff');
   });
 });
+
+/**
+ * Nothing used to say that a size was the decoder's proposal rather than an instruction,
+ * which is the whole reason the picker exists.
+ */
+describe('status bar: where a size came from', () => {
+  it('marks a size the decoder guessed', () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 0 });
+
+    expect(status([ready('a')]).summary?.text).toContain('4×3 (guessed)');
+  });
+
+  it('says nothing of the sort about a size that was asked for', () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 4, height: 3 });
+
+    expect(status([ready('a')]).summary?.text).not.toContain('guessed');
+  });
+
+  it('says nothing of the sort when a header dictated it', () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 0 });
+
+    expect(status([ready('a', { lockedByHeader: true })]).summary?.text).not.toContain('guessed');
+  });
+});
