@@ -15,20 +15,20 @@ export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): Tool
     height: dimension,
     offset: { placeholder: '0' },
     bytesPerRow: { placeholder: 'packed' },
-    alphaMode: { disabled: !format.hasAlpha },
-    endian: { disabled: !format.endianSensitive },
-    bitOrderMsb: { hidden: !format.bitOrderSensitive },
-    unpremultiply: { disabled: !format.hasAlpha || alphaMode === AlphaMode.Ignore },
-    // Disabled on extremities reach since the zoom cannot go further.
     zoomIn: { disabled: zoom >= ZOOM.max },
     zoomOut: { disabled: zoom <= ZOOM.min },
+    alphaMode: { disabled: !format.hasAlpha },
+    endian: { disabled: !format.endianSensitive },
+    // Disabled on extremities reach since the zoom cannot go further.
     zoomReset: { disabled: zoom === ZOOM.default },
+    bitOrderMsb: { hidden: !format.bitOrderSensitive },
+    unpremultiply: { disabled: !format.hasAlpha || alphaMode === AlphaMode.Ignore },
   };
 }
 
 export function resolveToolbarState(sync: ToolbarSyncPayload): ToolbarState {
   return {
-    values: mapControlsToValues(sync.options),
+    values: mapControlsToValues(sync),
     kind: ToolbarStateTransition.Synced,
     availability: resolveAvailability(sync),
   };
