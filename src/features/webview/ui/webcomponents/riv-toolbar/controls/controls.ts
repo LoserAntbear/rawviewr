@@ -2,9 +2,18 @@ import { Endian } from '@definitions/bits';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 
 
+import { ViewerBackground } from '@features/viewer/definitions';
+
 import { ToolbarGroup } from '../definitions';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { WebviewMessage } from '@features/webview/webviewHost/types';
+
 import { ToolbarControl } from './types';
 import { TAG_DESCRIPTORS } from './tagDescriptors';
+
+function decodeOptionsUpdate(options: Partial<DecodeOptions>): WebviewMessage {
+  return { type: 'decode:options:update', options };
+}
 
 function toDimension(raw: string): number {
   const parsed = Number.parseInt(raw, 10);
@@ -31,24 +40,24 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Format,
     tag: TAG_DESCRIPTORS.buildFormatFieldTagDescriptor(),
     tooltip: 'How the bytes are laid out per pixel.',
-    toValueFromDecodeOptions: (options) => options.format.id,
-    toDecodeOptions: (raw, formatRegistry) => ({ format: formatRegistry.get(raw) }),
+    toValue: ({ options }) => options.format.id,
+    toCommand: (raw, { formats }) => decodeOptionsUpdate({ format: formats.get(raw) }),
   },
   {
     id: 'width',
     label: 'Width',
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
-    toValueFromDecodeOptions: (options) => fromDimension(options.width),
-    toDecodeOptions: (raw) => ({ width: toDimension(raw) }),
+    toValue: ({ options }) => fromDimension(options.width),
+    toCommand: (raw) => decodeOptionsUpdate({ width: toDimension(raw) }),
   },
   {
     id: 'height',
     label: 'Height',
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
-    toValueFromDecodeOptions: (options) => fromDimension(options.height),
-    toDecodeOptions: (raw) => ({ height: toDimension(raw) }),
+    toValue: ({ options }) => fromDimension(options.height),
+    toCommand: (raw) => decodeOptionsUpdate({ height: toDimension(raw) }),
   },
   {
     id: 'offset',
@@ -56,8 +65,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
     tooltip: 'Bytes to skip before the first pixel.',
-    toValueFromDecodeOptions: (options) => fromDimension(options.offset),
-    toDecodeOptions: (raw) => ({ offset: toDimension(raw) }),
+    toValue: ({ options }) => fromDimension(options.offset),
+    toCommand: (raw) => decodeOptionsUpdate({ offset: toDimension(raw) }),
   },
   {
     id: 'bytesPerRow',
@@ -65,8 +74,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Geometry,
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
     tooltip: 'Bytes per row including padding. Empty means tightly packed.',
-    toValueFromDecodeOptions: (options) => fromDimension(options.bytesPerRow),
-    toDecodeOptions: (raw) => ({ bytesPerRow: toDimension(raw) }),
+    toValue: ({ options }) => fromDimension(options.bytesPerRow),
+    toCommand: (raw) => decodeOptionsUpdate({ bytesPerRow: toDimension(raw) }),
   },
   {
     id: 'endian',
@@ -76,8 +85,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: Endian.Little, label: 'little' },
       { value: Endian.Big, label: 'big' },
     ]),
-    toValueFromDecodeOptions: (options) => options.endian,
-    toDecodeOptions: (raw) => ({ endian: raw as Endian }),
+    toValue: ({ options }) => options.endian,
+    toCommand: (raw) => decodeOptionsUpdate({ endian: raw as Endian }),
   },
   {
     id: 'bitOrderMsb',
@@ -88,8 +97,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: '', label: 'LSB first' },
     ]),
     tooltip: 'For sub-byte formats: which end of the byte the first pixel sits in.',
-    toValueFromDecodeOptions: (options) => fromToggle(options.bitOrderMsb),
-    toDecodeOptions: (raw) => ({ bitOrderMsb: toggled(raw) }),
+    toValue: ({ options }) => fromToggle(options.bitOrderMsb),
+    toCommand: (raw) => decodeOptionsUpdate({ bitOrderMsb: toggled(raw) }),
   },
   {
     id: 'flipY',
@@ -97,8 +106,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Layout,
     tag: TAG_DESCRIPTORS.TOGGLE_FIELD,
     tooltip: 'Bottom-up buffers, as most GPU captures are.',
-    toValueFromDecodeOptions: (options) => fromToggle(options.flipY),
-    toDecodeOptions: (raw) => ({ flipY: toggled(raw) }),
+    toValue: ({ options }) => fromToggle(options.flipY),
+    toCommand: (raw) => decodeOptionsUpdate({ flipY: toggled(raw) }),
   },
   {
     id: 'alphaMode',
@@ -108,8 +117,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: AlphaMode.Use, label: 'use' },
       { value: AlphaMode.Ignore, label: 'ignore' },
     ]),
-    toValueFromDecodeOptions: (options) => options.alphaMode,
-    toDecodeOptions: (raw) => ({ alphaMode: raw as AlphaMode }),
+    toValue: ({ options }) => options.alphaMode,
+    toCommand: (raw) => decodeOptionsUpdate({ alphaMode: raw as AlphaMode }),
   },
   {
     id: 'unpremultiply',
@@ -117,8 +126,8 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     group: ToolbarGroup.Alpha,
     tag: TAG_DESCRIPTORS.TOGGLE_FIELD,
     tooltip: 'Divide colour back out by alpha.',
-    toValueFromDecodeOptions: (options) => fromToggle(options.unpremultiply),
-    toDecodeOptions: (raw) => ({ unpremultiply: toggled(raw) }),
+    toValue: ({ options }) => fromToggle(options.unpremultiply),
+    toCommand: (raw) => decodeOptionsUpdate({ unpremultiply: toggled(raw) }),
   },
   {
     id: 'headerPreset',
@@ -132,15 +141,30 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: HeaderPreset.U32BE, label: 'u32 BE' },
     ]),
     tooltip: 'Read width and height from a header instead of the fields.',
-    toValueFromDecodeOptions: (options) => options.headerPreset,
-    toDecodeOptions: (raw) => ({ headerPreset: raw as HeaderPreset }),
+    toValue: ({ options }) => options.headerPreset,
+    toCommand: (raw) => decodeOptionsUpdate({ headerPreset: raw as HeaderPreset }),
+  },
+  {
+    id: 'background',
+    label: 'Background',
+    group: ToolbarGroup.View,
+    tag: TAG_DESCRIPTORS.buildSelectFieldTagDescriptor([
+      { value: ViewerBackground.checker, label: 'checker' },
+      { value: ViewerBackground.black, label: 'black' },
+      { value: ViewerBackground.white, label: 'white' },
+      { value: ViewerBackground.magenta, label: 'magenta' },
+      { value: ViewerBackground.editor, label: 'editor' },
+    ]),
+    tooltip: 'What is painted behind transparent pixels. The setting only picks what a view opens with.',
+    toValue: ({ background }) => background,
+    toCommand: (raw) => ({ type: 'view:background:update', background: raw as ViewerBackground }),
   },
   {
     id: 'zoomOut',
     label: '−',
     group: ToolbarGroup.View,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
-    command: { type: 'view:zoom', direction: 'out' },
+    toCommand: () => ({ type: 'view:zoom', direction: 'out' }),
     tooltip: 'Zoom out',
   },
   {
@@ -148,7 +172,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: '1:1',
     group: ToolbarGroup.View,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
-    command: { type: 'view:zoom', direction: 'reset' },
+    toCommand: () => ({ type: 'view:zoom', direction: 'reset' }),
     tooltip: 'Back to one screen pixel per image pixel.',
   },
   {
@@ -156,7 +180,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: '+',
     group: ToolbarGroup.View,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
-    command: { type: 'view:zoom', direction: 'in' },
+    toCommand: () => ({ type: 'view:zoom', direction: 'in' }),
     tooltip: 'Zoom in',
   },
   {
@@ -164,11 +188,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     label: 'Export PNG',
     group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
-    command: { type: 'export:request' },
+    toCommand: () => ({ type: 'export:request' }),
     tooltip: 'Save what is on screen as a PNG.',
   },
 ];
-
-export const TOOLBAR_CONTROLS_BY_ID: ReadonlyMap<string, ToolbarControl> = new Map(
-  TOOLBAR_CONTROLS.map((control) => [control.id, control]),
-);
