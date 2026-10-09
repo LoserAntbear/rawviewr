@@ -20,6 +20,7 @@ export class RIVGallery extends RIVHTMLElement {
     // is derived from both, so both have to re-render it.
     this.observe(store.bus, "sources:change", this.render.bind(this));
     this.observe(store.bus, "view:change", this.render.bind(this));
+    this.observe(store.bus, "config:change", this.render.bind(this));
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));
     this.observe(this.view.rootRef, 'dblclick', this.handleDoubleClick.bind(this));
