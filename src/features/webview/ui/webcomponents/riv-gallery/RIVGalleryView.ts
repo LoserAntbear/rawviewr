@@ -1,6 +1,9 @@
 import { isHTMLElement } from '@features/webview/utils/html';
 
+import { applyStyleProperties } from '@features/webview/utils/styleProperties';
+
 import { RIVView } from '../RIVView';
+import { GALLERY_STYLE_PROPERTIES } from './definitions';
 import { ElementBuilder } from './ElementBuilder';
 import type { GalleryState } from './state/types';
 
@@ -21,9 +24,8 @@ export class RIVGalleryView extends RIVView {
 
     list.dataset.viewMode = state.mode;
 
-    // Set once on the list: every tile inherits it, which is the only way into their roots.
-    // I do not use transform: scale() on the list itself because it would also scale the scrollbars.
-    list.style.setProperty('--riv-image-scale', String(state.zoom));
+    // Every property the tiles inherit, written from one declared set rather than by hand.
+    applyStyleProperties(list.style, GALLERY_STYLE_PROPERTIES, state);
 
     this.removeStaleEntries(state.visibleIds);
 
