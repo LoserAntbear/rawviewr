@@ -6,9 +6,16 @@ import type { StatusBarEntry } from '../../types';
 import { byViewMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 
 function formatName({ appState }: StatusBarStateContext): string {
   return appState[StoreSliceId.DecodeOptions].format.label.split(' — ')[0];
+}
+
+function formatDimensions({ appState }: StatusBarStateContext, geometry: Geometry): string {
+  const guessed = !geometry.lockedByHeader && appState[StoreSliceId.DecodeOptions].width === 0;
+
+  return `${geometry.width}×${geometry.height}${guessed ? ' (guessed)' : ''}`;
 }
 
 const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
@@ -23,7 +30,7 @@ const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
     const geometry = item.geometry;
 
     return [
-      `${geometry.width}×${geometry.height}`,
+      formatDimensions(context, geometry),
       formatName(context),
       `${geometry.bytesPerRow} B/row`,
       StringFormat.bytes(item.byteLength),
