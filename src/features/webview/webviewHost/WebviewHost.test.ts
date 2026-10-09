@@ -3,12 +3,17 @@ import { commands, Uri, window, workspace } from 'vscode';
 import { Endian } from '@definitions/bits';
 
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
+import type { ViewerConfiguration } from '@features/settings/VSCodeWorkspaceConfig/types';
 
 import type { FileSource } from '../types';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import { WebviewHost } from './WebviewHost';
 
 let consoleError: MockInstance;
+
+/** Set by `mount`, so a test can push a settings change the way the controller would. */
+let pushViewerConfiguration: ((config: ViewerConfiguration) => void) | undefined;
 
 beforeEach(() => {
   consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -46,7 +51,16 @@ function mount(
     webview as never,
     sources,
     'gallery' as never,
-    { readDefaultDecodeOptions: () => DEFAULT_DECODE_OPTIONS } as never,
+    {
+      readDefaultDecodeOptions: () => DEFAULT_DECODE_OPTIONS,
+      readViewerConfiguration: () => DEFAULT_VIEWER_CONFIGURATION,
+      readDefaultBackground: () => ViewerBackground.checker,
+      onViewerConfigurationChange: (listen: (config: ViewerConfiguration) => void) => {
+        pushViewerConfiguration = listen;
+
+        return { dispose: () => (pushViewerConfiguration = undefined) };
+      },
+    } as never,
     sourcesDecoder as never,
     itemOpener,
   );
@@ -208,7 +222,7 @@ describe('WebviewHost: a first load needs no request', () => {
     await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('images:decode:ready'));
     expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS);
     expect(posted.mock.calls.map(([type]) => type))
-      .toEqual(['session:start', 'sources:update', 'images:decode:ready']);
+      .toEqual(['session:start', 'view:config:update', 'sources:update', 'images:decode:ready']);
   });
 });
 
@@ -243,5 +257,53 @@ describe('WebviewHost: a probe read that fails', () => {
 
     // A pixel that could not be read is the bar's business, not a message box's.
     await vi.waitFor(() => expect(window.showErrorMessage).not.toHaveBeenCalled());
+  });
+});
+
+/**
+ * The backdrop and the tile size are the two settings a view may follow while it is open —
+ * changing one you cannot see until you reopen the file is a poor way to pick it.
+ */
+describe('WebviewHost: the viewer configuration', () => {
+  it('sends what is configured when the view announces itself', async () => {
+    const posted = vi.fn();
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    });
+
+    receive({ type: 'app:ready' });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith({
+      type: 'view:config:update',
+      config: DEFAULT_VIEWER_CONFIGURATION,
+    }));
+  });
+
+  it('pushes a change into the view that is already open', async () => {
+    const posted = vi.fn();
+
+    mount(async (message) => {
+      posted(message);
+
+      return true;
+    });
+
+    pushViewerConfiguration?.({ tileSize: 300 });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith({
+      type: 'view:config:update',
+      config: { tileSize: 300 },
+    }));
+  });
+
+  it('stops following the settings once the view is gone', () => {
+    const { host } = mount(async () => true);
+
+    host.dispose();
+
+    // The subscription belongs to the view, not to the window.
+    expect(pushViewerConfiguration).toBeUndefined();
   });
 });
