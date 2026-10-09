@@ -13,8 +13,12 @@ export type ToolbarChoiceGroup = {
   readonly choices: readonly ToolbarChoice[];
 };
 export type SupportedControlTag = 'select' | 'input' | 'button';
+export type SelectTagDescriptor = {
+  readonly tag: 'select';
+  readonly choiceGroups: (state: ToolbarSyncPayload) => readonly ToolbarChoiceGroup[];
+};
 export type ControlTagDescriptor =
-  | { readonly tag: 'select'; readonly choiceGroups: () => readonly ToolbarChoiceGroup[] }
+  | SelectTagDescriptor
   | { readonly tag: 'input'; readonly type: 'number'; readonly min?: string }
   | { readonly tag: 'input'; readonly type: 'checkbox' }
   | { readonly tag: 'button' };
