@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ViewerBackground } from '@features/viewer/definitions';
+
 import { createWebviewStore } from '../../createWebviewStore';
 import { StoreSliceId } from '../../definitions';
 import type { AppStore } from '../../types';
@@ -88,6 +90,6 @@ describe('ViewSlice zoom', () => {
     view().setZoom('in');
     view().setMode('gallery');
 
-    expect(view().getState()).toEqual({ mode: 'gallery', zoom: 2 });
+    expect(view().getState()).toEqual({ mode: 'gallery', zoom: 2, background: ViewerBackground.checker });
   });
 });
