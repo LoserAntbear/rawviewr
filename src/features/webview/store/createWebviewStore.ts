@@ -7,6 +7,7 @@ import { StoreSliceId } from './definitions';
 import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from './slice/ViewSlice/ViewSlice';
 import { ProbeSlice } from './slice/ProbeSlice/ProbeSlice';
+import { ConfigSlice } from './slice/ConfigSlice/ConfigSlice';
 import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
 import { STORE_REACTIONS } from './reactions';
@@ -22,6 +23,7 @@ function createDefaultSlices(
   return {
     [StoreSliceId.View]: new ViewSlice(),
     [StoreSliceId.Probe]: new ProbeSlice(),
+    [StoreSliceId.Config]: new ConfigSlice(),
     [StoreSliceId.Images]: new ImagesSlice(),
     [StoreSliceId.Sources]: new SourcesSlice(),
     [StoreSliceId.DecodeOptions]: new DecodeOptionsSlice(),
