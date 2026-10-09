@@ -4,7 +4,8 @@ import { type StatusSegmentsMap } from './segment/segments';
 import type { StatusBarEntry, StatusBarRenderEntries } from './types';
 import type { StatusBarStateContext } from '../state/types';
 import { type StatusSegment } from './segment/types';
-import { SlotLifecycleMode } from './segment/definitions';
+import { SlotLifecycleMode, SEGMENT_STYLE_PROPERTIES } from './segment/definitions';
+import { applyStyleProperties } from '@features/webview/utils/styleProperties';
 
 type SegmentSlot = {
   readonly element: HTMLElement;
@@ -61,16 +62,10 @@ export class RIVStatusBarView extends RIVView {
   }
 
   private applySample(element: HTMLElement, entry: StatusBarEntry | null): void {
+    // The attribute is what the chip's rule selects on; the colour is what it paints with.
     element.toggleAttribute('data-sample', entry?.sample !== undefined);
 
-    // Cleaning empty entries to avoid it being displayed with stale colors.
-    if (entry?.sample === undefined) {
-      element.style.removeProperty('--sample-color');
-
-      return;
-    }
-
-    element.style.setProperty('--sample-color', entry.sample);
+    applyStyleProperties(element.style, SEGMENT_STYLE_PROPERTIES, entry);
   }
 
   private buildSlots(segments: StatusSegment[]): HTMLElement[] {
