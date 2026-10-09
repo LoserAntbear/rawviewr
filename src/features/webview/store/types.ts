@@ -2,6 +2,7 @@ import type { EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/T
 import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice } from './slice/ViewSlice';
 import type { ProbeSlice } from './slice/ProbeSlice';
+import type { ConfigSlice } from './slice/ConfigSlice';
 import type { ImagesSlice } from './slice/ImagesSlice';
 import type { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
 import type { ReactiveStore } from './ReactiveStore';
@@ -25,6 +26,7 @@ export type SliceMap<TSliceIds extends string = string> = Readonly<Record<TSlice
 export type StoreSlices = {
   readonly [StoreSliceId.View]: ViewSlice;
   readonly [StoreSliceId.Probe]: ProbeSlice;
+  readonly [StoreSliceId.Config]: ConfigSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
   readonly [StoreSliceId.Sources]: SourcesSlice;
   readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
