@@ -1,4 +1,4 @@
-import { mapControlsToValues } from '../controls/utils';
+import { mapControlsToChoices, mapControlsToValues } from '../controls/utils';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 import { ZOOM } from '@features/webview/store/slice/ViewSlice';
 
@@ -17,6 +17,7 @@ export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): Tool
     bytesPerRow: { placeholder: 'packed' },
     zoomIn: { disabled: zoom >= ZOOM.max },
     zoomOut: { disabled: zoom <= ZOOM.min },
+    dimensions: { disabled: geometryLocked },
     alphaMode: { disabled: !format.hasAlpha },
     endian: { disabled: !format.endianSensitive },
     // Disabled on extremities reach since the zoom cannot go further.
@@ -29,6 +30,7 @@ export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): Tool
 export function resolveToolbarState(sync: ToolbarSyncPayload): ToolbarState {
   return {
     values: mapControlsToValues(sync),
+    choices: mapControlsToChoices(sync),
     kind: ToolbarStateTransition.Synced,
     availability: resolveAvailability(sync),
   };
