@@ -10,6 +10,7 @@ import type { WebviewMessage } from '@features/webview/webviewHost/types';
 
 import { ToolbarControl } from './types';
 import { TAG_DESCRIPTORS } from './tagDescriptors';
+import { toDimensionChoices, toDimensionOptions, toDimensionValue } from './dimensionGuess';
 
 function decodeOptionsUpdate(options: Partial<DecodeOptions>): WebviewMessage {
   return { type: 'decode:options:update', options };
@@ -58,6 +59,15 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
     tag: TAG_DESCRIPTORS.NUMBER_FIELD,
     toValue: ({ options }) => fromDimension(options.height),
     toCommand: (raw) => decodeOptionsUpdate({ height: toDimension(raw) }),
+  },
+  {
+    id: 'dimensions',
+    label: 'Guess',
+    group: ToolbarGroup.Geometry,
+    tag: { tag: 'select', choiceGroups: (state) => [{ choices: toDimensionChoices(state) }] },
+    tooltip: 'Sizes the buffer could be, best first. Picking one fills Width and Height.',
+    toValue: toDimensionValue,
+    toCommand: (raw) => decodeOptionsUpdate(toDimensionOptions(raw)),
   },
   {
     id: 'offset',
