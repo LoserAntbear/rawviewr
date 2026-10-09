@@ -22,6 +22,10 @@ export class VSCodeWorkspaceConfigurationController extends DisposableStore {
     return vscode.workspace.getConfiguration(this.extensionConfigKey);
   }
 
+  public get onDidChange(): vscode.Event<ConfigChangePayload> {
+    return this.EMITTER.event;
+  }
+
   constructor(
     private readonly EMITTER: vscode.EventEmitter<ConfigChangePayload>,
     private readonly extensionConfigKey: string = EXTENSION_CONFIGURATION_KEY,
