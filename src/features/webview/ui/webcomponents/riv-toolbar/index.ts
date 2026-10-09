@@ -7,7 +7,7 @@ import { RIVTags } from '../definitions';
 import { RIVToolbarView } from './RIVToolbarView';
 import template from './index.html';
 import styles from './index.css';
-import { getActionControlForElement, getValueControlForElement } from './controls/utils';
+import { getControlForElement, respondsTo } from './controls/utils';
 import { readElementValue } from './ElementBuilder/utils';
 import { ToolbarState, ToolbarTransitionPayloads } from './state/types';
 import { EMPTY_TOOLBAR_STATE, ToolbarStateTransition } from './state/definitions';
@@ -26,8 +26,9 @@ export class RIVToolbar extends RIVHTMLElement {
   public connectedCallback(): void {
     this.view.build();
 
-    this.observe(this.view.rootRef, 'change', this.handleControlChange.bind(this));
-    this.observe(this.view.rootRef, 'click', this.handleControlClick.bind(this));
+    // Both interactions, one handler: the control table says which one each answers to.
+    this.observe(this.view.rootRef, 'change', this.handleControlInteraction.bind(this));
+    this.observe(this.view.rootRef, 'click', this.handleControlInteraction.bind(this));
     // Decode options fill the fields; the view's zoom decides which zoom buttons still bite.
     this.observe(
       WebviewContextProvider.context.store.bus,
@@ -43,26 +44,17 @@ export class RIVToolbar extends RIVHTMLElement {
     this.sync();
   }
 
-  private handleControlChange(event: Event): void {
-    const control = getValueControlForElement(event.target);
+  private handleControlInteraction(event: Event): void {
+    const control = getControlForElement(event.target);
 
-    if (!control) {
+    if (!control || !respondsTo(control, event.type)) {
       return;
     }
 
-    const value = readElementValue(event.target as HTMLElement);
-
-    WebviewContextProvider.context.store
-      .get(StoreSliceId.DecodeOptions)
-      .setOptions(control.toDecodeOptions(value, WebviewContextProvider.context.formatRegistry));
-  }
-
-  private handleControlClick(event: Event): void {
-    const control = getActionControlForElement(event.target);
-
-    if (control) {
-      this.emitCommand(control.command);
-    }
+    this.emitCommand(control.toCommand(
+      readElementValue(event.target as HTMLElement),
+      { formats: WebviewContextProvider.context.formatRegistry },
+    ));
   }
 
   private sync(): void {
@@ -71,6 +63,7 @@ export class RIVToolbar extends RIVHTMLElement {
     this.view.render(
       this.viewState.updateState(ToolbarStateTransition.Synced, {
         zoom: store.get(StoreSliceId.View).zoom,
+        background: store.get(StoreSliceId.View).background,
         options: store.get(StoreSliceId.DecodeOptions).options,
       }),
     );
