@@ -4,13 +4,20 @@ import { RIVView } from '../RIVView';
 import { ToolbarGroup } from './definitions';
 import { TOOLBAR_CONTROLS } from './controls/controls';
 import { ElementBuilder } from './ElementBuilder/ElementBuilder';
-import type { ControlElement, ToolbarControl } from './controls/types';
+import type { ControlElement, ToolbarChoiceGroup, ToolbarControl } from './controls/types';
 import type { ToolbarAvailability, ToolbarState } from './state/types';
 
 type ControlField = {
   readonly field: HTMLElement;
   readonly element: ControlElement;
 };
+
+/** Cheap enough to compute per render, and the only way to know an offer is unchanged. */
+function toChoiceSignature(groups: readonly ToolbarChoiceGroup[]): string {
+  return groups
+    .map(({ label, choices }) => `${label ?? ''}:${choices.map(({ value, label: text }) => `${value}=${text}`).join(',')}`)
+    .join('|');
+}
 
 const ORDERED_TOOLBAR_GROUPS: readonly ToolbarGroup[] = [
   ToolbarGroup.Format,
@@ -95,6 +102,9 @@ export class RIVToolbarView extends RIVView {
     for (const [id, { element }] of this.controlFields) {
       const value = state.values[id];
 
+      // Before the value: it can only be selected once the option offering it exists.
+      this.applyChoices(element, state.choices[id]);
+
       // Only value controls have an entry; anything else has no value to write.
       if (value !== undefined) {
         this.write(element, value);
@@ -102,6 +112,21 @@ export class RIVToolbarView extends RIVView {
     }
 
     this.applyAvailability(state.availability);
+  }
+
+  private applyChoices(element: ControlElement, groups: readonly ToolbarChoiceGroup[] = []): void {
+    if (!(element instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    const signature = toChoiceSignature(groups);
+
+    if (element.dataset.choices === signature) {
+      return;
+    }
+
+    element.dataset.choices = signature;
+    element.replaceChildren(...ElementBuilder.buildChoices(groups));
   }
 
   private write(element: ControlElement, rawValue: string): void {
