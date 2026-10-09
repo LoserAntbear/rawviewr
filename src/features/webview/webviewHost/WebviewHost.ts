@@ -43,7 +43,11 @@ export class WebviewHost extends DisposableStore {
         () => this.handleWebviewMessage(message),
         (error) => console.error(`WebviewHost: handling "${message.type}" failed:`, error),
       )),
-      // The context key is global: a view that goes away must not leave it set behind it.
+      // A setting the user changes while looking at a view should reach that view. So we must subscribe to it
+      this.settingsController.onViewerConfigurationChange((config) => attemptDetached(
+        () => this.post({ type: 'view:config:update', config }),
+        (error) => console.error('WebviewHost: failed to push the viewer configuration:', error),
+      )),
       { dispose: () => attemptDetached(
         () => this.setFieldFocusContext(false),
         (error) => console.error('WebviewHost: failed to release the field-focus context:', error),
@@ -166,6 +170,7 @@ export class WebviewHost extends DisposableStore {
       const decodeOptions = this.settingsController.readDefaultDecodeOptions();
 
       await this.initializeSession(this.viewMode, decodeOptions);
+      await this.postViewerConfiguration();
       await this.postSources();
       // Nothing to ask for on a first load: the sources and the options are both here.
       await this.handleRequestDecode(this.sources, decodeOptions);
@@ -183,7 +188,12 @@ export class WebviewHost extends DisposableStore {
       viewMode,
       decodeOptions,
       type: 'session:start',
+      background: this.settingsController.readDefaultBackground(),
     });
+  }
+
+  private postViewerConfiguration(): Promise<void> {
+    return this.post({ type: 'view:config:update', config: this.settingsController.readViewerConfiguration() });
   }
 
   private postSources(): Promise<void> {
