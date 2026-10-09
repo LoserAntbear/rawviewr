@@ -4,6 +4,8 @@ import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@features/image/imageDecoder/definitions';
 import { RIV_COMMAND_EVENT_ID } from '@features/webview/commands/definitions';
+import { WEBVIEW_COMMAND_RESOLVERS } from '@features/webview/commands/resolvers';
+import { WebviewCommandDispatcher } from '@features/webview/commands/webviewCommandDispatcher';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
@@ -17,9 +19,10 @@ import { RIVToolbar } from './index';
 /**
  * The toolbar mounted as a real custom element, driven the way a user drives it.
  *
- * Every control change goes the whole way: a real `change` event inside the shadow root,
- * the delegated listener, `readElementValue`, the value-control registry, the option patch,
- * `decode:change`, and the re-render. This is the path the checkbox-only bug lived on.
+ * Every interaction goes the whole way: a real event inside the shadow root, the delegated
+ * listener, `readElementValue`, the control table, the command it names, the dispatcher that
+ * resolves it, the store write, and the re-render. The dispatcher is part of that path now —
+ * a control performs nothing itself, so without one nothing would land.
  */
 
 let store: AppStore;
@@ -32,6 +35,12 @@ beforeAll(() => {
 
   WebviewContextProvider.create({ store, formatRegistry });
   customElements.define(RIVToolbar.tagName, RIVToolbar);
+
+  new WebviewCommandDispatcher(
+    WEBVIEW_COMMAND_RESOLVERS,
+    { postToWebviewHost: () => undefined },
+    { store },
+  ).listen(document);
 });
 
 beforeEach(() => {
@@ -287,5 +296,61 @@ describe('riv-toolbar: the backdrop', () => {
     const offered = [...control<HTMLSelectElement>('background').options].map((option) => option.value);
 
     expect(new Set(offered)).toEqual(new Set(Object.values(ViewerBackground)));
+  });
+});
+
+/**
+ * One handler serves both interactions, so what keeps them apart is the control table rather
+ * than the component. Without that, the click that merely opens a select would be taken for
+ * a choice, and a checkbox would speak twice for one toggle.
+ */
+describe('riv-toolbar: which interaction a control answers to', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it.each([
+    ['a select', 'format'],
+    ['a number input', 'width'],
+    ['a checkbox', 'flipY'],
+  ])('says nothing when %s is merely clicked', (_label, id) => {
+    const commands = emitted();
+
+    control(id).dispatchEvent(new Event('click', { bubbles: true }));
+
+    expect(commands).toEqual([]);
+  });
+
+  it('says nothing when a button reports a change it cannot have', () => {
+    const commands = emitted();
+
+    control('exportPng').dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(commands).toEqual([]);
+  });
+
+  it('still answers each on the interaction it does speak', () => {
+    const commands = emitted();
+
+    control('exportPng').dispatchEvent(new Event('click', { bubbles: true }));
+    pick('format', 'rgb565');
+
+    expect(commands.map(({ type }) => type)).toEqual(['export:request', 'decode:options:update']);
   });
 });

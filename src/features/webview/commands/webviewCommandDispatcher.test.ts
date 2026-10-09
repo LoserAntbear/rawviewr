@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 
+import { ViewerBackground } from '@features/viewer/definitions';
+
 import { createWebviewStore } from '../store/createWebviewStore';
 import { StoreSliceId } from '../store/definitions';
 import type { ImageItem } from '../store/slice/ImagesSlice';
@@ -117,6 +119,19 @@ describe('WebviewCommandDispatcher: a command the host never hears about', () =>
     dispatcher.dispatch({ type: 'view:zoom', direction: 'in' });
 
     expect(store.get(StoreSliceId.View).zoom).toBe(2);
+    expect(post).not.toHaveBeenCalled();
+  });
+});
+
+describe('WebviewCommandDispatcher: the backdrop', () => {
+  it('paints the view the way the toolbar asked, without troubling the host', () => {
+    const post = vi.fn();
+    const { store } = createWebviewStore();
+
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store })
+      .dispatch({ type: 'view:background:update', background: ViewerBackground.white });
+
+    expect(store.get(StoreSliceId.View).background).toBe(ViewerBackground.white);
     expect(post).not.toHaveBeenCalled();
   });
 });

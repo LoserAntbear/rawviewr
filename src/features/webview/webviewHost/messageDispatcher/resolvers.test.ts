@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { SourceBytesResult } from '@features/image/sourceReader/types';
 
+import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { ViewerBackground } from '@features/viewer/definitions';
+
 import { createWebviewStore } from '../../store/createWebviewStore';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
@@ -75,5 +78,21 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: probe:receive:source-bytes', () => {
 
     // Nothing was pinned, so there is nothing the answer belongs to.
     expect(store.get(StoreSliceId.Probe).pinnedSample).toBeNull();
+  });
+});
+
+describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: session:start', () => {
+  it('opens the view on the backdrop the settings chose', async () => {
+    await WEBVIEW_HOST_MESSAGE_RESOLVERS['session:start'](
+      {
+        type: 'session:start',
+        viewMode: 'single',
+        background: ViewerBackground.magenta,
+        decodeOptions: DEFAULT_DECODE_OPTIONS,
+      },
+      { store, bridge: { postToWebviewHost: () => undefined } },
+    );
+
+    expect(store.get(StoreSliceId.View).background).toBe(ViewerBackground.magenta);
   });
 });
