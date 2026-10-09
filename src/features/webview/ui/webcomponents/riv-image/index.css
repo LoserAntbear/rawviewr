@@ -1,6 +1,13 @@
 :host {
   display: block;
   min-width: 0;
+
+  /* Named once so the backdrop property can fall back to it without repeating it. */
+  --riv-checkerboard:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%);
 }
 
 #frame {
@@ -12,7 +19,7 @@
 }
 
 /*
- * Four properties are the whole contract with whatever lays this component out.
+ * Six properties are the whole contract with whatever lays this component out.
  * They are custom properties rather than attributes because inherited properties are
  * the only styling that crosses a shadow boundary:
  *
@@ -20,6 +27,8 @@
  *   --riv-image-fit       canvas max-width/height (default: intrinsic size, no scaling)
  *   --riv-image-caption   caption display         (default: shown)
  *   --riv-image-scale     zoom factor             (default: 1, one screen pixel per pixel)
+ *   --riv-image-backdrop         colour behind the pixels (default: checkerboard grey)
+ *   --riv-image-backdrop-pattern pattern over it          (default: the checkerboard)
  */
 #viewport {
   display: flex;
@@ -29,13 +38,14 @@
   min-height: 0;
   height: var(--riv-image-viewport, auto);
 
-  /* Checkerboard, so transparent pixels read as transparent rather than as the editor. */
-  background-color: #808080;
-  background-image:
-    linear-gradient(45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(0, 0, 0, 0.18) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.18) 75%);
+  /*
+   * The checkerboard is the default rather than the only choice: transparent pixels read as
+   * transparent against it, which is what a buffer with an alpha channel needs. The setting
+   * replaces it by naming a colour and turning the pattern off — and `editor` names a
+   * transparent colour, so the editor itself shows through.
+   */
+  background-color: var(--riv-image-backdrop, #808080);
+  background-image: var(--riv-image-backdrop-pattern, var(--riv-checkerboard));
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
