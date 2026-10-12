@@ -126,7 +126,7 @@ export class RIVToolbarView extends RIVView {
     }
 
     element.dataset.choices = signature;
-    element.replaceChildren(...ElementBuilder.buildChoices(groups));
+    element.replaceChildren(...ElementBuilder.buildSelectChoices(groups));
   }
 
   private write(element: ControlElement, rawValue: string): void {
