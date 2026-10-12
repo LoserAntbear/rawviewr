@@ -2,8 +2,8 @@ import type { InputDescriptor, ExtractDescriptor, SupportedInputType } from '../
 import type {
   ControlElement,
   ToolbarControl,
+  ToolbarChoiceGroup,
   SupportedControlTag,
-  ControlTagDescriptor,
 } from '../controls/types';
 import type {
   InputBuilderMap,
@@ -99,24 +99,39 @@ export class ElementBuilder {
     return field;
   }
 
-  private static buildSelect(
-    descriptor: ExtractDescriptor<ControlTagDescriptor, 'tag', 'select'>,
-  ): HTMLSelectElement {
-    const select = document.createElement('select');
+  private static buildSelect(): HTMLSelectElement {
+    return document.createElement('select');
+  }
 
-    for (const { label, choices } of descriptor.choiceGroups()) {
-      const parent = ElementBuilder.buildSelectorGroupParentNode(select, label);
+  public static buildSelectChoices(groups: readonly ToolbarChoiceGroup[]): HTMLElement[] {
+    const nodes: HTMLElement[] = [];
+
+    for (const { label, choices } of groups) {
+      const parent = label ? ElementBuilder.buildOptionGroup(label) : null;
 
       for (const choice of choices) {
         const option = document.createElement('option');
 
         option.value = choice.value;
         option.textContent = choice.label;
-        parent.append(option);
+        
+        (parent ?? { append: (node: HTMLElement) => nodes.push(node) }).append(option);
+      }
+
+      if (parent) {
+        nodes.push(parent);
       }
     }
 
-    return select;
+    return nodes;
+  }
+
+  private static buildOptionGroup(label: string): HTMLOptGroupElement {
+    const group = document.createElement('optgroup');
+
+    group.label = label;
+
+    return group;
   }
 
   private static buildInput(descriptor: InputDescriptor): HTMLInputElement {
@@ -152,23 +167,4 @@ export class ElementBuilder {
     return input;
   }
 
-  /**
-   * <optgrup> for labelled groups
-   * nothing if no label given
-   */
-  private static buildSelectorGroupParentNode(
-    select: HTMLSelectElement,
-    label: string | undefined,
-  ): HTMLSelectElement | HTMLOptGroupElement {
-    if (!label) {
-      return select;
-    }
-
-    const group = document.createElement('optgroup');
-
-    group.label = label;
-    select.append(group);
-
-    return group;
-  }
 }
