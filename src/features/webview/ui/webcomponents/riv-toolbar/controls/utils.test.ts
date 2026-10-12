@@ -7,15 +7,11 @@ import type { ToolbarSyncPayload } from '../state/types';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { ViewerBackground } from '@features/viewer/definitions';
 
-/**
- * One kind of control, so what used to be told apart by shape is now told apart by data: a
- * control answers to the interaction its widget speaks, and shows a value only if it has one.
- */
-
 const sync: ToolbarSyncPayload = {
   zoom: 1,
-  background: ViewerBackground.checker,
+  availableBytes: 0,
   options: DEFAULT_DECODE_OPTIONS,
+  background: ViewerBackground.checker,
 };
 
 function elementFor(id: string): HTMLElement {
