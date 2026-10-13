@@ -9,7 +9,6 @@ function parseTsConfigPath(pathName) {
   return {
     pattern: pathNameSource + patternSelectorAll,
     group: 'internal',
-    position: 'after',
   };
 }
 

@@ -1,6 +1,6 @@
 import js from '@eslint/js';
-import importPlugin from 'eslint-plugin-import';
 import { defineConfig } from 'eslint/config';
+import importPlugin from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 
 import LintUtils from './scripts/eslintUtils.mjs';
@@ -21,6 +21,14 @@ export default defineConfig({
     tseslint.configs.recommended,
   ],
   plugins: { import: importPlugin },
+  settings: {
+    /**
+     * `vscode` is handed to an extension by its host and is never installed, so it does not
+     * resolve into node_modules. Left alone, `import/order` reads that as a project-internal
+     * module and files it next to the aliases; it belongs at the top, with the builtins.
+     */
+    'import/core-modules': ['vscode'],
+  },
   rules: {
     'no-restricted-syntax': [
       'error',
@@ -52,6 +60,14 @@ export default defineConfig({
         'functions': 'always-multiline',
       },
     ],
+    /**
+     * Members inside the braces, alphabetically. Declaration order is `import/order`'s job,
+     * so it is left alone here — the two rules would otherwise disagree about it.
+     */
+    'sort-imports': ['error', {
+      ignoreCase: true,
+      ignoreDeclarationSort: true,
+    }],
     'object-curly-spacing': ['error', 'always'],
     /**
      * Braces open and close the same way. Without this, merging two imports of one module
@@ -81,8 +97,16 @@ export default defineConfig({
       'error',
       {
         pathGroups,
-        groups: ['builtin', 'external', 'internal', 'parent'],
+        /**
+         * Empty on purpose. An alias like `@features/x` is shaped exactly like a scoped
+         * package, so `import/order` types it `external` — and the default value of this
+         * option excludes `external` from path-group matching, which drops the aliases and
+         * the real third-party imports into one undifferentiated block.
+         */
+        pathGroupsExcludedImportTypes: [],
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
         'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
     'no-unused-vars': 'off',
