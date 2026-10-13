@@ -10,6 +10,7 @@ import { ViewerBackground } from '@features/viewer/definitions';
 const sync: ToolbarSyncPayload = {
   zoom: 1,
   availableBytes: 0,
+  preserveOptions: false,
   options: DEFAULT_DECODE_OPTIONS,
   background: ViewerBackground.checker,
 };

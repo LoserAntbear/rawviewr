@@ -17,6 +17,7 @@ import type { ToolbarSyncPayload } from '../../state/types';
 const sync = (width = 0, height = 0, availableBytes = 24): ToolbarSyncPayload => ({
   zoom: 1,
   availableBytes,
+  preserveOptions: false,
   background: ViewerBackground.checker,
   options: { ...DEFAULT_DECODE_OPTIONS, format: PixelFormatPresets.getPreset('rgba4444'), width, height },
 });

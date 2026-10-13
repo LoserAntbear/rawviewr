@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { SourceBytesResult } from '@features/image/sourceReader/types';
 
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { toPreservedOptions } from '@features/settings/snapshot';
 import { ViewerBackground } from '@features/viewer/definitions';
 
 import { createWebviewStore } from '../../store/createWebviewStore';
@@ -94,5 +95,68 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: session:start', () => {
     );
 
     expect(store.get(StoreSliceId.View).background).toBe(ViewerBackground.magenta);
+  });
+});
+
+/**
+ * The toolbar the host keeps, pushed to every view. The guard against re-sending it is the
+ * whole reason this is not a loop: two open views would otherwise hand the same options back
+ * and forth for as long as they were both open.
+ */
+describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: decode:options:preserved', () => {
+  /** The format is copied, as a snapshot that has been through `postMessage` would be. */
+  const snapshot = (preserved: boolean, flipY = true) => ({
+    preserved,
+    options: {
+      ...toPreservedOptions(DEFAULT_DECODE_OPTIONS),
+      flipY,
+      format: { ...DEFAULT_DECODE_OPTIONS.format },
+    },
+  });
+
+  const preserved = async (value: boolean, flipY?: boolean) =>
+    WEBVIEW_HOST_MESSAGE_RESOLVERS['decode:options:preserved'](
+      { type: 'decode:options:preserved', snapshot: snapshot(value, flipY) },
+      { store, bridge: { postToWebviewHost: () => undefined } },
+    );
+
+  it('shows the toggle as the host has it', async () => {
+    await preserved(true);
+
+    expect(store.get(StoreSliceId.Config).preserveOptionsForAllWindows).toBe(true);
+  });
+
+  it('takes the toolbar it was handed', async () => {
+    await preserved(true);
+
+    expect(store.get(StoreSliceId.DecodeOptions).options).toMatchObject({ flipY: true });
+  });
+
+  it('leaves the geometry alone, which belongs to the file rather than the toolbar', async () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64, height: 64 });
+
+    await preserved(true);
+
+    expect(store.get(StoreSliceId.DecodeOptions).options).toMatchObject({ width: 64, height: 64 });
+  });
+
+  it('leaves the toolbar alone when nothing is being preserved', async () => {
+    const before = store.get(StoreSliceId.DecodeOptions).options;
+
+    await preserved(false);
+
+    expect(store.get(StoreSliceId.DecodeOptions).options).toBe(before);
+  });
+
+  it('says nothing further when the toolbar it was handed is the one it already has', async () => {
+    await preserved(true);
+
+    const changed = vi.fn();
+
+    store.bus.on('decodeOptions:change', changed);
+    await preserved(true);
+
+    // A copy that read as a change would be sent straight back to the host.
+    expect(changed).not.toHaveBeenCalled();
   });
 });

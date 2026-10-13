@@ -5,6 +5,7 @@ import { Endian } from '@definitions/bits';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
 import type { ViewerConfiguration } from '@features/settings/VSCodeWorkspaceConfig/types';
+import { toPreservedOptions, type ToolbarOptionsSnapshot } from '@features/settings/snapshot';
 
 import type { FileSource } from '../types';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
@@ -14,9 +15,14 @@ let consoleError: MockInstance;
 
 /** Set by `mount`, so a test can push a settings change the way the controller would. */
 let pushViewerConfiguration: ((config: ViewerConfiguration) => void) | undefined;
+let pushToolbarSnapshot: ((snapshot: ToolbarOptionsSnapshot) => void) | undefined;
+let storedSnapshot: ToolbarOptionsSnapshot | null;
+let writtenSnapshots: ToolbarOptionsSnapshot[];
 
 beforeEach(() => {
   consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  storedSnapshot = null;
+  writtenSnapshots = [];
 });
 
 afterEach(() => {
@@ -53,6 +59,20 @@ function mount(
     'gallery' as never,
     {
       readDefaultDecodeOptions: () => DEFAULT_DECODE_OPTIONS,
+      readSessionDecodeOptions: () => DEFAULT_DECODE_OPTIONS,
+      get toolbarSnapshot() {
+        return storedSnapshot;
+      },
+      writeToolbarSnapshot: (snapshot: ToolbarOptionsSnapshot) => {
+        writtenSnapshots.push(snapshot);
+
+        return Promise.resolve();
+      },
+      onToolbarSnapshotChange: (listen: (snapshot: ToolbarOptionsSnapshot) => void) => {
+        pushToolbarSnapshot = listen;
+
+        return { dispose: () => (pushToolbarSnapshot = undefined) };
+      },
       readViewerConfiguration: () => DEFAULT_VIEWER_CONFIGURATION,
       readDefaultBackground: () => ViewerBackground.checker,
       onViewerConfigurationChange: (listen: (config: ViewerConfiguration) => void) => {
@@ -305,5 +325,75 @@ describe('WebviewHost: the viewer configuration', () => {
 
     // The subscription belongs to the view, not to the window.
     expect(pushViewerConfiguration).toBeUndefined();
+  });
+});
+
+/**
+ * One toolbar for the window. A view opens on it, follows it while it is open, and hands its
+ * own back when the user asks for it to be kept.
+ */
+describe('WebviewHost: the preserved toolbar', () => {
+  const snapshot = { preserved: true, options: toPreservedOptions({ ...DEFAULT_DECODE_OPTIONS, flipY: true }) };
+
+  it('tells a view what is being kept, as it starts', async () => {
+    const posted = vi.fn();
+
+    storedSnapshot = snapshot;
+
+    const { receive } = mount(async (message) => {
+      posted(message);
+
+      return true;
+    });
+
+    receive({ type: 'app:ready' });
+
+    await vi.waitFor(() => expect(posted)
+      .toHaveBeenCalledWith({ type: 'decode:options:preserved', snapshot }));
+  });
+
+  it('says nothing of the sort when nothing has been kept', async () => {
+    const posted = vi.fn();
+    const { receive } = mount(async (message) => {
+      posted(message.type);
+
+      return true;
+    });
+
+    receive({ type: 'app:ready' });
+
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('images:decode:ready'));
+    expect(posted).not.toHaveBeenCalledWith('decode:options:preserved');
+  });
+
+  it('keeps what a view hands it', async () => {
+    const { receive } = mount(async () => true);
+
+    receive({ type: 'decode:options:snapshot', snapshot });
+
+    await vi.waitFor(() => expect(writtenSnapshots).toEqual([snapshot]));
+  });
+
+  it('passes a change on to a view that is already open', async () => {
+    const posted = vi.fn();
+
+    mount(async (message) => {
+      posted(message);
+
+      return true;
+    });
+
+    pushToolbarSnapshot?.(snapshot);
+
+    await vi.waitFor(() => expect(posted)
+      .toHaveBeenCalledWith({ type: 'decode:options:preserved', snapshot }));
+  });
+
+  it('stops following once the view is gone', () => {
+    const { host } = mount(async () => true);
+
+    host.dispose();
+
+    expect(pushToolbarSnapshot).toBeUndefined();
   });
 });

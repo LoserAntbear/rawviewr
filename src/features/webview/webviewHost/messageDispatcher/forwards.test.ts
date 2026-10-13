@@ -71,3 +71,35 @@ describe('STORE_EVENT_FORWARDS: probe:receive:source-bytes:requested', () => {
     expect(forwardProbe()).toMatchObject({ endian: Endian.Little });
   });
 });
+
+describe('STORE_EVENT_FORWARDS: decodeOptions:snapshot:requested', () => {
+  const forwardSnapshot = () => STORE_EVENT_FORWARDS['decodeOptions:snapshot:requested']?.(
+    { options: store.get(StoreSliceId.DecodeOptions).options },
+    { store, bridge: { postToWebviewHost: () => undefined } },
+  );
+
+  it('sends the toolbar on with the toggle that asked for it to be kept', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+    store.get(StoreSliceId.DecodeOptions).setOptions({ flipY: true });
+
+    expect(forwardSnapshot()).toMatchObject({
+      type: 'decode:options:snapshot',
+      snapshot: { preserved: true, options: expect.objectContaining({ flipY: true }) },
+    });
+  });
+
+  it('sends nothing of the geometry, which describes a file rather than a toolbar', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64, height: 64, offset: 8 });
+
+    const sent = forwardSnapshot() as { snapshot: { options: Record<string, unknown> } };
+
+    expect(Object.keys(sent.snapshot.options)).toEqual(
+      expect.not.arrayContaining(['width', 'height', 'offset', 'bytesPerRow', 'frame']),
+    );
+  });
+
+  it('says so when the toggle is off, which is how the host learns to stop', () => {
+    expect(forwardSnapshot()).toMatchObject({ snapshot: { preserved: false } });
+  });
+});

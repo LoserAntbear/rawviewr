@@ -444,3 +444,60 @@ describe('riv-toolbar: the dimension picker', () => {
     expect(offered()).not.toEqual(before);
   });
 });
+
+/**
+ * The toggle that makes this toolbar everyone's. It shows what the host keeps rather than
+ * what was last clicked, so a second view turning it off is reflected here.
+ */
+describe('riv-toolbar: preserving the options', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(false);
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it('starts unchecked, since nothing is being kept', () => {
+    expect(control<HTMLInputElement>('preserveOptions').checked).toBe(false);
+  });
+
+  it('shows what the host keeps, which another view can have set', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+
+    expect(control<HTMLInputElement>('preserveOptions').checked).toBe(true);
+  });
+
+  it('asks for the toolbar to be kept, and leaves the decode alone', () => {
+    const commands = emitted();
+    const before = options();
+
+    toggle('preserveOptions');
+
+    expect(commands).toEqual([{ type: 'decode:options:preserve', preserved: true }]);
+    expect(options()).toBe(before);
+  });
+
+  it('asks for it to be let go again', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+
+    const commands = emitted();
+
+    toggle('preserveOptions');
+
+    expect(commands).toEqual([{ type: 'decode:options:preserve', preserved: false }]);
+  });
+});
