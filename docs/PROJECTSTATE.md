@@ -323,14 +323,113 @@ Each item names what it depends on. Nothing below is started.
    in flight does not ask again.
 5. **Frame navigation and frame tiles** — README feature. `DecodeOptions.frame` and
    `Geometry.frameCount` decode correctly; nothing steps through frames or lays them out.
-6. **Backdrop choice and tile size** — needs the config emitter exposed. `background` and
-   `tileSize` are declared and validated, then read by nobody: the CSS hardcodes a
-   checkerboard and `--riv-tile: 220px`. They are the "watched" keys meant to update open
-   views live, but `VSCodeWorkspaceConfigurationController` keeps its emitter private, so
-   nothing can subscribe.
-7. **Dimension-guess picker** — README feature. `guessDimensions` fills empty width and
-   height silently; the ranked-candidate dropdown that lets the user choose is unported.
-8. **Remember decode options between views.** Built, then removed pending review.
+6. ~~**Backdrop choice and tile size**~~ **Landed.** The backdrop is a toolbar dropdown —
+   checker, black, white, magenta, or `editor` to let the editor itself show through — and
+   the setting, now `rawImageViewer.defaultBackground`, only says which one a view opens
+   with. Picking one is view state, so it lives on `ViewSlice` beside mode and zoom, and the
+   choice is per view: two buffers open side by side can be read against different backdrops.
+
+   That made a third kind of toolbar control: `ToolbarViewControl` reads its value from the
+   sync payload and maps the chosen value to a command, where the existing kinds either write
+   decode options or fire a fixed command on a click. Anything view-shaped that comes later —
+   fit, frames — now has a place to land.
+
+   `tileSize` is the one key a view still follows live: the config controller's event is
+   finally reachable, `SettingsController.onViewerConfigurationChange` filters it to the
+   `ViewerWatched` kind, and each `WebviewHost` pushes the fresh configuration into its own
+   view, where `ConfigSlice` holds it apart from interaction state.
+
+   Both reach the tiles as custom properties set once on the gallery list, the way the zoom
+   already does — a gallery can hold thousands of tiles, so it is one write per change rather
+   than one per tile. The checkerboard stays the stylesheet's default under the name
+   `--riv-checkerboard`, so choosing it simply takes the properties back off.
+
+   One correction on the way: `ViewerConfiguration` claimed to be "the subset that may be
+   pushed into viewers that are already open" but resolved to *every* setting — the key set's
+   generic defaults widened each list back to `ConfigKey[]`. It now comes from the key set's
+   value with `satisfies`, so the type means what its comment says.
+
+   **Note:** the manifest's `tileSize` default is 160 and the stylesheet's `--riv-tile` was
+   220px. The manifest wins now; 220 remains only as the pre-session fallback.
+
+7. ~~**Dimension-guess picker**~~ **Landed.** A `Guess` select in the Geometry group lists
+   what the decoder would consider — `4 × 3 — consumes the buffer exactly, square`, best
+   first — and picking one fills Width and Height; `auto` clears them and hands the decision
+   back. The ranking was never the missing part: `guessDimensions` has always returned up to
+   twelve scored candidates with their reasons, and `GeometryResolver` took `[0]` and dropped
+   the rest. The list is recomputed in the webview from `geometry.availableBytes` and the
+   format's `bpp`, so the picker costs no round trip and no new message.
+
+   A size that was typed is kept in the list as `5 × 7 — yours`, because a select that cannot
+   show its own value shows the first option instead — which would claim the dimensions were
+   automatic when they were not. The picker stands down entirely while a header preset
+   dictates the geometry.
+
+   The status bar now says `4×3 (guessed)` when the size is the decoder's proposal rather
+   than an instruction — only the width is ever guessed, since a height left open is derived
+   from what the buffer has left, and a header overrules both.
+
+   This needed one extension to the control contract: a select's `choiceGroups` is now a
+   function of the sync state, and the options are filled per render rather than at build,
+   since the candidates change with the file and the format. They are rebuilt only when the
+   offer actually differs — replacing a select's options in a real window closes the dropdown
+   under the user's cursor.
+
+8. ~~**Remember decode options between views.**~~ **Landed, as one snapshot per window.** A
+   `Preserve` toggle in the Actions group hands the toolbar as it stands to the host, which
+   keeps it in the workspace memento — under the prefix `Reset Remembered Decode Settings`
+   already sweeps. Every view opens on it, and views already open follow it: the controller
+   announces each write and each `WebviewHost` pushes it into its own webview. Changing any
+   option while the toggle is on updates what is kept, said in the store's own words through
+   the same reaction-and-forward path a decode request takes.
+
+   The earlier attempt remembered options *per buffer*; this one is one toolbar for the
+   window, which is what makes the next dump read the way the last one did.
+
+   **Geometry does not travel.** Format, endian, bit order, flip, alpha and header preset
+   are carried; width, height, offset, stride and frame describe one buffer and stay with it,
+   so each file is still guessed or given on its own terms. The kept toolbar is laid over the
+   configured defaults, which is where geometry always comes from. The carried keys are named
+   rather than derived by exclusion, so an option added later has to be considered before it
+   starts travelling — and with nothing to weigh, the host no longer asks the file system
+   anything.
+
+   **The echo is the part to be careful with.** A pushed snapshot arrives as a copy, so its
+   `format` is a different object saying the same thing; applied blindly it reads as a fresh
+   change and goes straight back to the host, and two open views hand the same options to
+   each other forever. `areSameOptions` compares by value, and the resolver applies only what
+   actually differs. The first test written for it passed either way — it reused the same
+   `format` reference — so the mutation survived until the fixture was made a real copy.
+
+### The 0.1 crash: a header preset that outlived its window
+
+Launching the dev host killed the extension host outright — `UtilityProcess type: extensionHost
+crashed with code 5`, once per attempt, with nothing in any log. No exception was thrown, so
+the `try`/`catch` at both entry points and every resolver boundary saw nothing; the process
+was killed rather than thrown out of. V8 reported no heap error either, because decoded pixels
+live in `ArrayBuffer`s: peak *heap* was 16 MB while RSS reached 4.2 GB.
+
+**What happened.** A header preset reads two numbers from the start of the file. On a file
+with no such header those are garbage, and each is clamped to `MAX_FILE_DIMENSION_PX`, so the
+geometry resolves to 65535×65535. Both dimensions pass their own range check — only their
+*product* gives it away — and nothing weighed it against the bytes available. The decoder then
+allocated 16 GiB, twice over, since the alpha pass copies the frame.
+
+It became sticky through the preserved toolbar: the window was closed with `Preserve` on while
+a header preset was selected, so every launch afterwards opened every file with a header it
+did not have.
+
+**Two fixes.** `ImageDecoder.decode` refuses any frame past `MAX_DECODED_PIXELS` (64 MP, 256 MB
+of RGBA) before allocating anything, whatever produced the numbers — a header, a typed width,
+or a carried toolbar. The refusal is a `DecodedSizeExceededError`, which the per-file decode
+path already turns into a readable message. And the preserved toolbar is let go when the last
+viewer closes: `ViewerRegistry` says when nothing is open, and the extension clears the
+snapshot, so a bad toolbar cannot greet the next launch.
+
+**Still open:** a *gallery* of legitimately-sized images is not bounded by that ceiling. The
+whole of `samples/raw` — 4757 files, 149 MB — decodes to 297 MB of RGBA and peaks at 1.3 GB
+RSS, because `decodeFromSource` runs every source through `Promise.all` and posts them in one
+message. That is the parked wire-cost finding, and virtualisation is what answers it.
 
 ### Testing
 
@@ -476,10 +575,10 @@ The gallery needs to ask for what is on screen and drop what is not
 2. Zoom → V (fit still open)
 3. Keyboard Shortcuts → V (zoom; `f` and frame arrows pending their features)
 4. Probe → V
-5. Frames →
-6. Backdrop + tile size →
-7. Guess picker →
-8. Remember options ->
+5. Frames → parked for 1.1 (GPU dumps deliver frames as separate files; nice to have)
+6. Backdrop + tile size → V
+7. Guess picker → V
+8. Remember options -> V
 9. Parallel HEX view (pixel-to-byte mapping) ->
 10. Gallery virtualization ->
 11. Image dynamic streaming.
