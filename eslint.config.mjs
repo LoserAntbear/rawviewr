@@ -2,34 +2,46 @@ import js from '@eslint/js';
 import importPlugin from 'eslint-plugin-import';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
-import LintUtils from './scripts/eslintUtils.js';
+
+import LintUtils from './scripts/eslintUtils.mjs';
 
 const pathGroups = LintUtils.importPathGroups();
 
 export default defineConfig({
-  files: ['**/*.{js,ts}'],
+  // The build output is generated, and `eslint .` would otherwise lint both bundles.
+  ignores: ['dist/**'],
+}, {
+  files: ['**/*.{js,mjs,ts}'],
+  linterOptions: {
+    // A disable comment that no longer suppresses anything is a claim that has gone stale.
+    reportUnusedDisableDirectives: 'error',
+  },
   extends: [
     js.configs.recommended,
     tseslint.configs.recommended,
   ],
   plugins: { import: importPlugin },
   rules: {
-    "no-restricted-syntax": [
-      "error",
+    'no-restricted-syntax': [
+      'error',
       // The rule is not so robust, but it will catch most cases of `disposables` being used in a class that does not extend `DisposableStore`.
       // Maybe I'll add some custom AST traversal logic in the future to make it more robust, but for now this should be good enough.
       {
-        // `DisposableStore` itself has no superClass (it `implements`, not `extends`), so
-        // excluding by superClass alone still matches the base class's own field.
-        "selector": ":matches(ClassDeclaration, ClassExpression):not([superClass.name='DisposableStore']):not([id.name='DisposableStore']):not([id.name='WebviewDisposableStore']) > ClassBody > PropertyDefinition[key.name='disposables'][value.type='ArrayExpression']",
-        "message": "Restricted use of a raw `disposables` array. Extend `DisposableStore` (extension host) or hold a `WebviewDisposableStore` (webview) instead — both give safe, centralised cleanup."
-      }
+        // The two stores own this field; the rule stands down for their files (see below),
+        // which is why their names are not spelled into the selector.
+        selector: ":matches(ClassDeclaration, ClassExpression):not([superClass.name='DisposableStore']) > ClassBody > PropertyDefinition[key.name='disposables'][value.type='ArrayExpression']",
+        message: 'Restricted use of a raw `disposables` array. Extend `DisposableStore` (extension host) or hold a `WebviewDisposableStore` (webview) instead — both give safe, centralised cleanup.',
+      },
     ],
-    quotes: ['error', 'single'],
-    'prettier/prettier': 0,
+    // `avoidEscape` so a string carrying an apostrophe keeps its double quotes instead of
+    // growing backslashes.
+    quotes: ['error', 'single', { avoidEscape: true }],
     'import/no-duplicates': 2,
     'no-bitwise': 'off',
-    'indent': ['error', 2],
+    // `SwitchCase: 1` is not the rule's default, but it is how every switch here is written.
+    'indent': ['error', 2, { SwitchCase: 1 }],
+    // The merge fixer for duplicate imports leaves `A , B` behind; this cleans up after it.
+    'comma-spacing': ['error', { before: false, after: true }],
     'comma-dangle': [
       'error',
       {
@@ -40,15 +52,15 @@ export default defineConfig({
         'functions': 'always-multiline',
       },
     ],
-    'sort-imports': [
-      'error',
-      {
-        ignoreMemberSort: true,
-        ignoreDeclarationSort: true,
-        memberSyntaxSortOrder: ['none', 'all', 'single', 'multiple'],
-      },
-    ],
     'object-curly-spacing': ['error', 'always'],
+    /**
+     * Braces open and close the same way. Without this, merging two imports of one module
+     * leaves `  LastMember } from '…'`, which `--fix` is happy with and nobody can read.
+     */
+    'object-curly-newline': ['error', {
+      ImportDeclaration: { multiline: true, consistent: true },
+      ExportDeclaration: { multiline: true, consistent: true },
+    }],
     'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 1 }],
     'max-len': [
       'error',
@@ -70,12 +82,10 @@ export default defineConfig({
       {
         pathGroups,
         groups: ['builtin', 'external', 'internal', 'parent'],
-        pathGroupsExcludedImportTypes: ['react'],
         'newlines-between': 'always',
       },
     ],
     'no-unused-vars': 'off',
-    'no-shadow': 'off',
   },
 }, {
   files: ['src/**/*.ts'],
@@ -88,6 +98,17 @@ export default defineConfig({
   rules: {
     '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: false, checkThenables: true }],
     '@typescript-eslint/no-misused-promises': 'error',
+    '@typescript-eslint/await-thenable': 'error',
+
+    '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
+    '@typescript-eslint/no-import-type-side-effects': 'error',
+
+    '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
+    '@typescript-eslint/explicit-member-accessibility': ['error', {
+      accessibility: 'explicit',
+      overrides: { constructors: 'no-public' },
+    }],
   },
 }, {
   /**
@@ -113,7 +134,23 @@ export default defineConfig({
           allowTypeImports: true,
           message: 'Host-only: the webview posts an app:status message instead.',
         },
+        {
+          // Not even the webview host: it asks the host for bytes, it never reads them itself.
+          group: ['fs', 'fs/*', 'path', 'os', 'child_process', 'node:*'],
+          message: 'There is no file system in the webview. Request the bytes over the bridge.',
+        },
       ],
     }],
   },
+}, {
+  /**
+   * The two classes the `disposables` restriction exists to point at. Naming the files rather
+   * than the class names means a rename cannot quietly re-enable the rule on them, and a move
+   * shows up as the rule firing on its own owner.
+   */
+  files: [
+    'src/features/disposable/DisposableStore.ts',
+    'src/features/webview/disposable/WebviewDisposableStore.ts',
+  ],
+  rules: { 'no-restricted-syntax': 'off' },
 });
