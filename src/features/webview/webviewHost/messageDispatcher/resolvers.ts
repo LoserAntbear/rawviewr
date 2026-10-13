@@ -1,5 +1,6 @@
 import { exportSelected } from '../../image/export/exportSelected';
 import { StoreSliceId } from '../../store/definitions';
+import { SnapshotValidator } from '@features/settings/snapshot';
 
 import type { WebviewHostMessageResolverMap } from './types';
 
@@ -32,6 +33,14 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
 
   "view:config:update": ({ config }, { store }) => {
     store.get(StoreSliceId.Config).setConfiguration(config);
+  },
+
+  "decode:options:preserved": ({ snapshot }, { store }) => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(snapshot.preserved);
+
+    if (snapshot.preserved && !SnapshotValidator.areSameOptions(store.get(StoreSliceId.DecodeOptions).options, snapshot.options)) {
+      store.get(StoreSliceId.DecodeOptions).setOptions(snapshot.options);
+    }
   },
 
   // Basically a keystroke redirected through the host.
