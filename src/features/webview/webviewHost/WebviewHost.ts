@@ -43,6 +43,11 @@ export class WebviewHost extends DisposableStore {
         () => this.handleWebviewMessage(message),
         (error) => console.error(`WebviewHost: handling "${message.type}" failed:`, error),
       )),
+      // If we want to share the options b/w all views, we listen for changes and propagate them.
+      this.settingsController.onToolbarSnapshotChange((snapshot) => attemptDetached(
+        () => this.post({ type: 'decode:options:preserved', snapshot }),
+        (error) => console.error('WebviewHost: failed to push the toolbar snapshot:', error),
+      )),
       // A setting the user changes while looking at a view should reach that view. So we must subscribe to it
       this.settingsController.onViewerConfigurationChange((config) => attemptDetached(
         () => this.post({ type: 'view:config:update', config }),
@@ -111,6 +116,9 @@ export class WebviewHost extends DisposableStore {
         case 'probe:request':
           await this.handleProbeRequest(message.id, message.location, message.endian);
           break;
+        case 'decode:options:snapshot':
+          await this.settingsController.writeToolbarSnapshot(message.snapshot);
+          break;
         case 'view:fieldFocus':
           await this.setFieldFocusContext(message.focused);
           break;
@@ -167,9 +175,10 @@ export class WebviewHost extends DisposableStore {
 
   private async handleAppReady(): Promise<void> {
     try {
-      const decodeOptions = this.settingsController.readDefaultDecodeOptions();
+      const decodeOptions = this.settingsController.readSessionDecodeOptions();
 
       await this.initializeSession(this.viewMode, decodeOptions);
+      await this.postToolbarSnapshot();
       await this.postViewerConfiguration();
       await this.postSources();
       // Nothing to ask for on a first load: the sources and the options are both here.
@@ -190,6 +199,12 @@ export class WebviewHost extends DisposableStore {
       type: 'session:start',
       background: this.settingsController.readDefaultBackground(),
     });
+  }
+
+  private postToolbarSnapshot(): Promise<void> {
+    const snapshot = this.settingsController.toolbarSnapshot;
+
+    return snapshot ? this.post({ type: 'decode:options:preserved', snapshot }) : Promise.resolve();
   }
 
   private postViewerConfiguration(): Promise<void> {
