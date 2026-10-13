@@ -4,6 +4,7 @@ import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer
 
 import { AlphaMode, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { PixelFormatPresets } from '@features/image/format/presets';
+import { toPreservedOptions } from './snapshot';
 
 import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
 import type { ConfigChangePayload } from './VSCodeWorkspaceConfig/types';
@@ -120,13 +121,13 @@ describe('SettingsController.onViewerConfigurationChange', () => {
  * in the workspace memento under the same prefix the reset command already sweeps.
  */
 describe('SettingsController: the toolbar snapshot', () => {
-  const snapshot = (preserved = true, width = 0) => ({
+  const snapshot = (preserved = true) => ({
     preserved,
-    options: { ...DEFAULT_DECODE_OPTIONS, width, height: width },
+    options: toPreservedOptions(DEFAULT_DECODE_OPTIONS),
   });
 
   it('has nothing remembered to begin with', () => {
-    expect(controllerWith(configured).settings.readToolbarSnapshot()).toBeNull();
+    expect(controllerWith(configured).settings.toolbarSnapshot).toBeNull();
   });
 
   it('keeps what it was given, and reads it back', async () => {
@@ -134,7 +135,7 @@ describe('SettingsController: the toolbar snapshot', () => {
 
     await settings.writeToolbarSnapshot(snapshot());
 
-    expect(settings.readToolbarSnapshot()).toEqual(snapshot());
+    expect(settings.toolbarSnapshot).toEqual(snapshot());
   });
 
   it('tells the views already open, not only the next one', async () => {
@@ -158,49 +159,52 @@ describe('SettingsController: the toolbar snapshot', () => {
   });
 });
 
+/** Every key answered in its own currency: a width that is a width, a format that is one. */
+const defaults = (key: string) => (
+  key === 'defaultFormat' ? 'rgb565'
+    : key === 'defaultLittleEndian' ? true
+      : key === 'defaultAlphaMode' ? AlphaMode.Use
+        : 320
+);
+
 describe('SettingsController.readSessionDecodeOptions', () => {
-  const remembered = (preserved: boolean, width: number) => ({
+  const remembered = (preserved: boolean, formatId = 'rgba8888') => ({
     preserved,
-    options: {
+    options: toPreservedOptions({
       ...DEFAULT_DECODE_OPTIONS,
-      width,
-      height: width,
-      format: PixelFormatPresets.getPreset('rgba8888'),
-    },
+      flipY: true,
+      format: PixelFormatPresets.getPreset(formatId),
+    }),
   });
 
   it('opens on the remembered toolbar while it is being preserved', async () => {
     const { settings } = controllerWith(configured);
 
-    await settings.writeToolbarSnapshot(remembered(true, 16));
+    await settings.writeToolbarSnapshot(remembered(true));
 
-    expect(settings.readSessionDecodeOptions(1024)).toMatchObject({ width: 16, height: 16 });
+    expect(settings.readSessionDecodeOptions()).toMatchObject({
+      flipY: true,
+      format: expect.objectContaining({ id: 'rgba8888' }),
+    });
   });
 
   it('opens on the configured defaults when nothing is being preserved', async () => {
-    // Every key answered in its own currency: a width that is a width, a format that is one.
-    const { settings } = controllerWith((key) => (
-      key === 'defaultFormat' ? 'rgb565'
-        : key === 'defaultLittleEndian' ? true
-          : key === 'defaultAlphaMode' ? AlphaMode.Use
-            : 320
-    ));
+    const { settings } = controllerWith(defaults);
 
-    await settings.writeToolbarSnapshot(remembered(false, 16));
+    await settings.writeToolbarSnapshot(remembered(false));
 
-    // `configured` answers 320 for every numeric key, defaults included.
-    expect(settings.readSessionDecodeOptions(1024)).toMatchObject({ width: 320 });
+    expect(settings.readSessionDecodeOptions()).toMatchObject({
+      flipY: false,
+      format: expect.objectContaining({ id: 'rgb565' }),
+    });
   });
 
-  it('drops a remembered size this buffer cannot hold, and keeps the rest', async () => {
-    const { settings } = controllerWith(configured);
+  /** A kept toolbar says nothing about geometry, so each buffer still gets its own. */
+  it('leaves the geometry to the file, however it was opened', async () => {
+    const { settings } = controllerWith(defaults);
 
-    await settings.writeToolbarSnapshot(remembered(true, 1920));
+    await settings.writeToolbarSnapshot(remembered(true));
 
-    expect(settings.readSessionDecodeOptions(1024)).toMatchObject({
-      width: 0,
-      height: 0,
-      format: expect.objectContaining({ id: 'rgba8888' }),
-    });
+    expect(settings.readSessionDecodeOptions()).toMatchObject({ width: 320, height: 320, offset: 320 });
   });
 });

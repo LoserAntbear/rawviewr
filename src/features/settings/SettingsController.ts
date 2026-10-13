@@ -11,7 +11,7 @@ import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@featur
 import type { ViewerBackground } from '@features/viewer/definitions';
 import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
-import { SnapshotValidator, type ToolbarOptionsSnapshot } from './snapshot';
+import type { ToolbarOptionsSnapshot } from './snapshot';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
 const TOOLBAR_SNAPSHOT_KEY = `${VSCODE_MEMENTO_SETTINGS_PREFIX}toolbarSnapshot`;
@@ -48,12 +48,13 @@ export class SettingsController extends DisposableStore {
     return this.snapshotEmitter.event(listen);
   }
 
-  public readSessionDecodeOptions(availableBytes: number): DecodeOptions {
+  public readSessionDecodeOptions(): DecodeOptions {
     const snapshot = this.toolbarSnapshot;
 
-    return snapshot?.preserved
-      ? SnapshotValidator.toFittingOptions(snapshot.options, availableBytes)
-      : this.readDefaultDecodeOptions();
+    return {
+      ...this.readDefaultDecodeOptions(),
+      ...(snapshot?.preserved ? snapshot.options : {}),
+    };
   }
 
   public readDefaultDecodeOptions(): DecodeOptions {
