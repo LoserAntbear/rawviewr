@@ -54,6 +54,12 @@ export class RIVToolbar extends RIVHTMLElement {
       "images:change",
       this.sync.bind(this),
     );
+    // The toggle reflects what the host keeps, which another view can have changed.
+    this.observe(
+      WebviewContextProvider.context.store.bus,
+      "config:change",
+      this.sync.bind(this),
+    );
 
     this.sync();
   }
@@ -78,6 +84,7 @@ export class RIVToolbar extends RIVHTMLElement {
       this.viewState.updateState(ToolbarStateTransition.Synced, {
         zoom: store.get(StoreSliceId.View).zoom,
         availableBytes: resolveAvailableBytes(store),
+        preserveOptions: store.get(StoreSliceId.Config).preserveOptionsForAllWindows,
         background: store.get(StoreSliceId.View).background,
         options: store.get(StoreSliceId.DecodeOptions).options,
       }),
