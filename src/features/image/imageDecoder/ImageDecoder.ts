@@ -1,5 +1,7 @@
 import { FormatDecodersLibrary } from '@features/image/format/rowDecoders';
 
+import { MAX_DECODED_PIXELS } from './definitions';
+import { DecodedSizeExceededError } from './decodeErrors';
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 import { DecodeOptions, DecodeResult } from './types';
@@ -25,6 +27,8 @@ export class ImageDecoder {
     options: DecodeOptions,
     geometry: Geometry = this.resolveGeometry(source, options),
   ): DecodeResult {
+    this.assertDecodableSize(geometry);
+
     const data = this.applyAlphaMode(
       this.decodeSource(source, geometry, options),
       options,
@@ -35,6 +39,14 @@ export class ImageDecoder {
       geometry,
       image: { data, width: geometry.width, height: geometry.height },
     };
+  }
+
+  // To avoid OS itself from running out of memory and killing the process,
+  // we refuse to decode images that exceed the maximum allowed pixel count.
+  private assertDecodableSize({ width, height }: Geometry): void {
+    if (width * height > MAX_DECODED_PIXELS) {
+      throw new DecodedSizeExceededError(width, height, MAX_DECODED_PIXELS);
+    }
   }
 
   private decodeSource(
