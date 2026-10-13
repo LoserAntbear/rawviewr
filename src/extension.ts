@@ -14,6 +14,7 @@ import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCod
 import { AppContextProvider } from '@features/appContext/AppContextProvider';
 import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
 import { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+import { attemptDetached } from '@utils/attempt';
 
 export function activate(context: vscode.ExtensionContext): void {
   // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
@@ -50,6 +51,12 @@ export function activate(context: vscode.ExtensionContext): void {
     ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
+
+  context.subscriptions.push(viewerRegistry.onEmpty(() => attemptDetached(
+    () => settingsController.clearToolbarSnapshot(),
+    (error) => console.error('Failed to release the preserved toolbar:', error),
+  )));
+
   const host = new ExtensionHost(context, rawEditorProvider, dispatcher);
 
   host.registerSelf();
