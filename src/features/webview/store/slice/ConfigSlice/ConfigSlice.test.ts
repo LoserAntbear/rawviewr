@@ -16,7 +16,7 @@ beforeEach(() => {
 
 describe('ConfigSlice', () => {
   it('starts on the defaults, which stand until the host says otherwise', () => {
-    expect(config().getState()).toEqual({ ...DEFAULT_VIEWER_CONFIGURATION, preserveOptions: false });
+    expect(config().getState()).toEqual({ ...DEFAULT_VIEWER_CONFIGURATION, preserveOptionsForAllWindows: false });
   });
 
   it('takes what the host sent', () => {
