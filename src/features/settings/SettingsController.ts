@@ -10,10 +10,17 @@ import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
 import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
 import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
+import { DisposableStore } from '@features/disposable/DisposableStore';
+import { SnapshotValidator, type ToolbarOptionsSnapshot } from './snapshot';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
+const TOOLBAR_SNAPSHOT_KEY = `${VSCODE_MEMENTO_SETTINGS_PREFIX}toolbarSnapshot`;
 
-export class SettingsController {
+export class SettingsController extends DisposableStore {
+  public get toolbarSnapshot(): ToolbarOptionsSnapshot | null {
+    return this.workspaceState.get<ToolbarOptionsSnapshot>(TOOLBAR_SNAPSHOT_KEY) ?? null;
+  }
+
   private get keys(): string[] {
     return this.workspaceState.keys().filter(
       (key) => key.startsWith(VSCODE_MEMENTO_SETTINGS_PREFIX),
@@ -23,7 +30,31 @@ export class SettingsController {
   constructor(
     private readonly workspaceState: vscode.Memento,
     private readonly configController: VSCodeWorkspaceConfigurationController,
-  ) {}
+    private readonly snapshotEmitter: vscode.EventEmitter<ToolbarOptionsSnapshot> =
+      new vscode.EventEmitter<ToolbarOptionsSnapshot>(),
+  ) {
+    super();
+
+    this.disposables.push(this.snapshotEmitter);
+  }
+
+  public async writeToolbarSnapshot(snapshot: ToolbarOptionsSnapshot): Promise<void> {
+    await this.workspaceState.update(TOOLBAR_SNAPSHOT_KEY, snapshot);
+
+    this.snapshotEmitter.fire(snapshot);
+  }
+
+  public onToolbarSnapshotChange(listen: (snapshot: ToolbarOptionsSnapshot) => void): vscode.Disposable {
+    return this.snapshotEmitter.event(listen);
+  }
+
+  public readSessionDecodeOptions(availableBytes: number): DecodeOptions {
+    const snapshot = this.toolbarSnapshot;
+
+    return snapshot?.preserved
+      ? SnapshotValidator.toFittingOptions(snapshot.options, availableBytes)
+      : this.readDefaultDecodeOptions();
+  }
 
   public readDefaultDecodeOptions(): DecodeOptions {
     try {
