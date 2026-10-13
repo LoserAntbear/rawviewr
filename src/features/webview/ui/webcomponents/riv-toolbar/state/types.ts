@@ -9,6 +9,7 @@ export type ToolbarSyncPayload = {
   readonly zoom: number;
   readonly availableBytes: number;
   readonly options: DecodeOptions;
+  readonly preserveOptions: boolean;
   readonly background: ViewerBackground;
 };
 export type ToolbarTransitionPayloads = {
