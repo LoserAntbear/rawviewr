@@ -37,7 +37,7 @@ const requestSourceFileBytesOnPin: StoreReaction = (store) => ({
  */
 const updateSnapshotOnOptionsChange: StoreReaction = (store) => ({
   dispose: store.bus.on('decodeOptions:change', ({ detail: { next } }) => {
-    if (store.get(StoreSliceId.Config).preserveOptions) {
+    if (store.get(StoreSliceId.Config).preserveOptionsForAllWindows) {
       store.bus.emit('decodeOptions:snapshot:requested', { options: next });
     }
   }),

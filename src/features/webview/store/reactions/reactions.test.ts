@@ -78,7 +78,7 @@ describe('updateSnapshotOnOptionsChange', () => {
   it('offers the toolbar up whenever it changes', () => {
     const asked = vi.fn();
 
-    store.get(StoreSliceId.Config).setPreserveOptions(true);
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
     store.bus.on('decodeOptions:snapshot:requested', (event) => asked(event.detail.options.width));
 
     store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
@@ -98,7 +98,7 @@ describe('updateSnapshotOnOptionsChange', () => {
   it('says nothing when an option is set to what it already was', () => {
     const asked = vi.fn();
 
-    store.get(StoreSliceId.Config).setPreserveOptions(true);
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
     store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
     store.bus.on('decodeOptions:snapshot:requested', asked);
 
