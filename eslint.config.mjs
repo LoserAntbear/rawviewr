@@ -1,6 +1,10 @@
 import js from '@eslint/js';
+import importPlugin from 'eslint-plugin-import';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
+import LintUtils from './scripts/eslintUtils.js';
+
+const pathGroups = LintUtils.importPathGroups();
 
 export default defineConfig({
   files: ['**/*.{js,ts}'],
@@ -8,6 +12,7 @@ export default defineConfig({
     js.configs.recommended,
     tseslint.configs.recommended,
   ],
+  plugins: { import: importPlugin },
   rules: {
     "no-restricted-syntax": [
       "error",
@@ -19,8 +24,59 @@ export default defineConfig({
         "selector": ":matches(ClassDeclaration, ClassExpression):not([superClass.name='DisposableStore']):not([id.name='DisposableStore']):not([id.name='WebviewDisposableStore']) > ClassBody > PropertyDefinition[key.name='disposables'][value.type='ArrayExpression']",
         "message": "Restricted use of a raw `disposables` array. Extend `DisposableStore` (extension host) or hold a `WebviewDisposableStore` (webview) instead — both give safe, centralised cleanup."
       }
-    ]
-  }
+    ],
+    quotes: ['error', 'single'],
+    'prettier/prettier': 0,
+    'import/no-duplicates': 2,
+    'no-bitwise': 'off',
+    'indent': ['error', 2],
+    'comma-dangle': [
+      'error',
+      {
+        'arrays': 'always-multiline',
+        'objects': 'always-multiline',
+        'imports': 'always-multiline',
+        'exports': 'always-multiline',
+        'functions': 'always-multiline',
+      },
+    ],
+    'sort-imports': [
+      'error',
+      {
+        ignoreMemberSort: true,
+        ignoreDeclarationSort: true,
+        memberSyntaxSortOrder: ['none', 'all', 'single', 'multiple'],
+      },
+    ],
+    'object-curly-spacing': ['error', 'always'],
+    'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 1 }],
+    'max-len': [
+      'error',
+      {
+        code: 120,
+        tabWidth: 2,
+        ignoreComments: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+      },
+    ],
+    'no-shadow': 'off',
+    'no-undef': 'off',
+    'eol-last': 'error',
+    'no-extra-boolean-cast': 'off',
+    'no-useless-escape': 'off',
+    'import/order':[
+      'error',
+      {
+        pathGroups,
+        groups: ['builtin', 'external', 'internal', 'parent'],
+        pathGroupsExcludedImportTypes: ['react'],
+        'newlines-between': 'always',
+      },
+    ],
+    'no-unused-vars': 'off',
+    'no-shadow': 'off',
+  },
 }, {
   files: ['src/**/*.ts'],
   languageOptions: {
