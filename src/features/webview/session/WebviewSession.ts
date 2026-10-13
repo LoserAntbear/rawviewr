@@ -1,5 +1,5 @@
-import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../disposable/types';
+import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 
 /**
  * Holds the listeners a session runs on, and lets them all go at once. What they are is

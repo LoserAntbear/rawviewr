@@ -2,8 +2,8 @@ import type { AlphaMode } from '@features/image/imageDecoder/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
 
 import type {
-  EXTENSION_CONFIGURATION_KEY,
   ConfigChangeKind,
+  EXTENSION_CONFIGURATION_KEY,
   VIEWER_CONFIG_KEYS,
 } from './definitions';
 

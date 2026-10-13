@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_FILE_DIMENSION_PX, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+
 import { PixelFormatPresets } from '@features/image/format/presets';
+import { DEFAULT_DECODE_OPTIONS, MAX_FILE_DIMENSION_PX } from '@features/image/imageDecoder/definitions';
 import { ViewerBackground } from '@features/viewer/definitions';
 
 import type { ToolbarSyncPayload } from '../../state/types';

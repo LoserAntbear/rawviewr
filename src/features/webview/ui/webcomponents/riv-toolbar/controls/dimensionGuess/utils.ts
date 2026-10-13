@@ -2,10 +2,10 @@ import { guessDimensions } from '@features/image/imageDecoder/imagePreparation/d
 import type { Dimension } from '@features/image/imageDecoder/imagePreparation/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 
-import type { ToolbarChoice } from '../types';
 import type { ToolbarSyncPayload } from '../../state/types';
+import type { ToolbarChoice } from '../types';
 
-import { AUTO_DIMENSIONS, AUTO_DIMENSION_VALUE, DIMENSION_SEPARATOR } from './definitions';
+import { AUTO_DIMENSION_VALUE, AUTO_DIMENSIONS, DIMENSION_SEPARATOR } from './definitions';
 import { DIMENSION_LABELS } from './labels';
 import { areValidDimensions } from './validation';
 
@@ -14,9 +14,7 @@ function encodeDimensions({ width, height }: Dimension): string {
 }
 
 function parseDimensions(raw: string): Dimension | null {
-  // A raw value missing its separator leaves a part absent; NaN is what that is, and
-  // `areValidDimensions` turns it down the same way it turns down a zero.
-  const [width = NaN, height = NaN] = raw.split(DIMENSION_SEPARATOR).map(Number);
+  const [width, height] = raw.split(DIMENSION_SEPARATOR).map(Number);
   const dimension = { width, height };
 
   return areValidDimensions(dimension) ? dimension : null;

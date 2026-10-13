@@ -1,13 +1,14 @@
-import type { FileSource } from '@features/webview/types';
-import type { DecodeOptions } from '@features/image/imageDecoder/types';
-import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
-import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
-import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
+import { FileValidator } from '@features/file/FileValidator';
+import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import type { FileSource } from '@features/webview/types';
 
-import type { DecodedArrayBuffer, DecodedFileSource } from './types';
+import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
+
 import type { Geometry } from './imagePreparation/types';
+import type { DecodedArrayBuffer, DecodedFileSource } from './types';
 
 export class SourcesDecoder {
   constructor(

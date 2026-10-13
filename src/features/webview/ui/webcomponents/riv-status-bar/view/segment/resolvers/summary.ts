@@ -1,15 +1,16 @@
-import { StoreSliceId } from '@features/webview/store/definitions';
-import { StringFormat } from '@utils/string/formatters';
-import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+import { StoreSliceId } from '@features/webview/store/definitions';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
+
+import { StringFormat } from '@utils/string/formatters';
 
 import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
-import { byViewMode, byDisplayedItem } from '../strategies';
-import type { ModeStrategies, DisplayedItemStrategies } from '../types';
+import { byDisplayedItem, byViewMode } from '../strategies';
+import type { DisplayedItemStrategies, ModeStrategies } from '../types';
 
 function formatName({ appState }: StatusBarStateContext): string {
-  return appState[StoreSliceId.DecodeOptions].format.label.split(' — ')[0]!;
+  return appState[StoreSliceId.DecodeOptions].format.label.split(' — ')[0];
 }
 
 function formatDimensions({ appState }: StatusBarStateContext, geometry: Geometry): string {

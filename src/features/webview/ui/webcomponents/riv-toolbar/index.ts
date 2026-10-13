@@ -1,20 +1,20 @@
-import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { AppStore } from '@features/webview/store/types';
+import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
+import { RIVTags } from '../definitions';
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVViewState } from '../RIVViewState';
-import { RIVTags } from '../definitions';
 
-import { RIVToolbarView } from './RIVToolbarView';
-import template from './index.html';
-import styles from './index.css';
 import { getControlForElement, respondsTo } from './controls/utils';
 import { readElementValue } from './ElementBuilder/utils';
-import type { ToolbarState, ToolbarTransitionPayloads } from './state/types';
+import styles from './index.css';
+import template from './index.html';
+import { RIVToolbarView } from './RIVToolbarView';
 import { EMPTY_TOOLBAR_STATE, ToolbarStateTransition } from './state/definitions';
 import { TOOLBAR_STATE_HANDLERS } from './state/handlers';
+import type { ToolbarState, ToolbarTransitionPayloads } from './state/types';
 
 function resolveAvailableBytes(store: AppStore): number {
   const item = store.selectors.displayedItem();

@@ -1,13 +1,13 @@
-import { PAD_CHANNEL, RowChannel, FormatGroup, BITS_PER_BYTE, PACKED_GROUPS, CHANNEL_LETTERS } from '../definitions';
+import { BITS_PER_BYTE, CHANNEL_LETTERS, FormatGroup, PACKED_GROUPS, PAD_CHANNEL, RowChannel } from '../definitions';
 import type {
-  SubBits,
+  ByteOrderEntry,
+  FormatDefinition,
   FullBits,
   GrayBits,
-  PixelFormat,
-  ByteOrderEntry,
   PackedChannels,
   PackedWordBits,
-  FormatDefinition,
+  PixelFormat,
+  SubBits,
 } from '../types';
 import { FormatKind } from '../types';
 

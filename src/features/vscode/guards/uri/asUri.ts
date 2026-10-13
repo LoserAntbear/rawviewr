@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import type { UriLike } from '@features/vscode/types';
 
 function isUriLike(value: unknown): value is UriLike {

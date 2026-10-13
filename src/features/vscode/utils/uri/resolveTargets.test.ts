@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Uri, window } from 'vscode';
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveFolder } from './resolveFolder';
 import { resolveUriTargets } from './resolveUriTargets';

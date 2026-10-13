@@ -1,6 +1,6 @@
 import { WebviewDisposableUtils } from '../../disposable';
-import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
 import type { WebviewDisposable } from '../../disposable/types';
+import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
 import type { MessagePoster } from '../../messaging';
 import { getFocusElementDeep, isFormControlElement } from '../../utils/html';
 

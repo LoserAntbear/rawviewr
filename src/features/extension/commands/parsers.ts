@@ -1,10 +1,13 @@
 import type * as vscode from 'vscode';
+
 import { ExportFormat } from '@definitions/exportFormats';
-import type { IntentParser } from '@features/intent/types';
 import { IntentKind } from '@definitions/intent';
+
+import type { IntentParser } from '@features/intent/types';
 import { asLocalAllowedUri, asLocalUris, dedupeUris } from '@features/vscode/guards/uri';
-import { asEnumMember } from '@utils/enum';
 import type { ZoomDirection } from '@features/zoom';
+
+import { asEnumMember } from '@utils/enum';
 
 function parseTargets(args: readonly unknown[]): readonly vscode.Uri[] {
   const [first, second] = args;

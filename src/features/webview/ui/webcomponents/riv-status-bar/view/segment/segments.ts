@@ -1,5 +1,5 @@
-import { SEGMENT_RESOLVERS } from './resolvers';
 import { SlotLifecycleMode } from './definitions';
+import { SEGMENT_RESOLVERS } from './resolvers';
 import type { StatusSegment, StatusSegmentAlignment } from './types';
 
 export type StatusSegmentsMap = ReadonlyMap<StatusSegmentAlignment, StatusSegment[]>;

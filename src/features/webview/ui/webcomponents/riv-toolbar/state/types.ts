@@ -1,7 +1,7 @@
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ViewerBackground } from '@features/viewer/definitions';
 
-import type { ToolbarControlStatus, ToolbarChoiceGroup } from '../controls/types';
+import type { ToolbarChoiceGroup, ToolbarControlStatus } from '../controls/types';
 
 import type { ToolbarStateTransition } from './definitions';
 

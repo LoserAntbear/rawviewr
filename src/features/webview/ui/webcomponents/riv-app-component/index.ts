@@ -1,9 +1,9 @@
 
-import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+import { RIVHTMLElement } from '../RIVHTMLElement';
 
-import template from './index.html';
 import styles from './index.css';
+import template from './index.html';
 
 export class RIVAppComponent extends RIVHTMLElement {
   public static readonly tagName = RIVTags.App;

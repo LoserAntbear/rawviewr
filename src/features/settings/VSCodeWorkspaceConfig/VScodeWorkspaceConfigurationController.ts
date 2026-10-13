@@ -1,19 +1,20 @@
 import * as vscode from 'vscode';
+
 import { DisposableStore } from '@features/disposable/DisposableStore';
 
 import type { ConfigChangeKind } from './definitions';
 import {
-  VIEWER_CONFIG_KEYS,
   EXTENSION_CONFIGURATION_KEY,
+  VIEWER_CONFIG_KEYS,
 } from './definitions';
-import { CONFIG_VALIDATORS } from './validators';
 import type {
-  ConfigKey,
-  ViewerConfigSchema,
-  ViewerConfigKeySet,
   ConfigChangePayload,
+  ConfigKey,
+  ViewerConfigKeySet,
+  ViewerConfigSchema,
 } from './types';
 import { detectConfigKeyChangeKind } from './utils';
+import { CONFIG_VALIDATORS } from './validators';
 
 type ConfigChangeDetectedPayload = Record<ConfigChangeKind, ConfigKey[]>;
 

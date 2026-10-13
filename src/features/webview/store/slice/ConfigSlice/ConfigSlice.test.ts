@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 
 import { createWebviewStore } from '../../createWebviewStore';

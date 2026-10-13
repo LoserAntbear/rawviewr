@@ -1,18 +1,19 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@features/image/imageDecoder/definitions';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+import { ViewerBackground } from '@features/viewer/definitions';
 import { RIV_COMMAND_EVENT_ID } from '@features/webview/commands/definitions';
 import { WEBVIEW_COMMAND_RESOLVERS } from '@features/webview/commands/resolvers';
 import { WebviewCommandDispatcher } from '@features/webview/commands/webviewCommandDispatcher';
-import type { WebviewMessage } from '@features/webview/webviewHost/types';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { ZOOM } from '@features/webview/store/slice/ViewSlice';
-import { ViewerBackground } from '@features/viewer/definitions';
 import type { AppStore } from '@features/webview/store/types';
-import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+import type { WebviewMessage } from '@features/webview/webviewHost/types';
 
 import { RIVToolbar } from './index';
 

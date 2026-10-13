@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
-import type { IntentParserResult } from '@features/intent/types';
+
 import { ViewType } from '@definitions/viewTypes';
+
 import type { RawEditorProvider } from '@features/editor/RawEditorProvider';
-import type { IntentDispatcher } from '@features/intent/IntentDispatcher';
 import { COMMANDS } from '@features/extension/commands/table';
 import type { IntentCommand } from '@features/extension/commands/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import type { IntentDispatcher } from '@features/intent/IntentDispatcher';
+import type { IntentParserResult } from '@features/intent/types';
 
 const EDITOR_OPTIONS = {
   supportsMultipleEditorsPerDocument: true,

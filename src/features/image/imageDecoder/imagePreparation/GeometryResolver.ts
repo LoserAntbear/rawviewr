@@ -3,9 +3,9 @@ import { clamp } from '@utils/math';
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../definitions';
 import type { DecodeOptions } from '../types';
 
-import type { DimensionSource, Geometry } from './types';
-import { resolveHeaderDimensions } from './header/headerResolution';
 import { guessDimensions } from './dimension/guessDimensions';
+import { resolveHeaderDimensions } from './header/headerResolution';
+import type { DimensionSource, Geometry } from './types';
 
 /**
  * Bytes a single row of pixels occupies with no padding

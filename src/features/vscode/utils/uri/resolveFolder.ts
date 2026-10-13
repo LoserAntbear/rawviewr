@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 async function resolvePickedUrisWithDialog():  Promise<vscode.Uri | null> {

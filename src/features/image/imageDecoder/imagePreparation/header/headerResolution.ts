@@ -1,8 +1,9 @@
 import { Endian } from '@definitions/bits';
+
 import { readWord } from '@utils/bits';
 
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../../definitions';
-import type { HeaderDimensions, HeaderLayout, DefinedHeaderedPreset } from '../types';
+import type { DefinedHeaderedPreset, HeaderDimensions, HeaderLayout } from '../types';
 
 import { HeaderImplausibleError, HeaderTruncatedError } from './headerErrors';
 

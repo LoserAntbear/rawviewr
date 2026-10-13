@@ -1,4 +1,5 @@
 import type * as vscode from 'vscode';
+
 import { ALLOWED_DOCUMENT_SCHEMES } from '@definitions/vscode';
 
 import { asUri } from './asUri';

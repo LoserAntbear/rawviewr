@@ -1,13 +1,14 @@
 import { FormatDecodersLibrary } from '@features/image/format/rowDecoders';
+
 import { shiftRowIndices } from '@utils/array';
 
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 
-import { MAX_DECODED_PIXELS } from './definitions';
 import { DecodedSizeExceededError } from './decodeErrors';
+import { MAX_DECODED_PIXELS } from './definitions';
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
-import type { DecodeOptions, DecodeResult } from './types';
 import type { Geometry } from './imagePreparation/types';
+import type { DecodeOptions, DecodeResult } from './types';
 
 // TODO: Extract `GeometryResolver` if the geometry resolution logic needs to be reused independently.
 export class ImageDecoder {
@@ -76,16 +77,14 @@ export class ImageDecoder {
         result[i] = 255;
       }
     } else if (options.unpremultiply) {
-      // RGBA throughout, so the buffer length is a multiple of four and every channel of the
-      // pixel at `i` is there. The reads assert rather than re-check it per pixel.
       for (let i = 0; i < result.length; i += 4) {
-        const alpha = result[i + 3]!;
+        const alpha = result[i + 3];
 
         if (alpha > 0 && alpha < 255) {
           const scale = 255 / alpha;
 
           for (const j of shiftRowIndices(i)) {
-            result[j] = result[j]! * scale;
+            result[j] = result[j] * scale;
           }
         }
       }

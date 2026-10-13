@@ -2,7 +2,7 @@
  * Set of reusable strategy map utilities.
  */
 
-import type { Strategies, KindStrategies, Kinded } from './types';
+import type { Kinded, KindStrategies, Strategies } from './types';
 
 export function byKey<TKey extends string, TArgs extends unknown[], TResult>(
   strategies: Strategies<TKey, TArgs, TResult>,

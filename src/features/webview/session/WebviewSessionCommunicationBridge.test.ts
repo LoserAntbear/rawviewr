@@ -1,12 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
+import type { WebviewDisposable } from '../disposable/types';
+import { TypedEventTarget } from '../messaging';
 import { createWebviewStore } from '../store/createWebviewStore';
 import { StoreSliceId } from '../store/definitions';
 import type { AppStore } from '../store/types';
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from '../webviewHost/messageDispatcher';
 import type { WebviewHostMessage } from '../webviewHost/types';
-import type { WebviewDisposable } from '../disposable/types';
-import { TypedEventTarget } from '../messaging';
 
 import { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
 

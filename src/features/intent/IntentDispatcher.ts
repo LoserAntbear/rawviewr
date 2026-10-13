@@ -1,4 +1,4 @@
-import type { IntentResolverMap, Intent, IntentResolver } from './types';
+import type { Intent, IntentResolver, IntentResolverMap } from './types';
 
 export class IntentDispatcher {
   constructor(private readonly resolvers: IntentResolverMap) {}

@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
+
 import { ViewType } from '@definitions/viewTypes';
-import { fileSourceForUri } from '@features/vscode/utils/uri';
-import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
-import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
-import type { SettingsController } from '@features/settings/SettingsController';
+
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import type { SettingsController } from '@features/settings/SettingsController';
+import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import { fileSourceForUri } from '@features/vscode/utils/uri';
+import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 export class ViewerWindowController {
   constructor(

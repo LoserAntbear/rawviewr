@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
-import { AlphaMode, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-import { PixelFormatPresets } from '@features/image/format/presets';
 
+import { PixelFormatPresets } from '@features/image/format/presets';
+import { AlphaMode, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
+
+import { SettingsController } from './SettingsController';
 import { toPreservedOptions } from './snapshot';
 import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
 import type { ConfigChangePayload } from './VSCodeWorkspaceConfig/types';
-import { SettingsController } from './SettingsController';
 
 /**
  * The two settings a view may follow while it is open. The key set already sorts them into

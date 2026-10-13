@@ -1,10 +1,12 @@
 import { probePixel } from '@features/image/pixelProbe/PixelProbe';
+
+import { withThrottle } from '@utils/throttle';
+
+import { validateCanvas, validateImageItem, validatePointerEvent } from '@webview/guards';
 import { StoreSliceId } from '@webview/store/definitions';
 import type { ProbeSample } from '@webview/store/slice/ProbeSlice';
 import type { AppStore } from '@webview/store/types';
 import { WebviewContextProvider } from '@webview/webviewContext/WebviewContextProvider';
-import { validateCanvas, validatePointerEvent, validateImageItem } from '@webview/guards';
-import { withThrottle } from '@utils/throttle';
 
 import { resolveEffectiveZoom, resolveProbePosition } from './utils';
 

@@ -1,14 +1,15 @@
 import { Endian } from '@definitions/bits';
+
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
-import { ViewerBackground } from '@features/viewer/definitions';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import { ViewerBackground } from '@features/viewer/definitions';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
 
 import { ToolbarGroup } from '../definitions';
 
-import type { ToolbarControl } from './types';
-import { TAG_DESCRIPTORS } from './tagDescriptors';
 import { toDimensionChoices, toDimensionOptions, toDimensionValue } from './dimensionGuess';
+import { TAG_DESCRIPTORS } from './tagDescriptors';
+import type { ToolbarControl } from './types';
 
 function decodeOptionsUpdate(options: Partial<DecodeOptions>): WebviewMessage {
   return { type: 'decode:options:update', options };

@@ -1,6 +1,6 @@
 import type { Endian } from '@definitions/bits';
 
-import type { FormatGroup, RowChannel, PAD_CHANNEL } from './definitions';
+import type { FormatGroup, PAD_CHANNEL, RowChannel } from './definitions';
 
 export type RowOptions = {
   endian: Endian;

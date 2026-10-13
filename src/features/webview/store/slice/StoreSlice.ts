@@ -1,9 +1,9 @@
+import { StoreSliceEvent } from './SliceEvents/definitions';
+import type { StoreSliceEventPayloads } from './SliceEvents/types';
 import type {
   StoreSliceBus,
   StoreSliceEventKey,
 } from './types';
-import { StoreSliceEvent } from './SliceEvents/definitions';
-import type { StoreSliceEventPayloads } from './SliceEvents/types';
 
 type EventNames = StoreSliceEvent;
 

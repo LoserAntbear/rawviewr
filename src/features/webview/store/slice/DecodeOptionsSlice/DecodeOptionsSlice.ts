@@ -2,8 +2,8 @@ import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 
 import { StoreSliceId } from '../../definitions';
-import { StoreSlice } from '../StoreSlice';
 import type { StoreSliceEventPayloads } from '../SliceEvents/types';
+import { StoreSlice } from '../StoreSlice';
 
 export type DecodeOptionsState = DecodeOptions;
 

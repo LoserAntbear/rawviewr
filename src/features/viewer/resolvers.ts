@@ -1,10 +1,11 @@
+import { IntentKind } from '@definitions/intent';
+
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { IntentResolverMap } from '@features/intent/types';
 import { findGalleryTargets, folderTitle, selectionTitle } from '@features/viewer/gallery/galleryTargets';
-import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
-import { IntentKind } from '@definitions/intent';
-import { resolveUriTargets, resolveFolder } from '@features/vscode/utils/uri';
-import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
+import { resolveFolder, resolveUriTargets } from '@features/vscode/utils/uri';
 
 type ViewerIntentKind =
   | IntentKind.viewerOpenSingle

@@ -48,7 +48,7 @@ export function readWord(
   let value = 0;
 
   for (let i = 0; i < byteCount; i++) {
-    value = value * 256 + source[offset + msb + i * step]!;
+    value = value * 256 + source[offset + msb + i * step];
   }
 
   return value;
@@ -98,8 +98,7 @@ export const ByteConverter = {
       index++;
     }
 
-    // The loop's own condition is what stops `index` at the last grade.
-    return BYTE_GRADES[index]!;
+    return BYTE_GRADES[index];
   },
 };
 

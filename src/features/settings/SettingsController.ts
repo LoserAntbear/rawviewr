@@ -1,18 +1,21 @@
 import * as vscode from 'vscode';
+
+import { Endian } from '@definitions/bits';
+
+import { DisposableStore } from '@features/disposable/DisposableStore';
+import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
-import { PixelFormatPresets } from '@features/image/format/presets';
-import { Endian } from '@definitions/bits';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import { attempt } from '@utils/attempt';
 import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
-import { DisposableStore } from '@features/disposable/DisposableStore';
 
-import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
-import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
-import type { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
+import { attempt } from '@utils/attempt';
+
 import type { ToolbarOptionsSnapshot } from './snapshot';
+import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
+import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
+import type { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
 const TOOLBAR_SNAPSHOT_KEY = `${VSCODE_MEMENTO_SETTINGS_PREFIX}toolbarSnapshot`;

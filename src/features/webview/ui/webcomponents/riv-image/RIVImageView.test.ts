@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { DecodedImage } from '@features/image/imageDecoder/types';
 
 import { RIVImageView } from './RIVImageView';

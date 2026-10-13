@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { DecodedSizeExceededError } from './decodeErrors';
 import { DEFAULT_DECODE_OPTIONS } from './definitions';
 import { ImageDecoder } from './ImageDecoder';
-import { DecodedSizeExceededError } from './decodeErrors';
 import type { DecodeOptions } from './types';
 
 const decoder = new ImageDecoder();

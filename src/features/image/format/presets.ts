@@ -1,5 +1,5 @@
-import { buildFormat } from './formatBuilders/builders';
 import { FORMAT_DEFINITIONS } from './definitions';
+import { buildFormat } from './formatBuilders/builders';
 import type { FormatDefinition, PixelFormat } from './types';
 
 export class PixelFormatPresets {

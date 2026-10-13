@@ -1,4 +1,4 @@
-import { toStylePropertyList, type StylePropertyGroups } from '@features/webview/utils/styleProperties';
+import { type StylePropertyGroups, toStylePropertyList } from '@features/webview/utils/styleProperties';
 
 import type { StatusBarEntry } from '../types';
 

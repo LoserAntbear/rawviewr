@@ -1,8 +1,8 @@
+import { listenTo } from '../disposable/listenTo';
+import type { WebviewDisposable } from '../disposable/types';
 import { MessageDispatcher } from '../messaging';
 import type { AppStore } from '../store/types';
 import type { WebviewMessage } from '../webviewHost/types';
-import { listenTo } from '../disposable/listenTo';
-import type { WebviewDisposable } from '../disposable/types';
 
 import { RIV_COMMAND_EVENT_ID } from './definitions';
 

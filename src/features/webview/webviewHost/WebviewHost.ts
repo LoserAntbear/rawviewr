@@ -1,22 +1,25 @@
 import * as vscode from 'vscode';
-import type { SettingsController } from '@features/settings/SettingsController';
-import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
-import type { DecodeOptions } from '@features/image/imageDecoder/types';
+
+import type { Endian } from '@definitions/bits';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
-import type { Endian } from '@definitions/bits';
-import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
-import type { ZoomDirection } from '@features/zoom';
-import { DisposableStore } from '@features/disposable/DisposableStore';
-import { StringTemplate } from '@utils/string/StringTemplate';
-import { ImageExporter } from '@features/image/imageExport/ImageExporter';
-import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import { attemptAsync, attemptDetached } from '@utils/attempt';
-import { SourceReader } from '@features/image/sourceReader/SourceReader';
 
+import { DisposableStore } from '@features/disposable/DisposableStore';
+import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import { ImageExporter } from '@features/image/imageExport/ImageExporter';
+import { SourceReader } from '@features/image/sourceReader/SourceReader';
+import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
+import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import type { SettingsController } from '@features/settings/SettingsController';
+import type { ZoomDirection } from '@features/zoom';
+
+import { attemptAsync, attemptDetached } from '@utils/attempt';
+import { StringTemplate } from '@utils/string/StringTemplate';
+
+import type { FileSource } from '../types';
 import type { GalleryViewMode } from '../ui/webcomponents/types';
 import { getNonce } from '../utils';
-import type { FileSource } from '../types';
 
 import appShellHtml from './app-shell.html';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';

@@ -1,8 +1,11 @@
-import { clamp } from '@utils/math';
-import { asEnumMember } from '@utils/enum';
-import { ViewerBackground } from '@features/viewer/definitions';
-import { AlphaMode } from '@features/image/imageDecoder/definitions';
+
 import { PixelFormatPresets } from '@features/image/format/presets';
+import { AlphaMode } from '@features/image/imageDecoder/definitions';
+import { ViewerBackground } from '@features/viewer/definitions';
+
+import { asEnumMember } from '@utils/enum';
+import { clamp } from '@utils/math';
+
 import type { NumericRange } from '@app-types/math';
 
 import {

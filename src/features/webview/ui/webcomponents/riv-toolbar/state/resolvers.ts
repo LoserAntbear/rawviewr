@@ -4,7 +4,7 @@ import { ZOOM } from '@features/webview/store/slice/ViewSlice';
 import { mapControlsToChoices, mapControlsToValues } from '../controls/utils';
 
 import { ToolbarStateTransition } from './definitions';
-import type { ToolbarState, ToolbarAvailability, ToolbarSyncPayload } from './types';
+import type { ToolbarAvailability, ToolbarState, ToolbarSyncPayload } from './types';
 
 export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): ToolbarAvailability {
   const { format, alphaMode, headerPreset } = options;

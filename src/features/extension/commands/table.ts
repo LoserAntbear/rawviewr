@@ -1,14 +1,14 @@
 import { CommandNames } from '@definitions/commands';
 
 import {
-  parseOpen,
   parseExport,
+  parseOpen,
+  parseOpenFolderGallery,
+  parseOpenGallery,
+  parseResetSettings,
   parseZoomIn,
   parseZoomOut,
   parseZoomReset,
-  parseOpenGallery,
-  parseResetSettings,
-  parseOpenFolderGallery,
 } from './parsers';
 import type { IntentCommand } from './types';
 

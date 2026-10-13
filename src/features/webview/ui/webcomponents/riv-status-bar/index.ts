@@ -1,13 +1,13 @@
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
-import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+import { RIVHTMLElement } from '../RIVHTMLElement';
 
-import { RIVStatusBarView } from './view/RIVStatusBarView';
-import template from './index.html';
 import styles from './index.css';
-import { STATUS_SEGMENTS } from './view/segment/segments';
+import template from './index.html';
 import { selectStatusBarContext } from './state/selectors';
+import { RIVStatusBarView } from './view/RIVStatusBarView';
+import { STATUS_SEGMENTS } from './view/segment/segments';
 
 const STATUS_BAR_EVENTS = [
   'view:change',

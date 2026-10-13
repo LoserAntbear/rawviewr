@@ -1,18 +1,20 @@
 import * as vscode from 'vscode';
+
+import { AppContextProvider } from '@features/appContext/AppContextProvider';
 import { DisposableRegistry } from '@features/disposable/DisposableRegistry';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import { RawEditorProvider } from '@features/editor/RawEditorProvider';
 import { ExtensionHost } from '@features/extension/ExtensionHost';
+import { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
 import { IntentDispatcher } from '@features/intent/IntentDispatcher';
 import { SETTINGS_INTENT_RESOLVERS } from '@features/settings/resolvers';
+import { SettingsController } from '@features/settings/SettingsController';
+import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VIEW_INTENT_RESOLVERS, VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
 import { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
-import { SettingsController } from '@features/settings/SettingsController';
-import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
-import { AppContextProvider } from '@features/appContext/AppContextProvider';
-import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
-import { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+
 import { attemptDetached } from '@utils/attempt';
 
 export function activate(context: vscode.ExtensionContext): void {

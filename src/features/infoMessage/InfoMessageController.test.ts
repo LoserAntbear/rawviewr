@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { window } from 'vscode';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { InfoMessageController } from './InfoMessageController';
 

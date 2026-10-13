@@ -1,7 +1,8 @@
 
 import * as vscode from 'vscode';
-import { asLocalAllowedUri } from '@features/vscode/guards/uri/asLocalAllowedUri';
+
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
+import { asLocalAllowedUri } from '@features/vscode/guards/uri/asLocalAllowedUri';
 
 function activeDocumentUri(): vscode.Uri | null {
   return asLocalAllowedUri(vscode.window.activeTextEditor?.document.uri);

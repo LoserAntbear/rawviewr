@@ -1,7 +1,8 @@
 import type { Endian } from '@definitions/bits';
+
 import type { PixelFormat } from '@features/image/format/types';
 
-import type { HeaderPreset, AlphaMode } from './definitions';
+import type { AlphaMode, HeaderPreset } from './definitions';
 import type { Geometry } from './imagePreparation/types';
 
 export type DecodeOptions = {

@@ -1,6 +1,6 @@
-import type { ZoomDirection } from '@features/zoom';
 import { DEFAULT_VIEWER_BACKGROUND } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
+import type { ZoomDirection } from '@features/zoom';
 
 import type { GalleryViewMode } from '../../../ui/webcomponents/types';
 import { StoreSliceId } from '../../definitions';

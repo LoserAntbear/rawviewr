@@ -4,10 +4,10 @@ import { RIVView } from '../../RIVView';
 import type { StatusBarStateContext } from '../state/types';
 
 import { ElementBuilder } from './ElementBuilder';
+import { SEGMENT_STYLE_PROPERTIES, SlotLifecycleMode } from './segment/definitions';
 import type { StatusSegmentsMap } from './segment/segments';
-import type { StatusBarEntry, StatusBarRenderEntries } from './types';
 import type { StatusSegment } from './segment/types';
-import { SlotLifecycleMode, SEGMENT_STYLE_PROPERTIES } from './segment/definitions';
+import type { StatusBarEntry, StatusBarRenderEntries } from './types';
 
 type SegmentSlot = {
   readonly element: HTMLElement;

@@ -1,6 +1,7 @@
 import type { Vector2 } from '@definitions/geometry';
-import { VectorUtils } from '@utils/vector/vector';
+
 import { CanvasUtils } from '@utils/canvas';
+import { VectorUtils } from '@utils/vector/vector';
 
 type ProbeRect = Vector2 & { readonly width: number; readonly height: number };
 type ProbeSize = { readonly width: number; readonly height: number };

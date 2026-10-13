@@ -1,7 +1,9 @@
 import type { WebviewMessage } from '@features/webview/webviewHost';
-import { RIV_COMMAND_EVENT_ID } from '@webview/commands/definitions';
 import type { ZoomDirection } from '@features/zoom/types';
+
 import { withThrottle } from '@utils/throttle';
+
+import { RIV_COMMAND_EVENT_ID } from '@webview/commands/definitions';
 
 import { resolveWheelZoomDirection } from './utils';
 

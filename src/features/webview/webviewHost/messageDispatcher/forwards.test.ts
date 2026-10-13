@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { PixelFormatPresets } from '@features/image/format/presets';
+
 import { Endian } from '@definitions/bits';
+
+import { PixelFormatPresets } from '@features/image/format/presets';
 
 import { createWebviewStore } from '../../store/createWebviewStore';
 import { StoreSliceId } from '../../store/definitions';

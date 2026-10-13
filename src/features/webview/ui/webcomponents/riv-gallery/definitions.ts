@@ -1,5 +1,5 @@
 import { ViewerBackground } from '@features/viewer/definitions';
-import { toStylePropertyList, type StylePropertyGroups } from '@features/webview/utils/styleProperties';
+import { type StylePropertyGroups, toStylePropertyList } from '@features/webview/utils/styleProperties';
 
 import type { GalleryState } from './state/types';
 

@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { PixelFormatPresets } from '@features/image/format/presets';
 
 import { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
+import type { FileSource } from '../../types';
 import { STORE_EVENT_FORWARDS } from '../../webviewHost/messageDispatcher';
 import { createWebviewStore } from '../createWebviewStore';
 import { StoreSliceId } from '../definitions';
 import type { AppStore } from '../types';
-import type { FileSource } from '../../types';
 
 /**
  * The store says what it needs in its own words. Carrying that to the host is the bridge's,

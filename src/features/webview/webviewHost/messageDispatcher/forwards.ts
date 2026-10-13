@@ -1,5 +1,6 @@
-import { isPresent } from '@guards/valueGuards';
 import { toPreservedOptions } from '@features/settings/snapshot';
+
+import { isPresent } from '@guards/valueGuards';
 
 import type { MessageForwardMap } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';

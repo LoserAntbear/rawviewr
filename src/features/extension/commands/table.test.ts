@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
+
 import { CommandNames } from '@definitions/commands';
 import { IntentKind } from '@definitions/intent';
 

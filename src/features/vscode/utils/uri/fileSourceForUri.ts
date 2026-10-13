@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import type { FileSource } from '@features/webview/types';
 
 export function fileSourceForUri(uri: vscode.Uri): FileSource {

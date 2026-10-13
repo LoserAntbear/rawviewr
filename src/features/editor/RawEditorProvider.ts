@@ -1,11 +1,12 @@
 import type * as vscode from 'vscode';
+
 import { RawDocument } from '@features/document/RawDocument';
+import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
+import type { SettingsController } from '@features/settings/SettingsController';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
 import { fileSourceForUri } from '@features/vscode/utils/uri';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
-import type { SettingsController } from '@features/settings/SettingsController';
-import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
-import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
 
 export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<RawDocument> {
   constructor(

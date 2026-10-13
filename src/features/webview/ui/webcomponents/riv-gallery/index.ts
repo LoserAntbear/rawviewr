@@ -1,13 +1,13 @@
-import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
+import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
-import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+import { RIVHTMLElement } from '../RIVHTMLElement';
 
+import styles from './index.css';
+import template from './index.html';
 import { RIVGalleryView } from './RIVGalleryView';
 import { resolveGalleryState } from './state/resolvers';
-import template from './index.html';
-import styles from './index.css';
 
 export class RIVGallery extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Gallery;

@@ -1,6 +1,7 @@
-import { attemptAsync } from '@utils/attempt';
 import type { ImageItem } from '@features/webview/store/slice/ImagesSlice/types';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
+
+import { attemptAsync } from '@utils/attempt';
 
 import type { MessagePoster } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';

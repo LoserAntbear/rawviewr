@@ -1,15 +1,15 @@
-import type { EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 import type { WebviewDisposable } from '../disposable';
+import type { EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 
+import type { StoreSliceId } from './definitions';
+import type { ReactiveStore } from './ReactiveStore';
+import type { STORE_SELECTORS } from './selectors';
+import type { ConfigSlice } from './slice/ConfigSlice';
+import type { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
+import type { ImagesSlice } from './slice/ImagesSlice';
+import type { ProbeSlice } from './slice/ProbeSlice';
 import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice } from './slice/ViewSlice';
-import type { ProbeSlice } from './slice/ProbeSlice';
-import type { ConfigSlice } from './slice/ConfigSlice';
-import type { ImagesSlice } from './slice/ImagesSlice';
-import type { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
-import type { ReactiveStore } from './ReactiveStore';
-import type { StoreSliceId } from './definitions';
-import type { STORE_SELECTORS } from './selectors';
 
 type InferStoreSlicePayloads<TSlice> = TSlice extends { attach(bus: TypedEventTarget<infer TPayloads>): void }
   ? TPayloads

@@ -1,17 +1,17 @@
 import { WebviewDisposableStore } from '../disposable/WebviewDisposableStore';
 import { TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 
+import { StoreSliceId } from './definitions';
+import { STORE_REACTIONS } from './reactions';
 import { ReactiveStore } from './ReactiveStore';
 import { STORE_SELECTORS } from './selectors';
-import { StoreSliceId } from './definitions';
+import { ConfigSlice } from './slice/ConfigSlice/ConfigSlice';
+import { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
+import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
+import { ProbeSlice } from './slice/ProbeSlice/ProbeSlice';
 import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from './slice/ViewSlice/ViewSlice';
-import { ProbeSlice } from './slice/ProbeSlice/ProbeSlice';
-import { ConfigSlice } from './slice/ConfigSlice/ConfigSlice';
-import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
-import { DecodeOptionsSlice } from './slice/DecodeOptionsSlice';
-import { STORE_REACTIONS } from './reactions';
-import type { AppStore, StoreSlices, StoreReaction } from './types';
+import type { AppStore, StoreReaction, StoreSlices } from './types';
 
 type CreateWebviewStoreResult = {
   store: AppStore;

@@ -1,6 +1,7 @@
 import { type ImageItem, isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
-import { StringFormat } from '@utils/string/formatters';
+
 import { byKind, type KindStrategies } from '@utils/strategy';
+import { StringFormat } from '@utils/string/formatters';
 
 import { RIVImageStateKind } from './definitions';
 import type { RIVImageCaption, RIVImageState } from './types';

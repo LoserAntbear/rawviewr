@@ -1,5 +1,5 @@
-import type { InputDescriptor, ExtractDescriptor, SupportedInputType } from '../types';
-import type { SupportedControlTag, ControlTagDescriptor } from '../controls/types';
+import type { ControlTagDescriptor, SupportedControlTag } from '../controls/types';
+import type { ExtractDescriptor, InputDescriptor, SupportedInputType } from '../types';
 
 export type ElementBuilderFor<K extends SupportedControlTag> = (
   descriptor: ExtractDescriptor<ControlTagDescriptor, 'tag', K>,

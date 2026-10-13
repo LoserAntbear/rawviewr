@@ -2,10 +2,10 @@ import { isHTMLElement } from '@features/webview/utils/html';
 
 import { RIVView } from '../RIVView';
 
-import { ToolbarGroup } from './definitions';
 import { TOOLBAR_CONTROLS } from './controls/controls';
-import { ElementBuilder } from './ElementBuilder/ElementBuilder';
 import type { ControlElement, ToolbarChoiceGroup, ToolbarControl } from './controls/types';
+import { ToolbarGroup } from './definitions';
+import { ElementBuilder } from './ElementBuilder/ElementBuilder';
 import type { ToolbarAvailability, ToolbarState } from './state/types';
 
 type ControlField = {

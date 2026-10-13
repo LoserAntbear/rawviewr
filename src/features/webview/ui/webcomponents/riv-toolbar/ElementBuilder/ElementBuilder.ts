@@ -1,18 +1,18 @@
-import type { InputDescriptor, ExtractDescriptor, SupportedInputType } from '../types';
 import type {
   ControlElement,
-  ToolbarControl,
-  ToolbarChoiceGroup,
   SupportedControlTag,
+  ToolbarChoiceGroup,
+  ToolbarControl,
 } from '../controls/types';
 import type { ToolbarGroup } from '../definitions';
+import type { ExtractDescriptor, InputDescriptor, SupportedInputType } from '../types';
 
 import type {
-  InputBuilderMap,
-  InputBuilderFor,
-  FieldLabellerMap,
-  ElementBuilderMap,
   ElementBuilderFor,
+  ElementBuilderMap,
+  FieldLabellerMap,
+  InputBuilderFor,
+  InputBuilderMap,
 } from './types';
 
 export class ElementBuilder {

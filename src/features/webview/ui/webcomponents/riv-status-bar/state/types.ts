@@ -1,5 +1,5 @@
-import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
+import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { AppStoreState } from '@features/webview/store/types';
 
 export type DisplayedItem =

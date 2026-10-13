@@ -1,5 +1,5 @@
+import { DIMENSION_GUESS_RULES, GUESS_CONFIG, IMAGE_GUESS_RULES_BY_SHAPE } from './definitions';
 import type { Candidate, DimensionGuess, DimensionGuessRule, GuessingConfig } from './types';
-import { GUESS_CONFIG, IMAGE_GUESS_RULES_BY_SHAPE, DIMENSION_GUESS_RULES } from './definitions';
 
 /** Peaks at square-ish, falls away for extreme letterboxes. */
 function aspectScore(width: number, height: number): number {

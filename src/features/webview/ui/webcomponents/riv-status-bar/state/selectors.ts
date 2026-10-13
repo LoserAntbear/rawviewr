@@ -1,8 +1,8 @@
-import type { AppStoreState } from '@features/webview/store/types';
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
+import type { AppStoreState } from '@features/webview/store/types';
 
-import type { StatusBarStateContext } from './types';
 import { resolveDisplayedItem } from './resolvers';
+import type { StatusBarStateContext } from './types';
 
 export function selectStatusBarContext(
   state: AppStoreState,

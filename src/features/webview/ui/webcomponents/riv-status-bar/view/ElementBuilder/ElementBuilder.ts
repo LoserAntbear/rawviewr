@@ -1,5 +1,5 @@
-import type { StatusSegment } from '../segment/types';
 import { SlotLifecycleMode } from '../segment/definitions';
+import type { StatusSegment } from '../segment/types';
 
 export class ElementBuilder {
   public static buildSegment(segment: StatusSegment): HTMLElement {

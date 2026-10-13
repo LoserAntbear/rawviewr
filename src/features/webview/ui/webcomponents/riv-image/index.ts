@@ -1,19 +1,21 @@
-import { attemptDetached } from '@utils/attempt';
-import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+import type { BusEvent } from '@features/webview/messaging';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { ImagesState } from '@features/webview/store/slice/ImagesSlice';
-import type { BusEvent } from '@features/webview/messaging';
+import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+
+import { attemptDetached } from '@utils/attempt';
+
 import { ProbeInputHandler } from '@webview/_features/input/pointerInput/ProbeInputHandler';
 
-import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+import { RIVHTMLElement } from '../RIVHTMLElement';
 
 import { RIVImageStateKind } from './definitions';
-import { RIVImageView } from './RIVImageView';
-import { resolveImageState } from './RivImageState';
-import type { RIVImageRenderer, RIVImageRendererMap, RIVImageState } from './types';
-import template from './index.html';
 import styles from './index.css';
+import template from './index.html';
+import { resolveImageState } from './RivImageState';
+import { RIVImageView } from './RIVImageView';
+import type { RIVImageRenderer, RIVImageRendererMap, RIVImageState } from './types';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;

@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { RIV_COMMAND_EVENT_ID } from '@features/webview/commands/definitions';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
 

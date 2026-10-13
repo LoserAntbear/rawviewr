@@ -1,10 +1,10 @@
 import { attemptDetached } from '@utils/attempt';
 
-import type { WebviewHostMessage, WebviewHostMessageType, WebviewMessage } from '../webviewHost';
 import { listenTo } from '../disposable/listenTo';
 import type { WebviewDisposable } from '../disposable/types';
+import { type EventMap, TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
 import type { MessageForwardMap, MessageResolverMap, ResolverContext } from '../messaging/types';
-import { TypedEventTarget, type EventMap } from '../messaging/TypedEventTarget/TypedEventTarget';
+import type { WebviewHostMessage, WebviewHostMessageType, WebviewMessage } from '../webviewHost';
 
 import type { VSCodeWebviewApi, WebviewHostMessageEvents } from './types';
 

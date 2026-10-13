@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
 import { PRESERVED_OPTION_KEYS } from './types';

@@ -1,12 +1,14 @@
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
-import { isPresent } from '@guards/valueGuards';
-import { StringFormat } from '@utils/string/formatters';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
-import type { StatusBarEntry, StatusLevel } from '../../types';
+import { isPresent } from '@guards/valueGuards';
+
+import { StringFormat } from '@utils/string/formatters';
+
 import type { StatusBarStateContext } from '../../../state/types';
-import { byViewMode, byDisplayedItem } from '../strategies';
-import type { ModeStrategies, DisplayedItemStrategies } from '../types';
+import type { StatusBarEntry, StatusLevel } from '../../types';
+import { byDisplayedItem, byViewMode } from '../strategies';
+import type { DisplayedItemStrategies, ModeStrategies } from '../types';
 
 type GeometryNoteRule = (geometry: Geometry) => StatusBarEntry | null;
 
