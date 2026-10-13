@@ -10,11 +10,19 @@ import type { ConfigState } from './types';
  */
 export class ConfigSlice extends StoreSlice<StoreSliceId.Config, ConfigState> {
   constructor() {
-    super(StoreSliceId.Config, DEFAULT_VIEWER_CONFIGURATION);
+    super(StoreSliceId.Config, { ...DEFAULT_VIEWER_CONFIGURATION, preserveOptionsForAllWindows: false });
   }
 
   public get tileSize(): number {
     return this.getState().tileSize;
+  }
+
+  public get preserveOptionsForAllWindows(): boolean {
+    return this.getState().preserveOptionsForAllWindows;
+  }
+
+  public setPreserveOptionsForAllWindows(preserveOptionsForAllWindows: boolean): void {
+    this.patch({ preserveOptionsForAllWindows });
   }
 
   public setConfiguration(config: ViewerConfiguration): void {

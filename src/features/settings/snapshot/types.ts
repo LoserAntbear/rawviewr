@@ -5,13 +5,13 @@ import type { DecodeOptions } from '@features/image/imageDecoder/types';
  * Extend if needed.
  */
 export const PRESERVED_OPTION_KEYS = [
+  'flipY',
   'format',
   'endian',
-  'flipY',
   'alphaMode',
   'bitOrderMsb',
-  'unpremultiply',
   'headerPreset',
+  'unpremultiply',
 ] as const satisfies readonly (keyof DecodeOptions)[];
 
 export type PreservedOptionKey = typeof PRESERVED_OPTION_KEYS[number];

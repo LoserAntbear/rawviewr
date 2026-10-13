@@ -16,7 +16,7 @@ beforeEach(() => {
 
 describe('ConfigSlice', () => {
   it('starts on the defaults, which stand until the host says otherwise', () => {
-    expect(config().getState()).toEqual(DEFAULT_VIEWER_CONFIGURATION);
+    expect(config().getState()).toEqual({ ...DEFAULT_VIEWER_CONFIGURATION, preserveOptions: false });
   });
 
   it('takes what the host sent', () => {
@@ -28,10 +28,10 @@ describe('ConfigSlice', () => {
   it('announces a change, so the gallery can re-lay itself out', () => {
     const changed = vi.fn();
 
-    store.bus.on('config:change', (event) => changed(event.detail.next));
+    store.bus.on('config:change', (event) => changed(event.detail.next.tileSize));
     config().setConfiguration({ tileSize: 480 });
 
-    expect(changed).toHaveBeenCalledWith({ tileSize: 480 });
+    expect(changed).toHaveBeenCalledWith(480);
   });
 
   it('says nothing when the settings arrive unchanged', () => {
