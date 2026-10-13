@@ -44,6 +44,10 @@ export class SettingsController extends DisposableStore {
     this.snapshotEmitter.fire(snapshot);
   }
 
+  public async clearToolbarSnapshot(): Promise<void> {
+    await this.workspaceState.update(TOOLBAR_SNAPSHOT_KEY, undefined);
+  }
+
   public onToolbarSnapshotChange(listen: (snapshot: ToolbarOptionsSnapshot) => void): vscode.Disposable {
     return this.snapshotEmitter.event(listen);
   }

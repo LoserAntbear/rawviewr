@@ -208,3 +208,24 @@ describe('SettingsController.readSessionDecodeOptions', () => {
     expect(settings.readSessionDecodeOptions()).toMatchObject({ width: 320, height: 320, offset: 320 });
   });
 });
+
+describe('SettingsController.clearToolbarSnapshot', () => {
+  it('lets the kept toolbar go, so the next launch opens on the defaults', async () => {
+    const { settings } = controllerWith(configured);
+
+    await settings.writeToolbarSnapshot({ preserved: true, options: toPreservedOptions(DEFAULT_DECODE_OPTIONS) });
+    await settings.clearToolbarSnapshot();
+
+    expect(settings.toolbarSnapshot).toBeNull();
+  });
+
+  it('says nothing to anyone, since this runs when no view is left to hear it', async () => {
+    const { settings } = controllerWith(configured);
+    const heard = vi.fn();
+
+    settings.onToolbarSnapshotChange(heard);
+    await settings.clearToolbarSnapshot();
+
+    expect(heard).not.toHaveBeenCalled();
+  });
+});
