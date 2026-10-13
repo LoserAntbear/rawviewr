@@ -349,7 +349,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "package": "npm run typecheck && npm run build -- --production",
-    "lint": "eslint --ext .ts,.tsx src",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "vsix": "npx --yes @vscode/vsce package --no-dependencies -o raw-image-viewer.vsix",
     "vsix:local": "npx --yes @vscode/vsce package --baseContentUrl https://none --baseImagesUrl https://none --no-dependencies -o raw-image-viewer-local.vsix"
   },
