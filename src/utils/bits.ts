@@ -101,3 +101,9 @@ export const ByteConverter = {
     return BYTE_GRADES[index];
   },
 };
+
+const DEFAULT_ROW_LENGTH = 8 as const;
+
+export function minBytesPerRow(rowWidth: number, bpp: number, rowLength: number = DEFAULT_ROW_LENGTH): number {
+  return Math.ceil((rowWidth * bpp) / rowLength);
+}
