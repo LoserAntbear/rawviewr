@@ -73,3 +73,37 @@ describe('the decode request, end to end', () => {
     });
   });
 });
+
+describe('updateSnapshotOnOptionsChange', () => {
+  it('offers the toolbar up whenever it changes', () => {
+    const asked = vi.fn();
+
+    store.get(StoreSliceId.Config).setPreserveOptions(true);
+    store.bus.on('decodeOptions:snapshot:requested', (event) => asked(event.detail.options.width));
+
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
+
+    expect(asked).toHaveBeenCalledWith(64);
+  });
+
+  it('keeps the toolbar to itself while nothing is being preserved', () => {
+    const asked = vi.fn();
+
+    store.bus.on('decodeOptions:snapshot:requested', asked);
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
+
+    expect(asked).not.toHaveBeenCalled();
+  });
+
+  it('says nothing when an option is set to what it already was', () => {
+    const asked = vi.fn();
+
+    store.get(StoreSliceId.Config).setPreserveOptions(true);
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
+    store.bus.on('decodeOptions:snapshot:requested', asked);
+
+    store.get(StoreSliceId.DecodeOptions).setOptions({ width: 64 });
+
+    expect(asked).not.toHaveBeenCalled();
+  });
+});

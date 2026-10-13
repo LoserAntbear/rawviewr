@@ -33,8 +33,23 @@ const requestSourceFileBytesOnPin: StoreReaction = (store) => ({
 });
 
 /**
+ * We want all windows to fetch up new decode options when they change in the active window.
+ */
+const updateSnapshotOnOptionsChange: StoreReaction = (store) => ({
+  dispose: store.bus.on('decodeOptions:change', ({ detail: { next } }) => {
+    if (store.get(StoreSliceId.Config).preserveOptions) {
+      store.bus.emit('decodeOptions:snapshot:requested', { options: next });
+    }
+  }),
+});
+
+/**
  * The idea of reactions is to provide a scoped tool
  * for cross-slice interaction without exposing the implementation details of each slice
  * And without polluting the slices and store itself with cross-slice logic.
  */
-export const STORE_REACTIONS: readonly StoreReaction[] = [requestDecodeOnOptionsChange, requestSourceFileBytesOnPin];
+export const STORE_REACTIONS: readonly StoreReaction[] = [
+  requestSourceFileBytesOnPin,
+  requestDecodeOnOptionsChange,
+  updateSnapshotOnOptionsChange,
+];
