@@ -1,4 +1,5 @@
 import { isPresent } from '@guards/valueGuards';
+import { toPreservedOptions } from '@features/settings/snapshot';
 
 import type { MessageForwardMap } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';
@@ -10,6 +11,14 @@ export const STORE_EVENT_FORWARDS: MessageForwardMap<StoreEventMap> = {
     location,
     type: 'probe:request',
     endian: store.get(StoreSliceId.DecodeOptions).options.endian,
+  }),
+
+  'decodeOptions:snapshot:requested': ({ options }, { store }) => ({
+    type: 'decode:options:snapshot',
+    snapshot: {
+      options: toPreservedOptions(options),
+      preserved: store.get(StoreSliceId.Config).preserveOptionsForAllWindows,
+    },
   }),
 
   'images:decode:requested': ({ ids }, { store }) => ({
