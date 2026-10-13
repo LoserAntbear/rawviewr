@@ -5,7 +5,8 @@ import { listenTo } from '../disposable/listenTo';
 import type { WebviewDisposable } from '../disposable/types';
 import type { MessageForwardMap, MessageResolverMap, ResolverContext } from '../messaging/types';
 import { TypedEventTarget, type EventMap } from '../messaging/TypedEventTarget/TypedEventTarget';
-import { VSCodeWebviewApi, WebviewHostMessageEvents } from './types';
+
+import type { VSCodeWebviewApi, WebviewHostMessageEvents } from './types';
 
 let acquiredApi: VSCodeWebviewApi | null = null;
 

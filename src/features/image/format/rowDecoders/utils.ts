@@ -1,7 +1,7 @@
 import { expandTable } from '@utils/bits';
 
 import { RowChannel } from '../definitions';
-import { ChannelReader, Field, PackedChannels } from '../types';
+import type { ChannelReader, Field, PackedChannels } from '../types';
 
 function buildChannelReader(field: Field, rowIndexShift: RowChannel): ChannelReader {
   return {

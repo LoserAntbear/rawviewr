@@ -80,7 +80,10 @@ export class StringTemplate<const Tokens extends readonly string[]> {
     const foundTokens = new Set<string>();
 
     for (const [, token] of this.source.matchAll(this.replacePattern)) {
-      foundTokens.add(token);
+      // `replacePattern` is injectable, so its first group is not guaranteed to have matched.
+      if (token !== undefined) {
+        foundTokens.add(token);
+      }
     }
 
     return foundTokens;

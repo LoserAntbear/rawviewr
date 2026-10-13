@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { UriLike } from '@features/vscode/types';
+import type { UriLike } from '@features/vscode/types';
 
 function isUriLike(value: unknown): value is UriLike {
   if (typeof value !== 'object' || value === null) {

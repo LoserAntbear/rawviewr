@@ -4,7 +4,7 @@ import { fileSourceForUri } from '@features/vscode/utils/uri';
 import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VSCodeCommands } from '@definitions/vscode';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
-import { SettingsController } from '@features/settings/SettingsController';
+import type { SettingsController } from '@features/settings/SettingsController';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 

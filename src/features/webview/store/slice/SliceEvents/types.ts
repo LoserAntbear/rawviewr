@@ -1,5 +1,6 @@
-import type { StoreSliceEvent } from './definitions';
 import type { StoreSliceEventKey } from '../types';
+
+import type { StoreSliceEvent } from './definitions';
 
 type StoreSliceChange<TState> = {
   prev: TState;

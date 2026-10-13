@@ -3,6 +3,7 @@ import { StoreSliceId } from '@features/webview/store/definitions';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+
 import { RIVGalleryView } from './RIVGalleryView';
 import { resolveGalleryState } from './state/resolvers';
 import template from './index.html';
@@ -18,9 +19,9 @@ export class RIVGallery extends RIVHTMLElement {
 
     // Membership and order come from items; mode and selection from view. `visibleIds`
     // is derived from both, so both have to re-render it.
-    this.observe(store.bus, "sources:change", this.render.bind(this));
-    this.observe(store.bus, "view:change", this.render.bind(this));
-    this.observe(store.bus, "config:change", this.render.bind(this));
+    this.observe(store.bus, 'sources:change', this.render.bind(this));
+    this.observe(store.bus, 'view:change', this.render.bind(this));
+    this.observe(store.bus, 'config:change', this.render.bind(this));
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));
     this.observe(this.view.rootRef, 'dblclick', this.handleDoubleClick.bind(this));

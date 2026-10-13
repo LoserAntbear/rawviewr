@@ -1,6 +1,8 @@
-import { StoreSliceId } from '../store/definitions';
 import { toPreservedOptions } from '@features/settings/snapshot';
+
+import { StoreSliceId } from '../store/definitions';
 import { exportSelected } from '../image/export/exportSelected';
+
 import type { WebviewCommandResolversMap } from './types';
 
 /**

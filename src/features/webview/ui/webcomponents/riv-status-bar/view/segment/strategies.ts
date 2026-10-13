@@ -2,6 +2,7 @@ import { StoreSliceId } from '@features/webview/store/definitions';
 import { byKey, byKind } from '@utils/strategy';
 
 import type { StatusBarStateContext } from '../../state/types';
+
 import type { ModeStrategies, DisplayedItemStrategies } from './types';
 
 export function byViewMode<TResult>(strategies: ModeStrategies<TResult>, context: StatusBarStateContext): TResult {

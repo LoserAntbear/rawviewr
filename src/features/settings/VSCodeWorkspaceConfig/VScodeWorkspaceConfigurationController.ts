@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
+import { DisposableStore } from '@features/disposable/DisposableStore';
 
+import type { ConfigChangeKind } from './definitions';
 import {
-  ConfigChangeKind,
   VIEWER_CONFIG_KEYS,
   EXTENSION_CONFIGURATION_KEY,
 } from './definitions';
@@ -11,8 +12,7 @@ import type {
   ViewerConfigSchema,
   ViewerConfigKeySet,
   ConfigChangePayload,
- } from './types';
-import { DisposableStore } from '@features/disposable/DisposableStore';
+} from './types';
 import { detectConfigKeyChangeKind } from './utils';
 
 type ConfigChangeDetectedPayload = Record<ConfigChangeKind, ConfigKey[]>;

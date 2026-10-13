@@ -1,6 +1,7 @@
-import { FormatGroupEntry } from '@features/image/format/types';
-import type { ControlTagDescriptor, ToolbarChoice, ToolbarChoiceGroup } from './types';
+import type { FormatGroupEntry } from '@features/image/format/types';
 import { WebviewContextProvider } from '@webview/webviewContext/WebviewContextProvider';
+
+import type { ControlTagDescriptor, ToolbarChoice, ToolbarChoiceGroup } from './types';
 
 const TOGGLE_FIELD: ControlTagDescriptor = { tag: 'input', type: 'checkbox' };
 const NUMBER_FIELD: ControlTagDescriptor = { tag: 'input', type: 'number', min: '0' };

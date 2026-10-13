@@ -1,8 +1,10 @@
+import { WheelInputHandler } from '@features/webview/_features/input/wheelInput/WheelInputHandler';
+
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+
 import template from './index.html';
 import styles from './index.css';
-import { WheelInputHandler } from '@features/webview/_features/input/wheelInput/WheelInputHandler';
 
 export class RIVMainView extends RIVHTMLElement {
   public static readonly tagName = RIVTags.MainView;

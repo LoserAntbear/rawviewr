@@ -1,5 +1,6 @@
 import { PixelFormatPresets } from '../presets';
 import type { RowDecoder } from '../types';
+
 import { buildRowDecoder } from './decoders';
 
 export class FormatDecodersLibrary {

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
 
@@ -7,6 +6,7 @@ import { createWebviewStore } from '../../store/createWebviewStore';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
 import type { FileSource } from '../../types';
+
 import { STORE_EVENT_FORWARDS } from './forwards';
 
 /**

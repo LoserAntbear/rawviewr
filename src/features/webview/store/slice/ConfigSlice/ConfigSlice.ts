@@ -3,6 +3,7 @@ import { DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
+
 import type { ConfigState } from './types';
 
 /**

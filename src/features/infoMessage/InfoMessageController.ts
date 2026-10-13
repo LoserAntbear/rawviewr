@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-
 import { attemptDetached } from '@utils/attempt';
 
 type InfoMessage =

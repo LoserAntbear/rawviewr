@@ -1,4 +1,4 @@
-import { Vector2 } from '@definitions/geometry';
+import type { Vector2 } from '@definitions/geometry';
 import { clamp as clampNumber } from '@utils/math';
 
 function divide(vector: Vector2, divisor: number): Vector2 {

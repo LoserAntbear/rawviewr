@@ -1,15 +1,15 @@
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { StringFormat } from '@utils/string/formatters';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
+import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 
 import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
 import { byViewMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
-import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
-import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 
 function formatName({ appState }: StatusBarStateContext): string {
-  return appState[StoreSliceId.DecodeOptions].format.label.split(' — ')[0];
+  return appState[StoreSliceId.DecodeOptions].format.label.split(' — ')[0]!;
 }
 
 function formatDimensions({ appState }: StatusBarStateContext, geometry: Geometry): string {
@@ -20,7 +20,7 @@ function formatDimensions({ appState }: StatusBarStateContext, geometry: Geometr
 
 const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
   none: () => null,
-  loading: () => `loading…`,
+  loading: () => 'loading…',
   failed: ({ message }) => `failed: ${message}`,
   resolved: ({ item }, context) => {
     if (!isReadyImageItem(item)) {

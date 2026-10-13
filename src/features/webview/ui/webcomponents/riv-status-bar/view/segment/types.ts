@@ -2,8 +2,9 @@ import type { KindStrategies, Strategies } from '@utils/strategy';
 
 import type { GalleryViewMode } from '../../../types';
 import type { DisplayedItem, StatusBarStateContext } from '../../state/types';
-import type { SlotLifecycleMode } from './definitions';
 import type { StatusBarEntry } from '../types';
+
+import type { SlotLifecycleMode } from './definitions';
 
 export type StatusSegmentAlignment = 'start' | 'end';
 

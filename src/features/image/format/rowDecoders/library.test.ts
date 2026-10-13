@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-
 import { Endian } from '@definitions/bits';
 
 import type { RowOptions } from '../types';
 import { PixelFormatPresets } from '../presets';
+
 import { FormatDecodersLibrary } from './library';
 
 /**

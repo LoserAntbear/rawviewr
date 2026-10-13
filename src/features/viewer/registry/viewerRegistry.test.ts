@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-
 import type { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 import { ViewerRegistry } from './viewerRegistry';

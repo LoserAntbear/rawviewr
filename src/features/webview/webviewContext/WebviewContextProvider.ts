@@ -1,4 +1,4 @@
-import { WebviewContext } from './types';
+import type { WebviewContext } from './types';
 
 export class WebviewContextProvider {
   public static get context(): WebviewContext {

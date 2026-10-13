@@ -15,7 +15,6 @@ export type RIVImageState = { caption: RIVImageCaption } & (
   | { kind: RIVImageStateKind.Paint; image: DecodedImage; }
 );
 
-
 /** Painting is asynchronous — the bitmap has to be built — so a renderer may return one. */
 export type RIVImageRenderer<K extends RIVImageStateKind = RIVImageStateKind> = (
   state: Extract<RIVImageState, { kind: K }>,

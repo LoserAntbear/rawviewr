@@ -1,8 +1,8 @@
 import { isHTMLElement } from '@features/webview/utils/html';
-
 import { applyStyleProperties } from '@features/webview/utils/styleProperties';
 
 import { RIVView } from '../RIVView';
+
 import { GALLERY_STYLE_PROPERTIES } from './definitions';
 import { ElementBuilder } from './ElementBuilder';
 import type { GalleryState } from './state/types';

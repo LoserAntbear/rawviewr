@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
-
-import { MAX_FILE_DIMENSION_PX } from '@features/image/imageDecoder/definitions';
-import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { MAX_FILE_DIMENSION_PX, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { ViewerBackground } from '@features/viewer/definitions';
 
-import { toDimensionChoices, toDimensionOptions, toDimensionValue } from './utils';
 import type { ToolbarSyncPayload } from '../../state/types';
+
+import { toDimensionChoices, toDimensionOptions, toDimensionValue } from './utils';
 
 /**
  * The decoder has always ranked these and then quietly taken the first. The picker is that

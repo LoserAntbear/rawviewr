@@ -19,7 +19,7 @@ export const VIEWER_INTENT_RESOLVERS = (
       return await windowController.openSingle(await resolveUriTargets(targets));
     } catch (error) {
       InfoMessageController.showError(
-        `Failed to open single viewer: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to open single viewer: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   },
@@ -31,7 +31,7 @@ export const VIEWER_INTENT_RESOLVERS = (
       await windowController.openGallery(selectionTitle(resolved), resolved);
     } catch (error) {
       InfoMessageController.showError(
-        `Failed to open gallery: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to open gallery: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   },
@@ -49,7 +49,7 @@ export const VIEWER_INTENT_RESOLVERS = (
       await windowController.openGallery(folderTitle(resolved, targets), targets);
     } catch (error) {
       InfoMessageController.showError(
-        `Failed to open folder gallery: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to open folder gallery: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   },
@@ -63,7 +63,7 @@ export const VIEW_INTENT_RESOLVERS = (
       await viewerRegistry.activeViewer?.requestZoom(direction);
     } catch (error) {
       InfoMessageController.showError(
-        `Failed to zoom the view: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to zoom the view: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   },

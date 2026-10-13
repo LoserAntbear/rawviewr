@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { ViewerBackground } from '@features/viewer/definitions';
+
+import type { ToolbarSyncPayload } from '../state/types';
 
 import { TOOLBAR_CONTROLS } from './controls';
 import { CONTROL_INTERACTIONS } from './definitions';
 import { getControlForElement, mapControlsToValues, respondsTo } from './utils';
-import type { ToolbarSyncPayload } from '../state/types';
-import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-import { ViewerBackground } from '@features/viewer/definitions';
 
 const sync: ToolbarSyncPayload = {
   zoom: 1,

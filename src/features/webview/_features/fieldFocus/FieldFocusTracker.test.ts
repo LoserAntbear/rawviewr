@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { WebviewDisposable } from '../../disposable/types';
 import type { WebviewMessage } from '../../webviewHost/types';
+
 import { FieldFocusTracker } from './FieldFocusTracker';
 
 /**

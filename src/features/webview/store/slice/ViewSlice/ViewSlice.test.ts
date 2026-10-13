@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { ViewerBackground } from '@features/viewer/definitions';
 
 import { createWebviewStore } from '../../createWebviewStore';
 import { StoreSliceId } from '../../definitions';
 import type { AppStore } from '../../types';
+
 import { ZOOM } from './definitions';
 import { resolveZoom } from './utils';
 

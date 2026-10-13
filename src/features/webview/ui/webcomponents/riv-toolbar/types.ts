@@ -1,4 +1,4 @@
-import { ControlTagDescriptor } from './controls/types';
+import type { ControlTagDescriptor } from './controls/types';
 
 export type ExtractDescriptor<
   TDescriptor,

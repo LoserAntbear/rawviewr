@@ -1,6 +1,7 @@
 import { attemptDetached } from '@utils/attempt';
 
 import type { WebviewDisposable } from '../disposable/types';
+
 import type { MessageLike, MessagePoster, MessageResolverMap, ResolverContext } from './types';
 
 // Have to force-type the union of resolvers,

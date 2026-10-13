@@ -1,16 +1,15 @@
 import type * as vscode from 'vscode';
-
 import type { Endian } from '@definitions/bits';
 import type { ZoomDirection } from '@features/zoom';
 import type { ViewerConfiguration } from '@features/settings/VSCodeWorkspaceConfig/types';
 import type { ToolbarOptionsSnapshot } from '@features/settings/snapshot';
 import type { ViewerBackground } from '@features/viewer/definitions';
 import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
-import type { DecodedFileSource } from '@features/image/imageDecoder/types';
-import type { DecodeOptions } from '@features/image/imageDecoder/types';
-import type { GalleryViewMode } from '../ui/webcomponents/types';
+import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
-import { FileSource } from '../types';
+
+import type { GalleryViewMode } from '../ui/webcomponents/types';
+import type { FileSource } from '../types';
 
 export type WebviewHostMessageType = WebviewHostMessage['type'];
 export type WebviewHostMessage =
@@ -40,6 +39,6 @@ export type WebviewMessage =
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
   | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
 
-export interface ItemOpener {
+export type ItemOpener = {
   openSingle(targets: readonly vscode.Uri[]): Promise<void>;
 };

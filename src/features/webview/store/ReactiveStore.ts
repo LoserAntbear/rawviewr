@@ -1,4 +1,5 @@
-import { TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
+import type { TypedEventTarget } from '../messaging/TypedEventTarget/TypedEventTarget';
+
 import type {
   AppState,
   BoundSelectors,

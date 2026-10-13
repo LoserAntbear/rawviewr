@@ -1,6 +1,7 @@
 import type { DecodedImage } from '@features/image/imageDecoder/types';
 
 import { RIVView } from '../RIVView';
+
 import type { RIVImageCaption } from './types';
 
 export class RIVImageView extends RIVView {

@@ -3,7 +3,7 @@ import type {
   StoreSliceEventKey,
 } from './types';
 import { StoreSliceEvent } from './SliceEvents/definitions';
-import { StoreSliceEventPayloads } from './SliceEvents/types';
+import type { StoreSliceEventPayloads } from './SliceEvents/types';
 
 type EventNames = StoreSliceEvent;
 

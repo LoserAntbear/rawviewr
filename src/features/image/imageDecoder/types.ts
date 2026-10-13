@@ -1,9 +1,8 @@
 import type { Endian } from '@definitions/bits';
-
 import type { PixelFormat } from '@features/image/format/types';
 
 import type { HeaderPreset, AlphaMode } from './definitions';
-import { Geometry } from './imagePreparation/types';
+import type { Geometry } from './imagePreparation/types';
 
 export type DecodeOptions = {
   frame: number; /** --- Which frame of a multi-frame buffer to decode. */
@@ -50,7 +49,6 @@ export type DecodedArrayBuffer = {
   geometry: Geometry;
   image: DecodedImage;
 };
-
 
 /**
  * Pixel probing needs all three to relate a pixel back to its bytes;

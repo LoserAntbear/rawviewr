@@ -1,6 +1,7 @@
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
-import { DecodeOptions } from './types';
+
+import type { DecodeOptions } from './types';
 
 export const MAX_FILE_DIMENSION_PX = 65535; /** Upper bound for a decoded width or height, in pixels. */
 export const MAX_DECODED_PIXELS = 64 * 1024 * 1024; /** Upper bound for the total number of decoded pixels. */

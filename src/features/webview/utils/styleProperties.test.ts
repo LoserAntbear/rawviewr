@@ -56,8 +56,8 @@ describe('applyStyleProperties', () => {
 describe('toStylePropertyList', () => {
   it('reads out every property of every group, so none is grouped out of sight', () => {
     const list = toStylePropertyList<State>({
-      one: [properties[0]],
-      two: [properties[1], { name: '--extra', resolve: () => 'x' }],
+      one: [properties[0]!],
+      two: [properties[1]!, { name: '--extra', resolve: () => 'x' }],
     });
 
     expect(list.map(({ name }) => name)).toEqual(['--size', '--colour', '--extra']);

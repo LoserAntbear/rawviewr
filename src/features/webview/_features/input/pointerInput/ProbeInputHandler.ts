@@ -8,7 +8,7 @@ import { withThrottle } from '@utils/throttle';
 
 import { resolveEffectiveZoom, resolveProbePosition } from './utils';
 
-interface ProbeTarget { readonly itemId: string };
+type ProbeTarget = { readonly itemId: string };
 
 // Mimic a typical screen refresh rate of ~60Hz.
 const PROBE_INTERVAL_MS = 16 as const;

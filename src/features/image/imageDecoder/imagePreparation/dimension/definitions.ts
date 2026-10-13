@@ -1,5 +1,6 @@
 import { isPowerOfTwo } from '@utils/math';
-import { GuessingConfig, ScoringRule, DimensionGuessRule } from './types';
+
+import type { GuessingConfig, ScoringRule, DimensionGuessRule } from './types';
 import { perfectSquareWidths, divisorWidths, commonImageWidths } from './dimensionGuessResolvers';
 
 export const GUESS_CONFIG: GuessingConfig = {

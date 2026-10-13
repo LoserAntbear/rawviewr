@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
 // Just a placeholder for `CustomDocument` implementation
 export class RawDocument implements vscode.CustomDocument {
-  constructor(readonly uri: vscode.Uri) {}
+  constructor(public readonly uri: vscode.Uri) {}
 
-  dispose(): void {}
+  public dispose(): void {}
 }

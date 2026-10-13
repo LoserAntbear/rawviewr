@@ -1,14 +1,18 @@
 import type { AlphaMode } from '@features/image/imageDecoder/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
 
-import {
+import type {
   EXTENSION_CONFIGURATION_KEY,
   ConfigChangeKind,
   VIEWER_CONFIG_KEYS,
 } from './definitions';
 
-type ManifestProps =
-  typeof import('@packageRoot/package.json')['contributes']['configuration']['properties'];
+/**
+ * Inline `import()` on purpose: a top-level import would pull package.json into the program,
+ * and it sits outside `rootDir`.
+ */
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type ManifestProps = typeof import('@packageRoot/package.json')['contributes']['configuration']['properties'];
 
 /**
  * Every setting contributed in package.json, prefix stripped. Type-only import: nothing
@@ -41,7 +45,6 @@ export type ViewerConfigKeySet<
   Kinds extends ConfigChangeKind = ConfigChangeKind,
   Keys extends ConfigKey = ConfigKey,
 > = { all: Keys[]; } & { [K in Kinds]: Keys[] };
-
 
 export type WatchedConfigKey = typeof VIEWER_CONFIG_KEYS[ConfigChangeKind.ViewerWatched][number];
 export type ViewerConfiguration = Pick<ViewerConfigSchema, WatchedConfigKey>;

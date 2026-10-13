@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { PixelFormatPresets } from '@features/image/format/presets';
 
 import { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';

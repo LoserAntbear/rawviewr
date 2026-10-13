@@ -1,5 +1,5 @@
 import { ConfigChangeKind } from './definitions';
-import { ConfigKey, ViewerConfigKeySet } from './types';
+import type { ConfigKey, ViewerConfigKeySet } from './types';
 
 export function detectConfigKeyChangeKind(
   key: ConfigKey,

@@ -43,7 +43,7 @@ export class Uri {
   public static parse(value: string): Uri {
     const [scheme, ...path] = value.split(':');
 
-    return new Uri(scheme, path.join(':'));
+    return new Uri(scheme!, path.join(':'));
   }
 
   public static joinPath = vi.fn((base: { path: string }, ...segments: string[]) => ({

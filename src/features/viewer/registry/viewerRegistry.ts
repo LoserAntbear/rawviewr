@@ -1,7 +1,7 @@
 import type * as vscode from 'vscode';
+import type { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
-import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
-import { ViewerRegistryEntry } from './types';
+import type { ViewerRegistryEntry } from './types';
 
 export class ViewerRegistry {
   public get activeViewer(): WebviewHost | undefined {

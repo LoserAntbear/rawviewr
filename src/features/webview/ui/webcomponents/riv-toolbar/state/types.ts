@@ -1,6 +1,8 @@
-import { ToolbarControlStatus, type ToolbarChoiceGroup } from '../controls/types';
-import { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ViewerBackground } from '@features/viewer/definitions';
+
+import type { ToolbarControlStatus, ToolbarChoiceGroup } from '../controls/types';
+
 import type { ToolbarStateTransition } from './definitions';
 
 export type ToolbarAvailability = Readonly<Record<string, ToolbarControlStatus>>;

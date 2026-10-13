@@ -13,10 +13,10 @@ export type Candidate = {
 export type ScoringRule = Rule;
 export type DimensionGuessRule = Rule<(totalPixels: number) => number[]>;
 
-export interface DimensionGuess extends Candidate {
+export type DimensionGuess = Candidate & {
   score: number;
   reasons: string[]; /** --- Every rule that fired, provenance first. */
-}
+};
 
 export type GuessingConfig = {
   limit: number;

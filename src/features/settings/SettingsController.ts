@@ -1,16 +1,17 @@
 import * as vscode from 'vscode';
-import { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-import { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { Endian } from '@definitions/bits';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { attempt } from '@utils/attempt';
-import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
 import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
-import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
+
+import type { ViewerConfiguration } from './VSCodeWorkspaceConfig/types';
+import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
+import type { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 import type { ToolbarOptionsSnapshot } from './snapshot';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
@@ -31,7 +32,7 @@ export class SettingsController extends DisposableStore {
     private readonly workspaceState: vscode.Memento,
     private readonly configController: VSCodeWorkspaceConfigurationController,
     private readonly snapshotEmitter: vscode.EventEmitter<ToolbarOptionsSnapshot> =
-      new vscode.EventEmitter<ToolbarOptionsSnapshot>(),
+    new vscode.EventEmitter<ToolbarOptionsSnapshot>(),
   ) {
     super();
 
@@ -80,7 +81,6 @@ export class SettingsController extends DisposableStore {
       return DEFAULT_DECODE_OPTIONS;
     }
   }
-
 
   public readViewerConfiguration(): ViewerConfiguration {
     return attempt(

@@ -1,8 +1,10 @@
 import { Endian } from '@definitions/bits';
 import { readWord } from '@utils/bits';
+
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../../definitions';
-import { HeaderImplausibleError, HeaderTruncatedError } from './headerErrors';
 import type { HeaderDimensions, HeaderLayout, DefinedHeaderedPreset } from '../types';
+
+import { HeaderImplausibleError, HeaderTruncatedError } from './headerErrors';
 
 /** 1 Width + 1 height = 2 fields per header. Quick math. */
 const FIELDS_PER_HEADER = 2;

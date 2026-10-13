@@ -1,14 +1,12 @@
 import { Endian } from '@definitions/bits';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
-
-
 import { ViewerBackground } from '@features/viewer/definitions';
-
-import { ToolbarGroup } from '../definitions';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
 
-import { ToolbarControl } from './types';
+import { ToolbarGroup } from '../definitions';
+
+import type { ToolbarControl } from './types';
 import { TAG_DESCRIPTORS } from './tagDescriptors';
 import { toDimensionChoices, toDimensionOptions, toDimensionValue } from './dimensionGuess';
 

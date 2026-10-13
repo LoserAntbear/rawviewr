@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type { SourceBytesResult } from '@features/image/sourceReader/types';
-
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { toPreservedOptions } from '@features/settings/snapshot';
 import { ViewerBackground } from '@features/viewer/definitions';
+import type { ZoomDirection } from '@features/zoom';
 
 import { createWebviewStore } from '../../store/createWebviewStore';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
 import { ZOOM } from '../../store/slice/ViewSlice';
-import type { ZoomDirection } from '@features/zoom';
+
 import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from './resolvers';
 
 /**

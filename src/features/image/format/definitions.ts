@@ -1,4 +1,5 @@
-import { FormatDefinition, FormatKind, PackedWordBits } from './types';
+import type { FormatDefinition, PackedWordBits } from './types';
+import { FormatKind } from './types';
 
 export enum FormatGroup {
   SubByte = 'sub-byte',

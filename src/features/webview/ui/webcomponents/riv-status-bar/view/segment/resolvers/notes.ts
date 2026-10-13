@@ -1,12 +1,12 @@
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { isPresent } from '@guards/valueGuards';
 import { StringFormat } from '@utils/string/formatters';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
 import type { StatusBarEntry, StatusLevel } from '../../types';
 import type { StatusBarStateContext } from '../../../state/types';
 import { byViewMode, byDisplayedItem } from '../strategies';
 import type { ModeStrategies, DisplayedItemStrategies } from '../types';
-import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
 
 type GeometryNoteRule = (geometry: Geometry) => StatusBarEntry | null;
 
@@ -37,7 +37,7 @@ const NOTES_BY_DISPLAYED_ITEM: DisplayedItemStrategies<readonly StatusBarEntry[]
     }
 
     return GEOMETRY_NOTE_RULES.map((rule) => rule(item.geometry)).filter(isPresent);
-  } ,
+  },
 };
 
 const NOTES_BY_MODE: ModeStrategies<readonly StatusBarEntry[]> = {

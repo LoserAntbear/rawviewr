@@ -1,19 +1,19 @@
 import { attemptDetached } from '@utils/attempt';
-
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 import { StoreSliceId } from '@features/webview/store/definitions';
+import type { ImagesState } from '@features/webview/store/slice/ImagesSlice';
+import type { BusEvent } from '@features/webview/messaging';
+import { ProbeInputHandler } from '@webview/_features/input/pointerInput/ProbeInputHandler';
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+
 import { RIVImageStateKind } from './definitions';
 import { RIVImageView } from './RIVImageView';
 import { resolveImageState } from './RivImageState';
 import type { RIVImageRenderer, RIVImageRendererMap, RIVImageState } from './types';
 import template from './index.html';
 import styles from './index.css';
-import { ImagesState } from '@features/webview/store/slice/ImagesSlice';
-import type { BusEvent } from '@features/webview/messaging';
-import { ProbeInputHandler } from '@webview/_features/input/pointerInput/ProbeInputHandler';
 
 export class RIVImage extends RIVHTMLElement {
   public static readonly tagName = RIVTags.Image;
@@ -44,8 +44,8 @@ export class RIVImage extends RIVHTMLElement {
 
     const { store } = WebviewContextProvider.context;
 
-    this.observe(store.bus, "images:change", this.handleItemsChange.bind(this));
-    this.observe(store.bus, "decodeOptions:change", this.render.bind(this));
+    this.observe(store.bus, 'images:change', this.handleItemsChange.bind(this));
+    this.observe(store.bus, 'decodeOptions:change', this.render.bind(this));
 
     this.observeProbeInput();
     this.render();

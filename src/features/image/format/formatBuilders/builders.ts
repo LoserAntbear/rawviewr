@@ -1,16 +1,16 @@
-import { PAD_CHANNEL, CHANNEL_LETTERS } from '../definitions';
-import {
+import { PAD_CHANNEL, RowChannel, FormatGroup, BITS_PER_BYTE, PACKED_GROUPS, CHANNEL_LETTERS } from '../definitions';
+import type {
   SubBits,
   FullBits,
   GrayBits,
-  FormatKind,
   PixelFormat,
   ByteOrderEntry,
   PackedChannels,
   PackedWordBits,
   FormatDefinition,
 } from '../types';
-import { BITS_PER_BYTE, FormatGroup, RowChannel, PACKED_GROUPS } from '../definitions';
+import { FormatKind } from '../types';
+
 import { buildLabel } from './utils';
 
 export function buildPackedFormat(

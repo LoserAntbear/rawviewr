@@ -1,13 +1,14 @@
 import { attemptAsync } from '@utils/attempt';
-import { ExportError } from './ExportError';
+import type { ImageItem } from '@features/webview/store/slice/ImagesSlice/types';
+import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
+
 import type { MessagePoster } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
 import type { WebviewMessage } from '../../webviewHost/types';
-
 import { encodeImageToPng } from '../encodePng';
-import { ImageItem } from '@features/webview/store/slice/ImagesSlice/types';
-import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice/utils';
+
+import { ExportError } from './ExportError';
 
 function requireSelectedId(store: AppStore): string {
   // `??` is lazy: what is on screen is only consulted when nothing was picked.

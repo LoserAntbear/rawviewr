@@ -1,6 +1,7 @@
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+
 import template from './index.html';
 import styles from './index.css';
 

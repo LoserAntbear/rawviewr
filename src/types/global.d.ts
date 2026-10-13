@@ -8,7 +8,6 @@ declare module '*.css' {
   export default content;
 }
 
-
 declare type Strip<T extends string, P extends string> = T extends `${P}.${infer R}` ? R : never;
 
 /**

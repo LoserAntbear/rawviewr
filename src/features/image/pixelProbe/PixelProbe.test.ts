@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-
 import type { IntentParserResult } from '@features/intent/types';
 import { ViewType } from '@definitions/viewTypes';
 import type { RawEditorProvider } from '@features/editor/RawEditorProvider';

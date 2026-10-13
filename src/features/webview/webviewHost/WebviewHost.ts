@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import type { SettingsController } from '@features/settings/SettingsController';
-import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { ExportFormat } from '@definitions/exportFormats';
@@ -8,17 +7,19 @@ import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
 import type { Endian } from '@definitions/bits';
 import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import type { ZoomDirection } from '@features/zoom';
-
-import type { FileSource } from '../types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
-import appShellHtml from './app-shell.html';
 import { StringTemplate } from '@utils/string/StringTemplate';
-import { getNonce } from '../utils';
-import { GalleryViewMode } from '../ui/webcomponents/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { attemptAsync, attemptDetached } from '@utils/attempt';
 import { SourceReader } from '@features/image/sourceReader/SourceReader';
+
+import type { GalleryViewMode } from '../ui/webcomponents/types';
+import { getNonce } from '../utils';
+import type { FileSource } from '../types';
+
+import appShellHtml from './app-shell.html';
+import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 
 // TODO: Extract webview posting and handlers into a separate messaging layer
 export class WebviewHost extends DisposableStore {
@@ -107,7 +108,7 @@ export class WebviewHost extends DisposableStore {
           await this.handleOpenItem(message.id);
           break;
         case 'export:png':
-          //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
+        //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
           await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
           break;
         case 'sources:request:decode':

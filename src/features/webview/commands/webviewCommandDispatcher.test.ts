@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
-
 import { ViewerBackground } from '@features/viewer/definitions';
 
 import { createWebviewStore } from '../store/createWebviewStore';
 import { StoreSliceId } from '../store/definitions';
 import type { ImageItem } from '../store/slice/ImagesSlice';
 import type { AppStore } from '../store/types';
+
 import { RIV_COMMAND_EVENT_ID } from './definitions';
 import { WEBVIEW_COMMAND_RESOLVERS } from './resolvers';
 import type { WebviewCommandResolver, WebviewCommandResolversMap } from './types';

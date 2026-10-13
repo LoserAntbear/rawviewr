@@ -1,6 +1,7 @@
-import { mapControlsToChoices, mapControlsToValues } from '../controls/utils';
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 import { ZOOM } from '@features/webview/store/slice/ViewSlice';
+
+import { mapControlsToChoices, mapControlsToValues } from '../controls/utils';
 
 import { ToolbarStateTransition } from './definitions';
 import type { ToolbarState, ToolbarAvailability, ToolbarSyncPayload } from './types';

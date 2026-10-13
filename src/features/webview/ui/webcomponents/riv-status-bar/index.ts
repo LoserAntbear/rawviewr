@@ -2,6 +2,7 @@ import { WebviewContextProvider } from '@features/webview/webviewContext/Webview
 
 import { RIVHTMLElement } from '../RIVHTMLElement';
 import { RIVTags } from '../definitions';
+
 import { RIVStatusBarView } from './view/RIVStatusBarView';
 import template from './index.html';
 import styles from './index.css';
@@ -9,11 +10,11 @@ import { STATUS_SEGMENTS } from './view/segment/segments';
 import { selectStatusBarContext } from './state/selectors';
 
 const STATUS_BAR_EVENTS = [
-  "view:change",
-  "probe:change",
-  "images:change",
-  "sources:change",
-  "decodeOptions:change",
+  'view:change',
+  'probe:change',
+  'images:change',
+  'sources:change',
+  'decodeOptions:change',
 ] as const;
 
 export class RIVStatusBar extends RIVHTMLElement {

@@ -1,6 +1,8 @@
 import type { DecodedFileSource } from '@features/image/imageDecoder/types';
+
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
+
 import type { ImageItem, ImagesSlicePayloads, ImagesState } from './types';
 import { toImageItem } from './utils';
 

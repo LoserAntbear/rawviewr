@@ -13,7 +13,7 @@ export function toImageItem(decoded: DecodedFileSource): ImageItem {
       imageItem = { kind: 'failed', id: decoded.id, message: decoded.message };
       break;
     default:
-      throw new Error(`Unexpected decoded status`);
+      throw new Error('Unexpected decoded status');
   }
 
   return imageItem;

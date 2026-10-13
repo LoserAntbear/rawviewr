@@ -1,6 +1,7 @@
+import type { FileSource } from '@features/webview/types';
+
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
-import { FileSource } from '@features/webview/types';
 
 export type SourcesState = {
   readonly byId: ReadonlyMap<string, FileSource>;

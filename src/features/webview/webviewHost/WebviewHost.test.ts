@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import { commands, Uri, window, workspace } from 'vscode';
 import { Endian } from '@definitions/bits';
-
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
 import type { ViewerConfiguration } from '@features/settings/VSCodeWorkspaceConfig/types';
 import { toPreservedOptions, type ToolbarOptionsSnapshot } from '@features/settings/snapshot';
 
 import type { FileSource } from '../types';
+
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 import { WebviewHost } from './WebviewHost';
 

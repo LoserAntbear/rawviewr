@@ -31,7 +31,7 @@ describe('ImageExporter.savePng', () => {
   it('writes the bytes it was sent, unchanged', async () => {
     await save(arrayBufferOf(PNG_1X1));
 
-    const [, written] = vi.mocked(workspace.fs.writeFile).mock.calls[0];
+    const [, written] = vi.mocked(workspace.fs.writeFile).mock.calls[0]!;
 
     expect(Buffer.from(written).equals(PNG_1X1)).toBe(true);
   });

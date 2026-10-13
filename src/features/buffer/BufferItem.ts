@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import { FileSource } from '../webview/types';
+import type { FileSource } from '../webview/types';
+
 import type { BufferBuildPayload, BufferItemData } from './types';
 
 export class BufferItem implements BufferItemData {

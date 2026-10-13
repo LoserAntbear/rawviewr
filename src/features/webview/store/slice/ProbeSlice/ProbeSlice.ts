@@ -2,6 +2,7 @@ import type { SourceBytesResult, SourceLocation } from '@features/image/sourceRe
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
+
 import type { PinnedProbeSample, ProbeSample, ProbeSlicePayloads, ProbeState } from './types';
 import { isSameSample, isSamePixel } from './utils';
 

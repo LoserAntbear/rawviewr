@@ -1,5 +1,4 @@
 import type * as vscode from 'vscode';
-
 import type { IntentKind } from '@definitions/intent';
 import type { ExportFormat } from '@definitions/exportFormats';
 import type { ZoomDirection } from '@features/zoom';

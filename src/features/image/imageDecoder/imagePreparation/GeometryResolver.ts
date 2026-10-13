@@ -1,9 +1,11 @@
+import { clamp } from '@utils/math';
+
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../definitions';
-import { DecodeOptions } from '../types';
-import { DimensionSource, Geometry, Dimension } from './types';
+import type { DecodeOptions } from '../types';
+
+import type { DimensionSource, Geometry } from './types';
 import { resolveHeaderDimensions } from './header/headerResolution';
 import { guessDimensions } from './dimension/guessDimensions';
-import { clamp } from '@utils/math';
 
 /**
  * Bytes a single row of pixels occupies with no padding
@@ -38,7 +40,7 @@ export class GeometryResolver {
 
     const width = resolveDimension(
       source.width,
-      () => this.resolveBestGuessDimensions(availableBytes, formatDescriptor.bpp).width,
+      () => this.resolveBestGuessWidth(availableBytes, formatDescriptor.bpp),
     );
 
     const bytesPerRow = Math.max(
@@ -78,10 +80,7 @@ export class GeometryResolver {
     return { width, height, headerBytes, lockedByHeader: true };
   }
 
-  private resolveBestGuessDimensions(availableBytes: number, bpp: number): Dimension {
-    const guesses = guessDimensions(availableBytes, bpp);
-    const bestGuess = guesses.length === 0 ? { width: 1, height: 1 } : guesses[0];
-
-    return bestGuess;
+  private resolveBestGuessWidth(availableBytes: number, bpp: number): number {
+    return guessDimensions(availableBytes, bpp)[0]?.width ?? 1;
   }
 }

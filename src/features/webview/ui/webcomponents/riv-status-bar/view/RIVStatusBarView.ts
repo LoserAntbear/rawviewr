@@ -1,11 +1,13 @@
-import { RIVView } from '../../RIVView';
-import { ElementBuilder } from './ElementBuilder';
-import { type StatusSegmentsMap } from './segment/segments';
-import type { StatusBarEntry, StatusBarRenderEntries } from './types';
-import type { StatusBarStateContext } from '../state/types';
-import { type StatusSegment } from './segment/types';
-import { SlotLifecycleMode, SEGMENT_STYLE_PROPERTIES } from './segment/definitions';
 import { applyStyleProperties } from '@features/webview/utils/styleProperties';
+
+import { RIVView } from '../../RIVView';
+import type { StatusBarStateContext } from '../state/types';
+
+import { ElementBuilder } from './ElementBuilder';
+import type { StatusSegmentsMap } from './segment/segments';
+import type { StatusBarEntry, StatusBarRenderEntries } from './types';
+import type { StatusSegment } from './segment/types';
+import { SlotLifecycleMode, SEGMENT_STYLE_PROPERTIES } from './segment/definitions';
 
 type SegmentSlot = {
   readonly element: HTMLElement;
@@ -88,7 +90,7 @@ export class RIVStatusBarView extends RIVView {
     );
   }
 
-  private hideElementIfNeeded(element: HTMLElement, entry: StatusBarEntry | null  , mode?: SlotLifecycleMode): boolean {
+  private hideElementIfNeeded(element: HTMLElement, entry: StatusBarEntry | null, mode?: SlotLifecycleMode): boolean {
     if (mode === SlotLifecycleMode.LiveUpdate) {
       return false;
     }

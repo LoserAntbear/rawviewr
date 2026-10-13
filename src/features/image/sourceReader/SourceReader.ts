@@ -1,10 +1,10 @@
-import { Endian } from '@definitions/bits';
+import type { Endian } from '@definitions/bits';
 import { BITS_PER_BYTE } from '@features/image/format/definitions';
 import { readWord } from '@utils/bits';
 import { BufferItem } from '@features/buffer/BufferItem';
-import { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/webview/types';
 
-import { SourceBytes, SourceLocation } from './types';
+import type { SourceBytes, SourceLocation } from './types';
 
 /** A fresh one each time, so a caller holding the result can't poison the next. */
 function nothingToRead(): SourceBytes {
@@ -41,7 +41,8 @@ export class SourceReader {
       return nothingToRead();
     }
 
-    const byte = source[byteOffset];
+    // In range: the guard above is what makes this read safe.
+    const byte = source[byteOffset]!;
 
     return { bytes: [byte], value: (byte >>> bitOffset) & ((1 << bits) - 1) };
   }

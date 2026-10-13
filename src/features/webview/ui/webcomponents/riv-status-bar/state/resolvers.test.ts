@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
@@ -11,6 +10,7 @@ import type { AppStore } from '@features/webview/store/types';
 import type { FileSource } from '@features/webview/types';
 
 import { SEGMENT_RESOLVERS } from '../view/segment/resolvers';
+
 import { selectStatusBarContext } from './selectors';
 
 /**

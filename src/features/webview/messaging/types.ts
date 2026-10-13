@@ -1,8 +1,9 @@
 import type { AppStore } from '../store/types';
 import type { WebviewMessage } from '../webviewHost/types';
+
 import type { EventMap } from './TypedEventTarget';
 
-export interface MessagePoster {
+export type MessagePoster = {
   postToWebviewHost(message: WebviewMessage): void;
 };
 

@@ -1,4 +1,4 @@
-export interface UriLike {
+export type UriLike = {
   path: string;
   scheme: string;
 

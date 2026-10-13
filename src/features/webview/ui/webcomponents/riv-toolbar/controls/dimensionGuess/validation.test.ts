@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import { MAX_FILE_DIMENSION_PX } from '@features/image/imageDecoder/definitions';
 
 import { areValidDimensions, isValidDimension } from './validation';

@@ -2,16 +2,17 @@ import { expandTable, readWord } from '@utils/bits';
 import { byKind, type KindStrategies } from '@utils/strategy';
 
 import { BITS_PER_BYTE, OPAQUE_VALUE, PAD_CHANNEL, RowChannel } from '../definitions';
-import {
+import type {
   SubBits,
   GrayBits,
-  FormatKind,
   FormatSpec,
   RowDecoder,
   ByteOrderEntry,
   PackedChannels,
   PackedWordBits,
 } from '../types';
+import { FormatKind } from '../types';
+
 import { buildChannelReaders, buildEmptyRow } from './utils';
 
 function buildPackedRowDecoder(bits: PackedWordBits, spec: PackedChannels): RowDecoder {
@@ -36,7 +37,8 @@ function buildPackedRowDecoder(bits: PackedWordBits, spec: PackedChannels): RowD
       row[rowIndex + RowChannel.Alpha] = OPAQUE_VALUE;
 
       for (const { table, mask, wordShift, rowIndexShift } of channelReaders) {
-        row[rowIndex + rowIndexShift] = table[(word >>> wordShift) & mask];
+        // `mask` is the table's own width, so the masked word is always an index it has.
+        row[rowIndex + rowIndexShift] = table[(word >>> wordShift) & mask]!;
       }
     }
 
@@ -62,10 +64,10 @@ function buildByteOrderedRowDecoder(order: readonly ByteOrderEntry[]): RowDecode
       row[rowIndex + RowChannel.Alpha] = OPAQUE_VALUE;
 
       for (let byte = 0; byte < byteCount; byte++) {
-        const channel = order[byte];
+        const channel = order[byte]!;
 
         if (channel !== PAD_CHANNEL) {
-          row[rowIndex + channel] = source[sourceIndex + byte];
+          row[rowIndex + channel] = source[sourceIndex + byte]!;
         }
       }
     }
@@ -95,7 +97,7 @@ function buildSubByteGrayRowDecoder(bits: SubBits): RowDecoder {
       const shift = options.bitOrderMsb
         ? BITS_PER_BYTE - bits - subPixel * bits
         : subPixel * bits;
-      const luminance = table[(source[sourceIndex] >>> shift) & mask];
+      const luminance = table[(source[sourceIndex]! >>> shift) & mask]!;
 
       row[rowIndex + RowChannel.Red] = luminance;
       row[rowIndex + RowChannel.Green] = luminance;
@@ -152,7 +154,7 @@ function buildAlphaRowDecoder(): RowDecoder {
       row[rowIndex + RowChannel.Red] = OPAQUE_VALUE;
       row[rowIndex + RowChannel.Green] = OPAQUE_VALUE;
       row[rowIndex + RowChannel.Blue] = OPAQUE_VALUE;
-      row[rowIndex + RowChannel.Alpha] = source[sourceIndex];
+      row[rowIndex + RowChannel.Alpha] = source[sourceIndex]!;
     }
 
     return row;

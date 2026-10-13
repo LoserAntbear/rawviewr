@@ -3,9 +3,9 @@ import { DEFAULT_VIEWER_BACKGROUND } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
 
 import type { GalleryViewMode } from '../../../ui/webcomponents/types';
-
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
+
 import { ZOOM } from './definitions';
 import type { ViewState } from './types';
 import { resolveZoom } from './utils';

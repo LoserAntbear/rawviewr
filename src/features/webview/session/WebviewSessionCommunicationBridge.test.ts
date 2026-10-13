@@ -7,6 +7,7 @@ import { WEBVIEW_HOST_MESSAGE_RESOLVERS } from '../webviewHost/messageDispatcher
 import type { WebviewHostMessage } from '../webviewHost/types';
 import type { WebviewDisposable } from '../disposable/types';
 import { TypedEventTarget } from '../messaging';
+
 import { WebviewSessionCommunicationBridge } from './WebviewSessionCommunicationBridge';
 
 /**

@@ -1,22 +1,25 @@
-import { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/webview/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
 import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
-
 import { FileValidator } from '@features/file/FileValidator';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 
 import type { DecodedArrayBuffer, DecodedFileSource } from './types';
-import { Geometry } from './imagePreparation/types';
+import type { Geometry } from './imagePreparation/types';
 
 export class SourcesDecoder {
   constructor(
     private readonly decoder: ImageDecoder = new ImageDecoder(),
   ) {}
 
-  public async decodeFromSource(source: FileSource, options?: DecodeOptions, abortSignal?: AbortSignal,): Promise<DecodedFileSource[]>;
-  public async decodeFromSource(sources: FileSource[], options?: DecodeOptions, abortSignal?: AbortSignal): Promise<DecodedFileSource[]>;
+  public async decodeFromSource(
+    source: FileSource, options?: DecodeOptions, abortSignal?: AbortSignal,
+  ): Promise<DecodedFileSource[]>;
+  public async decodeFromSource(
+    sources: FileSource[], options?: DecodeOptions, abortSignal?: AbortSignal,
+  ): Promise<DecodedFileSource[]>;
   public async decodeFromSource(
     sourceOrSources: FileSource | FileSource[],
     options?: DecodeOptions,
@@ -27,8 +30,8 @@ export class SourcesDecoder {
         sourceOrSources.map(
           async source => {
             return await this.decodeSingle(source, options, abortSignal);
-          }
-        ).filter(Boolean)
+          },
+        ).filter(Boolean),
       ) as DecodedFileSource[];
     } else {
       const result = await this.decodeSingle(sourceOrSources, options, abortSignal);
@@ -68,7 +71,7 @@ export class SourcesDecoder {
         name: bufferItem.name,
         byteLength: bufferItem.data.byteLength,
         detail: bufferItem.detail ?? bufferItem.name,
-        ...image
+        ...image,
       };
     } catch (error) {
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);

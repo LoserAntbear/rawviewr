@@ -1,5 +1,6 @@
 import type { FormatRegistry } from '@features/image/format/FormatRegistry';
 import type { WebviewMessage } from '@features/webview/webviewHost/types';
+
 import type { ToolbarGroup } from '../definitions';
 import type { ToolbarSyncPayload } from '../state/types';
 

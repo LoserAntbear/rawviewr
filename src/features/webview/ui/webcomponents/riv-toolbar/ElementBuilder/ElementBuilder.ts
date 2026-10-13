@@ -5,6 +5,8 @@ import type {
   ToolbarChoiceGroup,
   SupportedControlTag,
 } from '../controls/types';
+import type { ToolbarGroup } from '../definitions';
+
 import type {
   InputBuilderMap,
   InputBuilderFor,
@@ -12,7 +14,6 @@ import type {
   ElementBuilderMap,
   ElementBuilderFor,
 } from './types';
-import { ToolbarGroup } from '../definitions';
 
 export class ElementBuilder {
   private static readonly builders: ElementBuilderMap = {
@@ -51,7 +52,6 @@ export class ElementBuilder {
 
     return button;
   }
-
 
   public static buildControlsGroup(
     groupId: ToolbarGroup,

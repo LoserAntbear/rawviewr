@@ -10,7 +10,6 @@ export class PixelFormatPresets {
     return new Set(this.PRESETS.map((format) => format.id));
   }
 
-
   public static readonly getPreset = (id: string): PixelFormat => {
     const preset = this.PRESETS.find((format) => format.id === id);
 

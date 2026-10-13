@@ -1,11 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-
 import { DEFAULT_VIEWER_CONFIGURATION, ViewerBackground } from '@features/viewer/definitions';
-
 import { AlphaMode, DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { PixelFormatPresets } from '@features/image/format/presets';
-import { toPreservedOptions } from './snapshot';
 
+import { toPreservedOptions } from './snapshot';
 import { ConfigChangeKind } from './VSCodeWorkspaceConfig/definitions';
 import type { ConfigChangePayload } from './VSCodeWorkspaceConfig/types';
 import { SettingsController } from './SettingsController';

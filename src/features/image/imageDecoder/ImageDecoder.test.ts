@@ -77,7 +77,8 @@ describe('ImageDecoder: what it refuses to allocate', () => {
 
   it('refuses a product that is absurd though each side is in range', () => {
     // Each dimension is inside MAX_FILE_DIMENSION_PX; only the area gives it away.
-    expect(() => decoder.decode(new Uint8Array(24), options(), geometry(60000, 60000))).toThrow(DecodedSizeExceededError);
+    expect(() => decoder.decode(new Uint8Array(24), options(), geometry(60000, 60000)))
+      .toThrow(DecodedSizeExceededError);
   });
 
   it('decodes what is within the budget, however short the buffer is', () => {

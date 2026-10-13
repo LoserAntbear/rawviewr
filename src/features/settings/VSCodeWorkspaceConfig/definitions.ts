@@ -1,5 +1,6 @@
 import { MAX_FILE_DIMENSION_PX } from '@features/image/imageDecoder/definitions';
-import { ViewerConfigKeySet } from './types';
+
+import type { ViewerConfigKeySet } from './types';
 
 export const EXTENSION_CONFIGURATION_KEY = 'rawImageViewer';
 

@@ -9,10 +9,10 @@ function readRgba({ data, width }: DecodedImage, { x, y }: Vector2): Rgba {
   const index = (y * width + x) * 4;
 
   return {
-    r: data[index],
-    g: data[index + 1],
-    b: data[index + 2],
-    a: data[index + 3],
+    r: data[index]!,
+    g: data[index + 1]!,
+    b: data[index + 2]!,
+    a: data[index + 3]!,
   };
 }
 

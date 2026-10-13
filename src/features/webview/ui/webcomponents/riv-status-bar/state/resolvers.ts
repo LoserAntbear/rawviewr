@@ -1,8 +1,8 @@
 import { STORE_SELECTORS } from '@features/webview/store/selectors';
 import type { AppStoreState } from '@features/webview/store/types';
+import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 
 import type { DisplayedItem } from './types';
-import { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 
 type DisplayedItemRule = (item: ImageItem) => DisplayedItem | null;
 

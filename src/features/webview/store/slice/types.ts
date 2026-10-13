@@ -1,7 +1,7 @@
-import type { StoreSliceEvent } from './SliceEvents/definitions';
 import type { TypedEventTarget } from '../../messaging/TypedEventTarget/TypedEventTarget';
-import { StoreSliceEventPayloads } from './SliceEvents/types';
 
+import type { StoreSliceEvent } from './SliceEvents/definitions';
+import type { StoreSliceEventPayloads } from './SliceEvents/types';
 
 /**
  * Slices automaticaly generate event keys based on their name and event names.

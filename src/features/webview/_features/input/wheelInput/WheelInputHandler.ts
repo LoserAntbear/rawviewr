@@ -1,8 +1,9 @@
-import { WebviewMessage } from '@features/webview/webviewHost';
+import type { WebviewMessage } from '@features/webview/webviewHost';
 import { RIV_COMMAND_EVENT_ID } from '@webview/commands/definitions';
-import { resolveWheelZoomDirection } from './utils';
-import { ZoomDirection } from '@features/zoom/types';
+import type { ZoomDirection } from '@features/zoom/types';
 import { withThrottle } from '@utils/throttle';
+
+import { resolveWheelZoomDirection } from './utils';
 
 const WHEEL_ZOOM_INTERVAL_MS = 100 as const;
 

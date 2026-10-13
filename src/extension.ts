@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-
 import { DisposableRegistry } from '@features/disposable/DisposableRegistry';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import { RawEditorProvider } from '@features/editor/RawEditorProvider';
@@ -39,7 +38,13 @@ export function activate(context: vscode.ExtensionContext): void {
     settingsController,
     sourcesDecoder,
   );
-  const rawEditorProvider = new RawEditorProvider(context, viewerRegistry, settingsController, sourcesDecoder, windowController);
+  const rawEditorProvider = new RawEditorProvider(
+    context,
+    viewerRegistry,
+    settingsController,
+    sourcesDecoder,
+    windowController,
+  );
 
   AppContextProvider.create({
     workspaceConfig: configController,

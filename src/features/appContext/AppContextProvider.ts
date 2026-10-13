@@ -1,5 +1,6 @@
-import { AppContext } from './types';
 import { DisposableStore } from '@features/disposable/DisposableStore';
+
+import type { AppContext } from './types';
 
 export class AppContextProvider extends DisposableStore {
   public static get context(): AppContext {

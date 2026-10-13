@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { ViewerBackground } from '@features/viewer/definitions';
 
 import { GALLERY_STYLE_PROPERTIES } from './definitions';
-
 import { RIVGalleryView } from './RIVGalleryView';
 import type { GalleryState } from './state/types';
 
@@ -49,7 +47,7 @@ describe('RIVGalleryView', () => {
     view.render(state(['a', 'b', 'c']));
 
     expect(ids()).toEqual(['a', 'b', 'c']);
-    expect(list.children[0].firstElementChild?.localName).toBe('riv-image-component');
+    expect(list.children[0]!.firstElementChild?.localName).toBe('riv-image-component');
     expect(list.dataset.viewMode).toBe('gallery');
   });
 

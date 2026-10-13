@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
 /** Merge the `(uri, uris)` pair the explorer sends, keeping order, dropping repeats. */
 export function dedupeUris(uris: readonly vscode.Uri[]): vscode.Uri[] {

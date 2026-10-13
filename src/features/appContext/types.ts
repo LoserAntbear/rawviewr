@@ -1,5 +1,5 @@
-import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
+import type { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 
-export interface AppContext {
+export type AppContext = {
   readonly workspaceConfig: VSCodeWorkspaceConfigurationController;
 }

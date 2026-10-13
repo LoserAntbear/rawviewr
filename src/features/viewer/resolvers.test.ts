@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { window } from 'vscode';
-
 import { IntentKind } from '@definitions/intent';
 import type { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 

@@ -1,10 +1,11 @@
 import { isHTMLElement } from '@features/webview/utils/html';
 
+import type { ToolbarSyncPayload } from '../state/types';
+
 import { TOOLBAR_CONTROLS } from './controls';
 import { CONTROL_INTERACTIONS } from './definitions';
 import { isValueControl } from './guards';
 import type { ControlInteraction, SelectTagDescriptor, ToolbarChoiceGroup, ToolbarControl } from './types';
-import type { ToolbarSyncPayload } from '../state/types';
 
 export const CONTROLS_BY_ID: ReadonlyMap<string, ToolbarControl> = new Map(
   TOOLBAR_CONTROLS.map((control) => [control.id, control]),

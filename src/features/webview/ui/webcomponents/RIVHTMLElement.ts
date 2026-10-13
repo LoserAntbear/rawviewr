@@ -1,8 +1,10 @@
+import { WebviewDisposableUtils } from '@features/webview/disposable';
+
 import type { WebviewMessage } from '../../webviewHost/types';
 import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
-import { WebviewDisposableUtils } from '@features/webview/disposable';
 import { StyleSheets } from '../styleSheets';
+
 import { RIVView } from './RIVView';
 import type { ReadonlyViewState } from './RIVViewState';
 

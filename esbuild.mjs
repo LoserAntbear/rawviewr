@@ -1,7 +1,9 @@
-import * as esbuild from 'esbuild';
-import { readTsconfigAliases } from './tsconfig-aliases.mjs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import * as esbuild from 'esbuild';
+
+import { readTsconfigAliases } from './tsconfig-aliases.mjs';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 
@@ -28,7 +30,7 @@ const esbuildProblemMatcherPlugin = {
       });
       console.log('[watch] build finished');
     });
-  }
+  },
 };
 // endregion
 
@@ -46,8 +48,8 @@ const sharedConfig = {
   loader: { '.html': 'text', '.css': 'text' },
   plugins: [
     /* esbuildProblemMatcherPlugin should go to the end of plugins array */
-    esbuildProblemMatcherPlugin
-  ]
+    esbuildProblemMatcherPlugin,
+  ],
 };
 
 /** @type {import('esbuild').BuildOptions[]} */

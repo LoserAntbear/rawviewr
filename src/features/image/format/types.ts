@@ -1,12 +1,13 @@
-import { Endian } from '@definitions/bits';
-import { FormatGroup, RowChannel, PAD_CHANNEL } from './definitions';
+import type { Endian } from '@definitions/bits';
 
-export interface RowOptions {
+import type { FormatGroup, RowChannel, PAD_CHANNEL } from './definitions';
+
+export type RowOptions = {
   endian: Endian;
   bitOrderMsb: boolean; /** --- For sub-byte formats: does the first pixel of a row sit in the high bits? */
 }
 
-export interface PixelFormat {
+export type PixelFormat = {
   bpp: Bits; /** --- Bits per pixel. BEWARE: May be < 8 for the sub-byte formats. */
   id: string;
   label: string;
@@ -28,7 +29,7 @@ export type RowDecoder = (
   options: RowOptions,
 ) => Uint8ClampedArray;
 
-export interface FormatGroupEntry {
+export type FormatGroupEntry = {
   group: FormatGroup;
   formats: readonly PixelFormat[];
 }
@@ -47,7 +48,7 @@ export type PackedWordBits = Exclude<FullBits, 24>;
 /** Luminance sample widths. Wider than 16 would have no extra bits to show. */
 export type GrayBits = Extract<FullBits, 8 | 16>;
 
-export interface Field {
+export type Field = {
   bits: number;
   shift: number; /** --- Shift of the field's least-significant bit within the packed word. */
 }

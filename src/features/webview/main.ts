@@ -1,6 +1,9 @@
-import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { FieldFocusTracker } from '@webview/_features/fieldFocus/FieldFocusTracker';
+import { PixelFormatPresets } from '@features/image/format/presets';
+import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+
+import { WebviewCommandDispatcher } from './commands/webviewCommandDispatcher';
 import { WebviewSession } from './session/WebviewSession';
 import { WebviewSessionCommunicationBridge } from './session/WebviewSessionCommunicationBridge';
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';
@@ -10,8 +13,6 @@ import { createWebviewStore } from './store/createWebviewStore';
 import { WebviewContextProvider } from './webviewContext/WebviewContextProvider';
 import { StyleSheets } from './ui/styleSheets';
 import shellStyles from './ui/shell.css';
-import { PixelFormatPresets } from '@features/image/format/presets';
-import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 
 // Order matters: RIVAppComponent mounts the others from its template during its own
 // constructor, so they must already be defined by the time it upgrades.

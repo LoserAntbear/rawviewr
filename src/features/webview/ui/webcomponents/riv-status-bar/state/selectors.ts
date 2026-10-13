@@ -6,7 +6,7 @@ import { resolveDisplayedItem } from './resolvers';
 
 export function selectStatusBarContext(
   state: AppStoreState,
-  formatRegistry: FormatRegistry
+  formatRegistry: FormatRegistry,
 ): StatusBarStateContext {
   return {
     formatRegistry,

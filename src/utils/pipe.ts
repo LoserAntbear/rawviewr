@@ -7,7 +7,7 @@ export function pipe<A, B, C, D, E>(
   input: A, s1: (a: NonNullable<A>) => B, s2: (b: NonNullable<B>) => C,
   s3: (c: NonNullable<C>) => D, s4: (d: NonNullable<D>) => E,
 ): void;
-export function pipe(input: unknown, ...steps: ((v: any) => unknown)[]): void {
+export function pipe(input: unknown, ...steps: ((v: unknown) => unknown)[]): void {
   let value: unknown = input;
 
   for (const step of steps) {
