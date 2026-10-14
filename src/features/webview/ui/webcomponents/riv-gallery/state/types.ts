@@ -7,6 +7,7 @@ export type GalleryState = {
   readonly tileSize: number;
   readonly mode: GalleryViewMode;
   readonly selectedId: string | null;
+  readonly imageIds: readonly string[];
   readonly background: ViewerBackground;
   readonly visibleIds: readonly string[];
 };
