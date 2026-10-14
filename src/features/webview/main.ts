@@ -1,7 +1,6 @@
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
-
 import { FieldFocusTracker } from '@webview/_features/fieldFocus/FieldFocusTracker';
 
 import { WEBVIEW_COMMAND_RESOLVERS } from './commands/resolvers';

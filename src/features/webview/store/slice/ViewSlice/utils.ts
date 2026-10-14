@@ -1,5 +1,4 @@
 import type { ZoomDirection } from '@features/zoom';
-
 import { byKey, type Strategies } from '@utils/strategy';
 
 import { ZOOM } from './definitions';

@@ -1,5 +1,4 @@
 import { toPreservedOptions } from '@features/settings/snapshot';
-
 import { isPresent } from '@guards/valueGuards';
 
 import type { MessageForwardMap } from '../../messaging';

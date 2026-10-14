@@ -1,5 +1,4 @@
 import { Endian } from '@definitions/bits';
-
 import { PixelFormatPresets } from '@features/image/format/presets';
 
 import type { DecodeOptions } from './types';

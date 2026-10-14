@@ -1,5 +1,4 @@
 import { Endian } from '@definitions/bits';
-
 import { AlphaMode, HeaderPreset } from '@features/image/imageDecoder/definitions';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { ViewerBackground } from '@features/viewer/definitions';

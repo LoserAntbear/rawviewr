@@ -1,11 +1,9 @@
 import type { Vector2 } from '@definitions/geometry';
-
 import { BITS_PER_BYTE } from '@features/image/format/definitions';
 import type { Bits, RowOptions } from '@features/image/format/types';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import type { SourceLocation } from '@features/image/sourceReader/types';
-
 import { clamp } from '@utils/math';
 
 export class PixelLocator {

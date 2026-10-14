@@ -2,9 +2,7 @@ import type { BusEvent } from '@features/webview/messaging';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { ImagesState } from '@features/webview/store/slice/ImagesSlice';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
-
 import { attemptDetached } from '@utils/attempt';
-
 import { ProbeInputHandler } from '@webview/_features/input/pointerInput/ProbeInputHandler';
 
 import { RIVTags } from '../definitions';

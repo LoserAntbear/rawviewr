@@ -1,5 +1,4 @@
 import type { Vector2 } from '@definitions/geometry';
-
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import type { DecodedImage, DecodeOptions } from '@features/image/imageDecoder/types';
 import { PixelLocator } from '@features/image/pixelLocator/PixelLocator';

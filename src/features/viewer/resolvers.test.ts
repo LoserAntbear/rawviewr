@@ -3,7 +3,6 @@ import { window } from 'vscode';
 import { describe, expect, it, vi } from 'vitest';
 
 import { IntentKind } from '@definitions/intent';
-
 import type { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
 import type { ViewerRegistry } from './registry/viewerRegistry';

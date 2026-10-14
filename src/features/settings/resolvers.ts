@@ -1,5 +1,4 @@
 import { IntentKind } from '@definitions/intent';
-
 import type { IntentResolverMap } from '@features/intent/types';
 
 import type { SettingsController } from './SettingsController';

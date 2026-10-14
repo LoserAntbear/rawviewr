@@ -1,5 +1,4 @@
 import { Endian } from '@definitions/bits';
-
 import { readWord } from '@utils/bits';
 
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../../definitions';

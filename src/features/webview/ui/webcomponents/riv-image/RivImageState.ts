@@ -1,5 +1,4 @@
 import { type ImageItem, isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
-
 import { byKind, type KindStrategies } from '@utils/strategy';
 import { StringFormat } from '@utils/string/formatters';
 

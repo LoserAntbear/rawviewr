@@ -1,7 +1,6 @@
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { isReadyImageItem } from '@features/webview/store/slice/ImagesSlice';
-
 import { StringFormat } from '@utils/string/formatters';
 
 import type { StatusBarStateContext } from '../../../state/types';

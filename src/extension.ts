@@ -14,7 +14,6 @@ import { VSCodeWorkspaceConfigurationController } from '@features/settings/VSCod
 import { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
 import { VIEW_INTENT_RESOLVERS, VIEWER_INTENT_RESOLVERS } from '@features/viewer/resolvers';
 import { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
-
 import { attemptDetached } from '@utils/attempt';
 
 export function activate(context: vscode.ExtensionContext): void {

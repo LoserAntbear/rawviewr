@@ -1,5 +1,4 @@
 import { FormatDecodersLibrary } from '@features/image/format/rowDecoders';
-
 import { shiftRowIndices } from '@utils/array';
 
 import { PixelLocator } from '../pixelLocator/PixelLocator';

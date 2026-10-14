@@ -1,5 +1,4 @@
 import type { Vector2 } from '@definitions/geometry';
-
 import { CanvasUtils } from '@utils/canvas';
 import { VectorUtils } from '@utils/vector/vector';
 

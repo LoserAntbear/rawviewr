@@ -1,5 +1,4 @@
 import type { Endian } from '@definitions/bits';
-
 import type { PixelFormat } from '@features/image/format/types';
 
 import type { AlphaMode, HeaderPreset } from './definitions';

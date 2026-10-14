@@ -1,12 +1,10 @@
 
+import type { NumericRange } from '@app-types/math';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { AlphaMode } from '@features/image/imageDecoder/definitions';
 import { ViewerBackground } from '@features/viewer/definitions';
-
 import { asEnumMember } from '@utils/enum';
 import { clamp } from '@utils/math';
-
-import type { NumericRange } from '@app-types/math';
 
 import {
   BYTE_OFFSET_LIMITS,

@@ -2,7 +2,6 @@ import type * as vscode from 'vscode';
 
 import type { Endian } from '@definitions/bits';
 import type { ExportFormat } from '@definitions/exportFormats';
-
 import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
 import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import type { ToolbarOptionsSnapshot } from '@features/settings/snapshot';

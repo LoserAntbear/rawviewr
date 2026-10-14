@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 import { ViewType } from '@definitions/viewTypes';
-
 import type { RawEditorProvider } from '@features/editor/RawEditorProvider';
 import { COMMANDS } from '@features/extension/commands/table';
 import type { IntentCommand } from '@features/extension/commands/types';

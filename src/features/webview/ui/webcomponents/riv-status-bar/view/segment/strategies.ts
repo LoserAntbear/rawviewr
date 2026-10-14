@@ -1,5 +1,4 @@
 import { StoreSliceId } from '@features/webview/store/definitions';
-
 import { byKey, byKind } from '@utils/strategy';
 
 import type { StatusBarStateContext } from '../../state/types';

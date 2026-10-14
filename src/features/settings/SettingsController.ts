@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 import { Endian } from '@definitions/bits';
-
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
@@ -9,7 +8,6 @@ import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@features/viewer/definitions';
 import type { ViewerBackground } from '@features/viewer/definitions';
-
 import { attempt } from '@utils/attempt';
 
 import type { ToolbarOptionsSnapshot } from './snapshot';

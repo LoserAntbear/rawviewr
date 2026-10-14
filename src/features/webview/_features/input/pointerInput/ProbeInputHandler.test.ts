@@ -4,7 +4,6 @@ import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
-
 import { createWebviewStore } from '@webview/store/createWebviewStore';
 import { StoreSliceId } from '@webview/store/definitions';
 import type { ImageItem } from '@webview/store/slice/ImagesSlice';

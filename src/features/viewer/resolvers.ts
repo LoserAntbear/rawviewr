@@ -1,5 +1,4 @@
 import { IntentKind } from '@definitions/intent';
-
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { IntentResolverMap } from '@features/intent/types';
 import { findGalleryTargets, folderTitle, selectionTitle } from '@features/viewer/gallery/galleryTargets';

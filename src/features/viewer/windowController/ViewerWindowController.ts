@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { ViewType } from '@definitions/viewTypes';
 import { VSCodeCommands } from '@definitions/vscode';
-
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { SettingsController } from '@features/settings/SettingsController';
