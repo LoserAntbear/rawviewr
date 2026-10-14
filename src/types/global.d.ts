@@ -11,6 +11,15 @@ declare module '*.css' {
 declare type Strip<T extends string, P extends string> = T extends `${P}.${infer R}` ? R : never;
 
 /**
+ * IntersectionObserver v2. Chromium ships `delay` and `trackVisibility`;
+ * TypeScript's DOM does not yet include these properties. Extending.
+ */
+interface IntersectionObserverInit {
+  delay?: number;
+  trackVisibility?: boolean;
+}
+
+/**
  * VSCode-provided API for webviews, see https://code.visualstudio.com/api/extension-guides/webview#passing-messages-from-a-webview-to-an-extension
  */
 declare function acquireVsCodeApi<
