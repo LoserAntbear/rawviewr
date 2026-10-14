@@ -12,31 +12,22 @@ export class RIVGalleryView extends RIVView {
     return this.root;
   }
 
+  private get listRef(): HTMLUListElement {
+    return this.ref<HTMLUListElement>('gallery') ?? (() => { throw new Error('riv-gallery: template is missing #gallery'); })();
+  }
+
   // Keyed by item id, to avoid rebuilds on re-render
   private readonly entries = new Map<string, HTMLLIElement>();
 
   public render(state: GalleryState): void {
-    const list = this.ref<HTMLUListElement>('gallery');
-
-    if (!list) {
-      throw new Error('riv-gallery: template is missing #gallery');
-    }
+    const list = this.listRef;
 
     list.dataset.viewMode = state.mode;
 
     // Every property the tiles inherit, written from one declared set rather than by hand.
     applyStyleProperties(list.style, GALLERY_STYLE_PROPERTIES, state);
 
-    this.removeStaleEntries(state.visibleIds);
-
-    state.visibleIds.forEach((id, index) => {
-      const entry = this.entries.get(id) ?? this.addEntry(id);
-
-      entry.classList.toggle('selected', id === state.selectedId);
-
-      // A no-op when the node already sits at that index.
-      list.insertBefore(entry, list.children[index] ?? null);
-    });
+    state.imageIds.forEach((id, index) => this.renderEntry(id, index, state.selectedId));
   }
 
   public entryIdFor(target: EventTarget | null): string | undefined {
@@ -48,24 +39,20 @@ export class RIVGalleryView extends RIVView {
     return target.closest('li')?.dataset.itemId;
   }
 
+  private renderEntry(id: string, index: number, selectedId: string | null): void {
+    const entry = this.entries.get(id) ?? this.addEntry(id);
+
+    entry.classList.toggle('selected', id === selectedId);
+
+    // A no-op when the node already sits at that index.
+    this.listRef.insertBefore(entry, this.listRef.children[index] ?? null);
+  }
+
   private addEntry(id: string): HTMLLIElement {
     const entry = ElementBuilder.buildEntry(id);
 
     this.entries.set(id, entry);
 
     return entry;
-  }
-
-  private removeStaleEntries(visible: readonly string[]): void {
-    const keep = new Set(visible);
-
-    for (const [id, entry] of this.entries) {
-      if (keep.has(id)) {
-        continue;
-      }
-
-      entry.remove();
-      this.entries.delete(id);
-    }
   }
 }
