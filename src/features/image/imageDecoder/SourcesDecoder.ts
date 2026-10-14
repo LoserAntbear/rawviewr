@@ -4,7 +4,6 @@ import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { FileSource } from '@features/webview/types';
-
 import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
 
 import type { Geometry } from './imagePreparation/types';
@@ -75,6 +74,10 @@ export class SourcesDecoder {
         ...image,
       };
     } catch (error) {
+      if (abortSignal?.aborted) {
+        throw error;
+      }
+
       InfoMessageController.showError(`Failed to decode image from source: ${error}`);
 
       return {
