@@ -127,7 +127,6 @@ export default defineConfig({
     '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
     '@typescript-eslint/no-import-type-side-effects': 'error',
 
-    '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     '@typescript-eslint/explicit-module-boundary-types': 'error',
     '@typescript-eslint/explicit-member-accessibility': ['error', {
       accessibility: 'explicit',
