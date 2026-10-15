@@ -43,6 +43,10 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
     this.put(decoded.map((item) => [item.id, toImageItem(item)] as [string, ImageItem]));
   }
 
+  public markPending(ids: readonly string[]): void {
+    this.put(ids.map((id) => [id, { id, kind: 'pending' }] as [string, ImageItem]));
+  }
+
   public clearAllExcept(ids: readonly string[]): void {
     const idsToKeep = new Set(ids);
     const currentState = this.getState();
