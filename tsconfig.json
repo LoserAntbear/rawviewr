@@ -10,6 +10,7 @@
     "paths": {
       "@common/*": ["src/common/*"],
       "@definitions/*": ["src/definitions/*"],
+      "@extensions/*": ["src/extensions/*"],
       "@features/*": ["src/features/*"],
       "@guards/*": ["src/guards/*"],
       "@utils/*": ["src/utils/*"],
