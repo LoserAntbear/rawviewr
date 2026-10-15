@@ -17,6 +17,5 @@ export function resolveGalleryState(state: AppStoreState): GalleryState {
     background,
     selectedId,
     imageIds: STORE_SELECTORS.imageIds(state),
-    visibleIds: STORE_SELECTORS.visibleIds(state),
   };
 }

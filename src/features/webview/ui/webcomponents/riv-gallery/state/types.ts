@@ -9,5 +9,4 @@ export type GalleryState = {
   readonly selectedId: string | null;
   readonly imageIds: readonly string[];
   readonly background: ViewerBackground;
-  readonly visibleIds: readonly string[];
 };
