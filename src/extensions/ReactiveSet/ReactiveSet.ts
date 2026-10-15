@@ -1,9 +1,9 @@
+import type { ReactiveSetListener } from './types';
+
 type InferActionResult<TAction, TResult> = TAction extends 'add' ? TResult : TAction extends 'delete' ? boolean : never;
 
-type Listener<T> = (values: T[]) => void;
-
 export class ReactiveSet<T> extends Set<T> {
-  private readonly listeners: Set<Listener<T>> = new Set();
+  private readonly listeners: Set<ReactiveSetListener<T>> = new Set();
 
   public add(value: T): this;
   public add(value: T[]): this;
@@ -44,11 +44,11 @@ export class ReactiveSet<T> extends Set<T> {
     this.onChange();
   }
 
-  public subscribe(listener: Listener<T>): void {
+  public subscribe(listener: ReactiveSetListener<T>): void {
     this.listeners.add(listener);
   }
 
-  public unsubscribe(listener: Listener<T>): void {
+  public unsubscribe(listener: ReactiveSetListener<T>): void {
     this.listeners.delete(listener);
   }
 
