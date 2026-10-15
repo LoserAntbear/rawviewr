@@ -1,3 +1,4 @@
+import { ListVirtualizationObserver } from '@features/webview/_features/listVirtualization/ListVirtualizationObserver';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
 
@@ -14,17 +15,21 @@ export class RIVGallery extends RIVHTMLElement {
 
   protected readonly view = new RIVGalleryView(this.mount(template, styles));
 
+  private readonly virtualizationObserver = new ListVirtualizationObserver(
+    this,
+    this.handleIntersection.bind(this),
+  )
+
   public connectedCallback(): void {
     const { store } = WebviewContextProvider.context;
 
-    // Membership and order come from items; mode and selection from view. `visibleIds`
-    // is derived from both, so both have to re-render it.
     this.observe(store.bus, 'sources:change', this.render.bind(this));
     this.observe(store.bus, 'view:change', this.render.bind(this));
     this.observe(store.bus, 'config:change', this.render.bind(this));
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));
     this.observe(this.view.rootRef, 'dblclick', this.handleDoubleClick.bind(this));
+    this.disposableStore.add(this.virtualizationObserver);
 
     // Items may already be in the store by now — paint from current state, don't just listen.
     this.render();
@@ -46,7 +51,22 @@ export class RIVGallery extends RIVHTMLElement {
     }
   }
 
+  private handleIntersection(entries: string[]): void {
+    WebviewContextProvider.context.store.get(StoreSliceId.Viewport).setIds(entries);
+  }
+
   private render(): void {
     this.view.render(resolveGalleryState(WebviewContextProvider.context.store.state));
+
+    /**
+     * Oh yiss, we really do that: listen to all the new entries and update the virtualization observer accordingly
+     * On re-render.
+     *
+     * Basically it's load-bearing ONLY on `config:change` re-render
+     * Since it kinda re-mounts all the gallery for now
+     *
+     * TODO: Optimise `config:change` handling
+     */
+    this.virtualizationObserver.observe(this.view.mountEntries);
   }
 }
