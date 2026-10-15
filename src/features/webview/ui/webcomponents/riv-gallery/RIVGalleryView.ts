@@ -12,12 +12,20 @@ export class RIVGalleryView extends RIVView {
     return this.root;
   }
 
+  public get mountEntriesIds(): string[] {
+    return Array.from(this.mountEntriesMap.keys());
+  }
+
+  public get mountEntries(): HTMLLIElement[] {
+    return Array.from(this.mountEntriesMap.values());
+  }
+
   private get listRef(): HTMLUListElement {
     return this.ref<HTMLUListElement>('gallery') ?? (() => { throw new Error('riv-gallery: template is missing #gallery'); })();
   }
 
   // Keyed by item id, to avoid rebuilds on re-render
-  private readonly entries = new Map<string, HTMLLIElement>();
+  private readonly mountEntriesMap = new Map<string, HTMLLIElement>();
 
   public render(state: GalleryState): void {
     const list = this.listRef;
@@ -40,7 +48,7 @@ export class RIVGalleryView extends RIVView {
   }
 
   private renderEntry(id: string, index: number, selectedId: string | null): void {
-    const entry = this.entries.get(id) ?? this.addEntry(id);
+    const entry = this.mountEntriesMap.get(id) ?? this.mountEntry(id);
 
     entry.classList.toggle('selected', id === selectedId);
 
@@ -48,10 +56,10 @@ export class RIVGalleryView extends RIVView {
     this.listRef.insertBefore(entry, this.listRef.children[index] ?? null);
   }
 
-  private addEntry(id: string): HTMLLIElement {
+  private mountEntry(id: string): HTMLLIElement {
     const entry = ElementBuilder.buildEntry(id);
 
-    this.entries.set(id, entry);
+    this.mountEntriesMap.set(id, entry);
 
     return entry;
   }

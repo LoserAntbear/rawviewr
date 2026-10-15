@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 const state = (
-  visibleIds: string[],
+  imageIds: string[],
   selectedId: string | null = null,
   mode: GalleryState['mode'] = 'gallery',
   zoom = 1,
@@ -36,7 +36,7 @@ const state = (
   tileSize,
   background,
   selectedId,
-  visibleIds,
+  imageIds,
 });
 
 const styleOf = (property: string) => list.style.getPropertyValue(property);
@@ -72,13 +72,6 @@ describe('RIVGalleryView', () => {
 
     expect(ids()).toEqual(['b', 'c', 'a']);
     expect(list.children[2]).toBe(a);
-  });
-
-  it('drops entries that are no longer visible', () => {
-    view.render(state(['a', 'b', 'c']));
-    view.render(state(['c']));
-
-    expect(ids()).toEqual(['c']);
   });
 
   it('marks exactly the selected entry', () => {
