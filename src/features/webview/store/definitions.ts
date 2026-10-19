@@ -4,5 +4,6 @@ export enum StoreSliceId {
   Config = 'config',
   Images = 'images',
   Sources = 'sources',
+  VirtualList = 'virtualList',
   DecodeOptions = 'decodeOptions',
 }

@@ -10,6 +10,7 @@ import type { ImagesSlice } from './slice/ImagesSlice';
 import type { ProbeSlice } from './slice/ProbeSlice';
 import type { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import type { ViewSlice } from './slice/ViewSlice';
+import type { VirtualListSlice } from './slice/VirtualListSlice';
 
 type InferStoreSlicePayloads<TSlice> = TSlice extends { attach(bus: TypedEventTarget<infer TPayloads>): void }
   ? TPayloads
@@ -30,6 +31,7 @@ export type StoreSlices = {
   readonly [StoreSliceId.Config]: ConfigSlice;
   readonly [StoreSliceId.Images]: ImagesSlice;
   readonly [StoreSliceId.Sources]: SourcesSlice;
+  readonly [StoreSliceId.VirtualList]: VirtualListSlice;
   readonly [StoreSliceId.DecodeOptions]: DecodeOptionsSlice;
 };
 export type StoreEventMap = UnionToIntersection<InferStoreSlicePayloads<StoreSlices[keyof StoreSlices]>>;

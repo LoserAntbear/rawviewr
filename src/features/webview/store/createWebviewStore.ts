@@ -11,6 +11,7 @@ import { ImagesSlice } from './slice/ImagesSlice/ImagesSlice';
 import { ProbeSlice } from './slice/ProbeSlice/ProbeSlice';
 import { SourcesSlice } from './slice/SourcesSlice/SourcesSlice';
 import { ViewSlice } from './slice/ViewSlice/ViewSlice';
+import { VirtualListSlice } from './slice/VirtualListSlice/VirtualListSlice';
 import type { AppStore, StoreReaction, StoreSlices } from './types';
 
 type CreateWebviewStoreResult = {
@@ -26,6 +27,7 @@ function createDefaultSlices(
     [StoreSliceId.Config]: new ConfigSlice(),
     [StoreSliceId.Images]: new ImagesSlice(),
     [StoreSliceId.Sources]: new SourcesSlice(),
+    [StoreSliceId.VirtualList]: new VirtualListSlice(),
     [StoreSliceId.DecodeOptions]: new DecodeOptionsSlice(),
   };
 }
