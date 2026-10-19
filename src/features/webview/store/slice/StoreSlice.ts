@@ -7,6 +7,7 @@ import type {
 
 type EventNames = StoreSliceEvent;
 
+// TODO: Extend with custom event payloads for specific slices.
 export abstract class StoreSlice<
   TName extends string,
   TState,
