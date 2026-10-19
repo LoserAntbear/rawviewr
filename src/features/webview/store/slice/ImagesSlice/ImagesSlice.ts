@@ -43,8 +43,15 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
     this.put(decoded.map((item) => [item.id, toImageItem(item)] as [string, ImageItem]));
   }
 
-  public markPending(ids: readonly string[]): void {
-    this.put(ids.map((id) => [id, { id, kind: 'pending' }] as [string, ImageItem]));
+  public requestDecode(ids: readonly string[]): void {
+    if (ids.length < 1) {
+      return;
+    }
+
+    this.markPending(ids);
+
+    // @ts-expect-error Will be fixed with custom payloads typings introduced slices.
+    this.emit('decode:requested', { ids });
   }
 
   public clearAllExcept(ids: readonly string[]): void {
@@ -68,5 +75,9 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
 
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
     byId.set(id, image);
+  }
+
+  private markPending(ids: readonly string[]): void {
+    this.put(ids.map((id) => [id, { id, kind: 'pending' }] as [string, ImageItem]));
   }
 }
