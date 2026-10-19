@@ -43,7 +43,7 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
     this.put(decoded.map((item) => [item.id, toImageItem(item)] as [string, ImageItem]));
   }
 
-  public requestDecode(ids: readonly string[]): void {
+  public queueDecode(ids: readonly string[]): void {
     if (ids.length < 1) {
       return;
     }
