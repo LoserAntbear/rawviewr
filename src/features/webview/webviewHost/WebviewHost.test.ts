@@ -3,7 +3,6 @@ import { commands, Uri, window, workspace } from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
 import { Endian } from '@definitions/bits';
-
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import { type ToolbarOptionsSnapshot, toPreservedOptions } from '@features/settings/snapshot';
 import type { ViewerConfiguration } from '@features/settings/VSCodeWorkspaceConfig/types';
@@ -225,8 +224,13 @@ describe('WebviewHost: failures end handled', () => {
   });
 });
 
-describe('WebviewHost: a first load needs no request', () => {
-  it('decodes the sources it already holds and sends the images back', async () => {
+/**
+ * A first load used to decode every source it held. For a folder of thousands that was the
+ * whole memory problem, so the host now says what it has and waits to be asked — the view
+ * knows what it can actually see, and this side does not.
+ */
+describe('WebviewHost: a first load decodes nothing', () => {
+  it('hands over the session and the sources, and asks for no pixels', async () => {
     const posted = vi.fn();
     const decodeFromSource = vi.fn(async () => [{ status: 'failure', id: 'a', message: 'stubbed' }]);
     const { receive } = mount(
@@ -242,10 +246,10 @@ describe('WebviewHost: a first load needs no request', () => {
 
     receive({ type: 'app:ready' });
 
-    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('images:decode:ready'));
-    expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS);
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('sources:update'));
+    expect(decodeFromSource).not.toHaveBeenCalled();
     expect(posted.mock.calls.map(([type]) => type))
-      .toEqual(['session:start', 'view:config:update', 'sources:update', 'images:decode:ready']);
+      .toEqual(['session:start', 'view:config:update', 'sources:update']);
   });
 });
 
@@ -365,7 +369,7 @@ describe('WebviewHost: the preserved toolbar', () => {
 
     receive({ type: 'app:ready' });
 
-    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('images:decode:ready'));
+    await vi.waitFor(() => expect(posted).toHaveBeenCalledWith('sources:update'));
     expect(posted).not.toHaveBeenCalledWith('decode:options:preserved');
   });
 
@@ -398,5 +402,134 @@ describe('WebviewHost: the preserved toolbar', () => {
     host.dispose();
 
     expect(pushToolbarSnapshot).toBeUndefined();
+  });
+});
+
+/**
+ * A decode is posted a chunk at a time, and only one run is alive. Both exist for the same
+ * reason: a fling asks for every window it passes through, and all but the last are wasted.
+ */
+describe('WebviewHost: decoding a window', () => {
+  const sources = (count: number): FileSource[] => Array.from(
+    { length: count },
+    (_, index) => ({ id: `s${index}`, name: `${index}.raw`, uri: Uri.file(`/${index}.raw`) as never }),
+  );
+
+  const decoded = (given: FileSource[]) => given.map(({ id }) => ({ status: 'failure', id, message: 'stubbed' }));
+
+  it('posts a chunk at a time rather than one message for everything', async () => {
+    const images = vi.fn();
+    const { receive } = mount(
+      async (message) => {
+        if (message.type === 'images:decode:ready') {
+          images(message.images.length);
+        }
+
+        return true;
+      },
+      undefined,
+      [],
+      { decodeFromSource: async (given: FileSource[]) => decoded(given) },
+    );
+
+    receive({ type: 'sources:request:decode', ids: sources(30), options: DEFAULT_DECODE_OPTIONS });
+
+    // 24 to a chunk, so thirty sources arrive as a full one and a remainder.
+    await vi.waitFor(() => expect(images).toHaveBeenCalledTimes(2));
+    expect(images.mock.calls.map(([size]) => size)).toEqual([24, 6]);
+  });
+
+  it('hands the decoder a signal, which it never used to get', async () => {
+    const signals: (AbortSignal | undefined)[] = [];
+    const { receive } = mount(
+      async () => true,
+      undefined,
+      [],
+      {
+        decodeFromSource: async (given: FileSource[], _options: unknown, signal?: AbortSignal) => {
+          signals.push(signal);
+
+          return decoded(given);
+        },
+      },
+    );
+
+    receive({ type: 'sources:request:decode', ids: sources(1), options: DEFAULT_DECODE_OPTIONS });
+
+    await vi.waitFor(() => expect(signals).toHaveLength(1));
+    expect(signals[0]).toBeInstanceOf(AbortSignal);
+    expect(signals[0]?.aborted).toBe(false);
+  });
+
+  it('abandons the run in flight when a newer window asks', async () => {
+    const seen: AbortSignal[] = [];
+    let release: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    const { receive } = mount(
+      async () => true,
+      undefined,
+      [],
+      {
+        decodeFromSource: async (given: FileSource[], _options: unknown, signal: AbortSignal) => {
+          seen.push(signal);
+          await held;
+
+          return decoded(given);
+        },
+      },
+    );
+
+    receive({ type: 'sources:request:decode', ids: sources(1), options: DEFAULT_DECODE_OPTIONS });
+    await vi.waitFor(() => expect(seen).toHaveLength(1));
+
+    receive({ type: 'sources:request:decode', ids: sources(1), options: DEFAULT_DECODE_OPTIONS });
+    await vi.waitFor(() => expect(seen).toHaveLength(2));
+
+    release?.();
+
+    // The first run's window has moved on; the second is the one still wanted.
+    expect(seen[0]?.aborted).toBe(true);
+    expect(seen[1]?.aborted).toBe(false);
+  });
+
+  /** An abandoned run must not paint: those pixels describe a viewport nobody is looking at. */
+  it('posts nothing from a run that was abandoned', async () => {
+    const images = vi.fn();
+    const { receive } = mount(
+      async (message) => {
+        if (message.type === 'images:decode:ready') {
+          images();
+        }
+
+        return true;
+      },
+      undefined,
+      [],
+      {
+        decodeFromSource: async (given: FileSource[], _options: unknown, signal: AbortSignal) => {
+          // What the real decoder does once a read is superseded: it throws rather than report.
+          await Promise.resolve();
+
+          if (signal.aborted) {
+            throw new Error('aborted');
+          }
+
+          return decoded(given);
+        },
+      },
+    );
+
+    const request = { type: 'sources:request:decode', ids: sources(48), options: DEFAULT_DECODE_OPTIONS } as const;
+
+    receive(request);
+    receive(request);
+
+    await vi.waitFor(() => expect(images).toHaveBeenCalled());
+
+    // Two chunks from the surviving run, and none from the one it replaced.
+    expect(images).toHaveBeenCalledTimes(2);
   });
 });

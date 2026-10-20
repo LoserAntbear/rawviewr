@@ -3,17 +3,16 @@ import * as vscode from 'vscode';
 import type { Endian } from '@definitions/bits';
 import type { ExportFormat } from '@definitions/exportFormats';
 import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
-
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
-import type { DecodeOptions } from '@features/image/imageDecoder/types';
+import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { SourceReader } from '@features/image/sourceReader/SourceReader';
 import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { SettingsController } from '@features/settings/SettingsController';
 import type { ZoomDirection } from '@features/zoom';
-
+import { toChunks } from '@utils/array';
 import { attemptAsync, attemptDetached } from '@utils/attempt';
 import { StringTemplate } from '@utils/string/StringTemplate';
 
@@ -24,8 +23,15 @@ import { getNonce } from '../utils';
 import appShellHtml from './app-shell.html';
 import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
 
+// More or less guessed and impercallly fits
+const DECODE_CHUNK_SIZE = 24 as const;
+
 // TODO: Extract webview posting and handlers into a separate messaging layer
+// TODO: Add decode runner and decompose it from here.
 export class WebviewHost extends DisposableStore {
+  /** The decode in flight, if any. A newer request takes its place and cancels it. */
+  private decodeRun?: AbortController;
+
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly webview: vscode.Webview,
@@ -185,8 +191,6 @@ export class WebviewHost extends DisposableStore {
       await this.postToolbarSnapshot();
       await this.postViewerConfiguration();
       await this.postSources();
-      // Nothing to ask for on a first load: the sources and the options are both here.
-      await this.handleRequestDecode(this.sources, decodeOptions);
     } catch (error) {
       InfoMessageController.handleMessage({
         level: 'error',
@@ -222,12 +226,29 @@ export class WebviewHost extends DisposableStore {
     });
   }
 
+  /**
+   * Due to chunking I can abort pending requests, when they're being asked too frequently.
+   * Thus anything captured mid-decode will be aborted and safely ignored.
+   */
   private async handleRequestDecode(sources: FileSource[], options: DecodeOptions): Promise<void> {
-    const decodedSources = await this.sourcesDecoder.decodeFromSource(sources, options);
+    this.decodeRun?.abort();
 
-    await this.post({
-      type: 'images:decode:ready',
-      images: decodedSources,
-    });
+    const run = new AbortController();
+
+    this.decodeRun = run;
+
+    for (const chunk of toChunks(sources, DECODE_CHUNK_SIZE)) {
+      // Only an abort comes back as a throw; a file that cannot be read is a failure item.
+      const decoded = await attemptAsync<DecodedFileSource[] | null>(
+        () => this.sourcesDecoder.decodeFromSource(chunk, options, run.signal),
+        () => null,
+      );
+
+      if (decoded === null || run.signal.aborted) {
+        break;
+      }
+
+      await this.post({ type: 'images:decode:ready', images: decoded });
+    }
   }
 }
