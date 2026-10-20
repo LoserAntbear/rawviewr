@@ -1,26 +1,75 @@
+import { selectUnique } from '@utils/array';
+import { byKey, type Strategies } from '@utils/strategy';
+
+import type { GalleryViewMode } from '../../ui/webcomponents/types';
 import { StoreSliceId } from '../definitions';
-import type { StoreReaction } from '../types';
+import { STORE_SELECTORS } from '../selectors';
+import type { AppStore, StoreReaction } from '../types';
+
+import { selectUndecodedIds } from './utils';
 
 /**
- * TODO: when virtualisation's added, consider active IDS
+ * For the single view I give all sources ids and simply fetch a single one. Since it's single view mode.
+ *
+ * For the gallery, however, I need to consider all items currently in the viewport and any retainable images.
+ */
+const DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE: Strategies<GalleryViewMode, [AppStore], readonly string[]> = {
+  single: (store) => store.get(StoreSliceId.Sources).ids,
+  gallery: (store) => selectUnique(
+    [...store.get(StoreSliceId.VirtualList).ids] as readonly string[],
+    STORE_SELECTORS.selectRetainableImageIds(store.state),
+  ),
+};
+
+function resolveDecodeTargets(store: AppStore): readonly string[] {
+  return byKey(DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE, store.get(StoreSliceId.View).mode, store);
+}
+
+/**
+ * So. I've brought virtualization exactly for that:
+ * I only request to decode these gallery items, which currently are present
+ * in viewport.
+ *
+ * Reducing the memory consumed and load for decoding.
+ */
+const requestDecodeOnVirtualizationChange: StoreReaction = (store) => ({
+  dispose: store.bus.on('virtualList:change', ({ detail: { next } }) => {
+    const images = store.get(StoreSliceId.Images);
+    const idsToRequest = selectUndecodedIds(next.ids, images.getState().byId);
+
+    images.clearAllExcept(resolveDecodeTargets(store));
+
+    if (idsToRequest.length > 0) {
+      images.queueDecode(idsToRequest);
+    }
+  }),
+});
+
+/**
+ * As user changes decode options, we need to re-decode them with the new settings.
+ *
+ * To avoid re-decoding everything unnecessarily, we only target the currently relevant items.
  */
 const requestDecodeOnOptionsChange: StoreReaction = (store) => ({
   dispose: store.bus.on('decodeOptions:change', () => {
-    const { ids } = store.get(StoreSliceId.Sources);
+    const targets = resolveDecodeTargets(store);
 
-    if (ids.length > 0) {
-      store.bus.emit('images:decode:requested', { ids });
+    store.get(StoreSliceId.Images).clearAllExcept(targets);
+
+    if (targets.length > 0) {
+      store.bus.emit('images:decode:requested', { ids: targets });
     }
   }),
 });
 
 /**
  * To actually display the data I firstly decode the image from source.
- * I DO NOT STORE the source – it's rendered and discarded immediately. No need for that in the store.
- * Imagine 100 items gallery for 4K images.
+ * I DO NOT STORE the source – it's rendered and discarded immediately (by canvas).
+ * No need for that to be keptin the store.
+ * Imagine 300 items gallery of 4K images.
  *
  * Pinned items also display the data of the SOURCE file.
- * Thus we have to request it from source to avoid keeping it in store.
+ * Thus we have to request it from source to avoid keeping he source itself in store.
  */
 const requestSourceFileBytesOnPin: StoreReaction = (store) => ({
   dispose: store.bus.on('probe:change', ({ detail: { prev, next } }) => {
@@ -52,4 +101,5 @@ export const STORE_REACTIONS: readonly StoreReaction[] = [
   requestSourceFileBytesOnPin,
   requestDecodeOnOptionsChange,
   updateSnapshotOnOptionsChange,
+  requestDecodeOnVirtualizationChange,
 ];
