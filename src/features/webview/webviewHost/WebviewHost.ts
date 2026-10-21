@@ -28,6 +28,7 @@ const DECODE_CHUNK_SIZE = 24 as const;
 
 // TODO: Extract webview posting and handlers into a separate messaging layer
 // TODO: Add decode runner and decompose it from here.
+// TODO: Remove sources from host and manage them from store. I already pass them and kip them there.
 export class WebviewHost extends DisposableStore {
   /** The decode in flight, if any. A newer request takes its place and cancels it. */
   private decodeRun?: AbortController;

@@ -1,5 +1,4 @@
 import { ReactiveSet, type ReactiveSetListener } from '@extensions/ReactiveSet';
-
 import type { WebviewDisposable } from '@features/webview/disposable';
 
 export const INTERSECTION_OBSERVER_CONFIG = {

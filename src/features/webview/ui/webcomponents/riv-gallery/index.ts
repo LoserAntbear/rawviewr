@@ -52,7 +52,7 @@ export class RIVGallery extends RIVHTMLElement {
   }
 
   private handleIntersection(entries: string[]): void {
-    WebviewContextProvider.context.store.get(StoreSliceId.Viewport).setIds(entries);
+    WebviewContextProvider.context.store.get(StoreSliceId.VirtualList).setIds(new Set(entries));
   }
 
   private render(): void {
