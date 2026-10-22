@@ -40,7 +40,7 @@ beforeEach(() => {
   store.get(StoreSliceId.Images).clear();
   store.get(StoreSliceId.View).reset();
   store.get(StoreSliceId.View).setMode('gallery');
-  store.get(StoreSliceId.Viewport).reset();
+  store.get(StoreSliceId.VirtualList).reset();
   store.get(StoreSliceId.Sources).upsert([source('a'), source('b'), source('c')]);
 
   gallery = document.createElement(RIVGallery.tagName) as RIVGallery;
@@ -72,7 +72,7 @@ const entryFor = (id: string): Element => {
   return entry;
 };
 
-const onScreen = () => [...store.get(StoreSliceId.Viewport).ids];
+const onScreen = () => [...store.get(StoreSliceId.VirtualList).ids];
 
 describe('riv-gallery: the observed window', () => {
   it('roots the observer at itself, which is the element that scrolls', () => {
