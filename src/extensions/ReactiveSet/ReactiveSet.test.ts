@@ -50,62 +50,61 @@ describe('ReactiveSet', () => {
     expect(set.delete(['absent'])).toBe(false);
   });
 
-  describe('batch', () => {
-    /**
-     * Both halves of a delta are one move. Published separately, the half-applied set goes out
-     * as a state of its own — and downstream that reads as a window nobody was looking at.
-     */
-    it('publishes once, at the end', () => {
+  it('does not tell a listener that has unsubscribed', () => {
+    const set = new ReactiveSet<string>();
+    const listener = vi.fn();
+
+    set.subscribe(listener);
+    set.unsubscribe(listener);
+    set.add('a');
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Both halves of a change are one move. Published separately, the half-applied set goes out
+   * as a state of its own — holding what is on its way out and what is on its way in at once.
+   * Downstream that reads as a window somebody was looking at, and gets decoded.
+   */
+  describe('refine', () => {
+    it('publishes once, with both halves applied', () => {
       const { set, seen } = watched<string>();
 
       set.add(['a', 'b']);
       seen.length = 0;
 
-      set.batch(() => {
-        set.add(['c']);
-        set.delete(['a']);
-      });
+      set.refine(['c'], ['a']);
 
       expect(seen).toEqual([['b', 'c']]);
     });
 
-    it('publishes nothing in the middle, even for a clear', () => {
+    it('never puts out the half-applied set on the way there', () => {
       const { set, seen } = watched<string>();
 
-      set.add(['a']);
+      set.add(['a', 'b']);
       seen.length = 0;
 
-      set.batch(() => {
-        set.clear();
-        set.add(['b']);
-      });
+      set.refine(['c'], ['a']);
 
-      // Never `[]`: an empty window would evict everything before the next line put it back.
-      expect(seen).toEqual([['b']]);
+      // `['a','b','c']` would name a leaving member and an arriving one in the same breath.
+      expect(seen.flat()).not.toContain('a');
     });
 
-    it('goes back to publishing after a batch throws', () => {
+    it('takes an arrival with nothing leaving', () => {
       const { set, seen } = watched<string>();
 
-      expect(() => set.batch(() => {
-        throw new Error('nope');
-      })).toThrow('nope');
-
-      seen.length = 0;
-      set.add('a');
+      set.refine(['a']);
 
       expect(seen).toEqual([['a']]);
     });
 
-    it('does not tell a listener that has unsubscribed', () => {
-      const set = new ReactiveSet<string>();
-      const listener = vi.fn();
+    it('leaves the set alone when neither side names anything', () => {
+      const { set } = watched<string>();
 
-      set.subscribe(listener);
-      set.unsubscribe(listener);
-      set.add('a');
+      set.add(['a']);
+      set.refine([], []);
 
-      expect(listener).not.toHaveBeenCalled();
+      expect([...set]).toEqual(['a']);
     });
   });
 });

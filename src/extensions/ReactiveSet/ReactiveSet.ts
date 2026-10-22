@@ -68,7 +68,7 @@ export class ReactiveSet<T> extends Set<T> {
   }
 
   protected onChange(): void {
-    if (!this.allowsPostChanges) {
+    if (this.allowsPostChanges) {
       for (const listener of this.listeners) {
         listener(Array.from(this));
       }
