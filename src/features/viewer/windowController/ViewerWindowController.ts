@@ -5,7 +5,7 @@ import { VSCodeCommands } from '@definitions/vscode';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { SettingsController } from '@features/settings/SettingsController';
-import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
+import { ContentViewSession, type  ViewerRegistry } from '@features/viewer';
 import { fileSourceForUri } from '@features/vscode/utils/uri';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
@@ -41,8 +41,7 @@ export class ViewerWindowController {
     const viewer = new WebviewHost(
       this.context,
       panel.webview,
-      targets.map(fileSourceForUri),
-      'gallery',
+      new ContentViewSession('gallery', targets.map(fileSourceForUri)),
       this.settingsController,
       this.sourcesDecoder,
       this,
