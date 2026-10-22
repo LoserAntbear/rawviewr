@@ -36,7 +36,12 @@ async function encodeExport(item: ImageItem): Promise<WebviewMessage> {
     throw new ExportError('warn', 'Raw Image Viewer: image is not ready for export.');
   }
 
-  return { type: 'export:png', name: `${item.name}.png`, data: await encodeImageToPng(item.image) };
+  return {
+    type: 'export:png',
+    id: item.id,
+    name: `${item.name}.png`,
+    data: await encodeImageToPng(item.image),
+  };
 }
 
 function resolveExportError(error: unknown): WebviewMessage {
