@@ -1,8 +1,7 @@
+import type { ContentViewMode, ViewerBackground } from '@features/viewer';
 import { DEFAULT_VIEWER_BACKGROUND } from '@features/viewer/definitions';
-import type { ViewerBackground } from '@features/viewer/definitions';
 import type { ZoomDirection } from '@features/zoom';
 
-import type { GalleryViewMode } from '../../../ui/webcomponents/types';
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 
@@ -19,7 +18,7 @@ export class ViewSlice extends StoreSlice<StoreSliceId.View, ViewState> {
     super(StoreSliceId.View, { mode: 'single', zoom: ZOOM.default, background: DEFAULT_VIEWER_BACKGROUND });
   }
 
-  public get mode(): GalleryViewMode {
+  public get mode(): ContentViewMode {
     return this.getState().mode;
   }
 
@@ -35,7 +34,7 @@ export class ViewSlice extends StoreSlice<StoreSliceId.View, ViewState> {
     this.patch({ background });
   }
 
-  public setMode(mode: GalleryViewMode): void {
+  public setMode(mode: ContentViewMode): void {
     this.patch({ mode });
   }
 

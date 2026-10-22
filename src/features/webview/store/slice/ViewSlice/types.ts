@@ -1,9 +1,7 @@
-import type { ViewerBackground } from '@features/viewer/definitions';
-
-import type { GalleryViewMode } from '../../../ui/webcomponents/types';
+import type { ContentViewMode, ViewerBackground } from '@features/viewer';
 
 export type ViewState = {
   readonly zoom: number;
-  readonly mode: GalleryViewMode;
+  readonly mode: ContentViewMode;
   readonly background: ViewerBackground;
 };

@@ -1,7 +1,7 @@
+import type { ContentViewMode } from '@features/viewer';
 import { selectUnique } from '@utils/array';
 import { byKey, type Strategies } from '@utils/strategy';
 
-import type { GalleryViewMode } from '../../ui/webcomponents/types';
 import { StoreSliceId } from '../definitions';
 import { STORE_SELECTORS } from '../selectors';
 import type { AppStore, StoreReaction } from '../types';
@@ -13,7 +13,7 @@ import { selectUndecodedIds } from './utils';
  *
  * For the gallery, however, I need to consider all items currently in the viewport and any retainable images.
  */
-const DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE: Strategies<GalleryViewMode, [AppStore], readonly string[]> = {
+const DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE: Strategies<ContentViewMode, [AppStore], readonly string[]> = {
   single: (store) => store.get(StoreSliceId.Sources).ids,
   gallery: (store) => selectUnique(
     [...store.get(StoreSliceId.VirtualList).ids] as readonly string[],

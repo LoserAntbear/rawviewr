@@ -1,6 +1,6 @@
+import type { ContentViewMode } from '@features/viewer';
 import type { KindStrategies, Strategies } from '@utils/strategy';
 
-import type { GalleryViewMode } from '../../../types';
 import type { DisplayedItem, StatusBarStateContext } from '../../state/types';
 import type { StatusBarEntry } from '../types';
 
@@ -18,7 +18,7 @@ export type StatusSegment = {
   readonly resolve: (context: StatusBarStateContext) => StatusBarEntry | null;
 };
 
-export type ModeStrategies<TResult> = Strategies<GalleryViewMode, [context: StatusBarStateContext], TResult>;
+export type ModeStrategies<TResult> = Strategies<ContentViewMode, [context: StatusBarStateContext], TResult>;
 export type DisplayedItemStrategies<TResult> = KindStrategies<
   DisplayedItem,
   [context: StatusBarStateContext],
