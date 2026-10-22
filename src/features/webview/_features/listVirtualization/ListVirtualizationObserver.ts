@@ -1,11 +1,14 @@
 import { ReactiveSet, type ReactiveSetListener } from '@extensions/ReactiveSet';
 import type { WebviewDisposable } from '@features/webview/disposable';
+import { withDebounce } from '@utils/methods/debounce';
 
 export const INTERSECTION_OBSERVER_CONFIG = {
   delay: 150,
   threshold: 0,
   rootMargin: '100% 0px',
 } as const satisfies Omit<IntersectionObserverInit, 'root'>;
+
+export const CROSSCHECK_DELAY_MS = 80 as const;
 
 export class ListVirtualizationObserver<TElement = string> implements WebviewDisposable {
   public get intersectingIds(): ReadonlySet<TElement> {
@@ -14,6 +17,8 @@ export class ListVirtualizationObserver<TElement = string> implements WebviewDis
 
   private readonly viewportObserver: IntersectionObserver;
   private readonly _intersectingElementsIds = new ReactiveSet<TElement>();
+
+  private disposed = false;
 
   // Like in the ideal world we'd definitely prefer to DI the IntersectionObserver
   // But we can't do that since we can't reassign the handler of it or trigger one manually.
@@ -28,7 +33,7 @@ export class ListVirtualizationObserver<TElement = string> implements WebviewDis
       this.handleIntersection.bind(this),
       { ...config, root: observerRoot },
     );
-    this._intersectingElementsIds.subscribe(listener);
+    this._intersectingElementsIds.subscribe(() => this.handleIntersectionUpdates(listener));
   }
 
   public observe(entries: Element[]): void {
@@ -44,18 +49,21 @@ export class ListVirtualizationObserver<TElement = string> implements WebviewDis
   }
 
   public dispose(): void {
+    this.disposed = true;
     this.viewportObserver.disconnect();
   }
 
   /**
-   * TODO: Add a short debounce on entries validation.
-   *
-   * Why: when the user scrolls fast as hell there will appear delayed calls of intersection handlers
-   * And on fast scroll we just can skip them, since they must be far-far gone at the point we want to call them
-   *
-   * So we kinda take a bit of time to •ensure• that no more delayed intersection calls are coming
-   * And then we can safely update the intersecting elements set.
+   * Have to create a separate handler to properly apply the debounce.
+   * Since we don't want the debounce to fire after the observer is disposed.
    */
+  @withDebounce(CROSSCHECK_DELAY_MS)
+  private handleIntersectionUpdates(listener: ReactiveSetListener<TElement>): void {
+    if (!this.disposed) {
+      listener(Array.from(this._intersectingElementsIds));
+    }
+  }
+
   private handleIntersection(entries: readonly IntersectionObserverEntry[]): void {
     const newValues: TElement[] = [];
     const staleValues: TElement[] = [];
