@@ -57,7 +57,8 @@ export class ListVirtualizationObserver<TElement = string> implements WebviewDis
    * And then we can safely update the intersecting elements set.
    */
   private handleIntersection(entries: readonly IntersectionObserverEntry[]): void {
-    const intersectingIds: TElement[] = [];
+    const newValues: TElement[] = [];
+    const staleValues: TElement[] = [];
 
     for (const { target, isIntersecting } of entries) {
       // Definitely calls for more dynamic ways to associate elements with IDs, but for now we rely on the dataset.
@@ -69,12 +70,9 @@ export class ListVirtualizationObserver<TElement = string> implements WebviewDis
         continue;
       }
 
-      if (isIntersecting) {
-        intersectingIds.push(id);
-      }
+      (isIntersecting ? newValues : staleValues).push(id);
     }
 
-    this._intersectingElementsIds.clear();
-    this._intersectingElementsIds.add(intersectingIds);
+    this._intersectingElementsIds.refine(newValues, staleValues);
   }
 }
