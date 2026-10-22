@@ -193,10 +193,10 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
   },
   {
     id: 'preserveOptions',
-    label: 'Share changes',
+    label: 'Preserve settings',
     group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.TOGGLE_FIELD,
-    tooltip: 'Keep these options for every view, including the ones opened later.',
+    tooltip: 'Keep selected settings for every view, including the ones opened later.',
     toValue: ({ preserveOptions }) => fromToggle(preserveOptions),
     toCommand: (raw) => ({ type: 'decode:options:preserve', preserved: toggled(raw) }),
   },
