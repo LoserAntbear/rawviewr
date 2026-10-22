@@ -2,10 +2,7 @@ import * as vscode from 'vscode';
 
 import { attemptDetached } from '@utils/attempt';
 
-export type InfoMessage =
-  | { level: 'warn' | 'error'; message: string; }
-  | { level: 'info'; message: string; items?: string[] };
-export type InfoMessageLevel = InfoMessage['level'];
+import type { InfoMessage } from './types';
 
 export class InfoMessageController {
   public static handleMessage(message: InfoMessage): void {
