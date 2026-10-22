@@ -1,5 +1,5 @@
 import { probePixel } from '@features/image/pixelProbe/PixelProbe';
-import { withThrottle } from '@utils/throttle';
+import { withThrottle } from '@utils/methods/throttle';
 import { validateCanvas, validateImageItem, validatePointerEvent } from '@webview/guards';
 import { StoreSliceId } from '@webview/store/definitions';
 import type { ProbeSample } from '@webview/store/slice/ProbeSlice';
