@@ -3,10 +3,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import { CROSSCHECK_DELAY_MS } from '@features/webview/_features/listVirtualization/ListVirtualizationObserver';
+import { WebviewSessionCommunicationBridge } from '@features/webview/session/WebviewSessionCommunicationBridge';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { AppStore } from '@features/webview/store/types';
 import { WebviewContextProvider } from '@features/webview/webviewContext/WebviewContextProvider';
+import { STORE_EVENT_FORWARDS } from '@features/webview/webviewHost/messageDispatcher';
 
 import {
   type FakeIntersectionObserver,
@@ -35,6 +38,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  vi.useFakeTimers();
   ({ instances } = installFakeIntersectionObserver());
 
   store.get(StoreSliceId.Images).clear();
@@ -49,8 +53,12 @@ beforeEach(() => {
 
 afterEach(() => {
   document.body.replaceChildren();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
+
+/** The observed window reaches the store only once the scrolling stops. */
+const settle = () => vi.advanceTimersByTime(CROSSCHECK_DELAY_MS);
 
 const observer = (): FakeIntersectionObserver => {
   const [first] = instances;
@@ -103,6 +111,7 @@ describe('riv-gallery: the observed window', () => {
    */
   it('seeds the window from the first pass, keeping only what intersects', () => {
     observer().reportFirstPass([entryFor('a'), entryFor('b')]);
+    settle();
 
     expect(onScreen()).toEqual(['a', 'b']);
   });
@@ -113,14 +122,18 @@ describe('riv-gallery: the observed window', () => {
    */
   it('accumulates across passes rather than replacing what it knows', () => {
     observer().reportFirstPass([entryFor('a')]);
+    settle();
     observer().report([[entryFor('b'), true]]);
+    settle();
 
     expect(onScreen()).toEqual(['a', 'b']);
   });
 
   it('lets go of a tile that has left', () => {
     observer().reportFirstPass([entryFor('a'), entryFor('b')]);
+    settle();
     observer().report([[entryFor('a'), false]]);
+    settle();
 
     expect(onScreen()).toEqual(['b']);
   });
@@ -130,6 +143,7 @@ describe('riv-gallery: the observed window', () => {
 
     store.bus.on('images:decode:requested', (event) => asked(event.detail));
     observer().reportFirstPass([entryFor('b')]);
+    settle();
 
     expect(asked).toHaveBeenCalledWith({ ids: ['b'] });
   });
@@ -150,5 +164,62 @@ describe('riv-gallery: the observed window', () => {
     document.body.replaceChildren();
 
     expect(observer().disconnected).toBe(true);
+  });
+});
+
+/**
+ * The question this answers: a tile that flashes past during a fling is on screen, briefly, and
+ * decoding it is work nobody ever sees. "I don't see it in the window" is not the same as "it
+ * was never asked for" — so these watch the far end of the chain instead, the message that
+ * actually leaves for the host.
+ */
+describe('riv-gallery: what a fling never asks for', () => {
+  const postedDecodeIds = (post: ReturnType<typeof vi.fn>): string[] => post.mock.calls
+    .map(([message]) => message)
+    .filter((message: { type: string }) => message.type === 'sources:request:decode')
+    .flatMap((message: { ids: { id: string }[] }) => message.ids.map(({ id }) => id));
+
+  const wiredBridge = () => {
+    const post = vi.fn();
+
+    new WebviewSessionCommunicationBridge({ postMessage: post } as never)
+      .forwardFrom(store.bus, STORE_EVENT_FORWARDS, { store });
+
+    return post;
+  };
+
+  it('never puts a tile that came and went on the wire', () => {
+    const post = wiredBridge();
+
+    observer().reportFirstPass([entryFor('a'), entryFor('b')]);
+    vi.advanceTimersByTime(10);
+    observer().report([[entryFor('b'), false]]);
+    settle();
+
+    // `b` crossed the margin and was gone before the window settled.
+    expect(postedDecodeIds(post)).toEqual(['a']);
+  });
+
+  it('asks for the tiles a fling actually came to rest on', () => {
+    const post = wiredBridge();
+
+    observer().reportFirstPass([entryFor('a')]);
+    vi.advanceTimersByTime(10);
+    observer().report([[entryFor('a'), false], [entryFor('b'), true]]);
+    vi.advanceTimersByTime(10);
+    observer().report([[entryFor('b'), false], [entryFor('c'), true]]);
+    settle();
+
+    // Two screens were crossed and neither was decoded; only where it stopped.
+    expect(postedDecodeIds(post)).toEqual(['c']);
+  });
+
+  it('sends nothing at all while the scrolling is still going', () => {
+    const post = wiredBridge();
+
+    observer().reportFirstPass([entryFor('a')]);
+    vi.advanceTimersByTime(CROSSCHECK_DELAY_MS - 1);
+
+    expect(post).not.toHaveBeenCalled();
   });
 });
