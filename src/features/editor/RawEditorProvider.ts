@@ -3,8 +3,11 @@ import type * as vscode from 'vscode';
 import { RawDocument } from '@features/document/RawDocument';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
 import type { SettingsController } from '@features/settings/SettingsController';
-import type { ViewerRegistry } from '@features/viewer/registry/viewerRegistry';
-import type { ViewerWindowController } from '@features/viewer/windowController/ViewerWindowController';
+import {
+  ContentViewSession,
+  type ViewerRegistry,
+  type ViewerWindowController,
+} from '@features/viewer';
 import { fileSourceForUri } from '@features/vscode/utils/uri';
 import { WebviewHost } from '@features/webview/webviewHost/WebviewHost';
 
@@ -25,10 +28,7 @@ export class RawEditorProvider implements vscode.CustomReadonlyEditorProvider<Ra
     const viewer = new WebviewHost(
       this.context,
       panel.webview,
-      [
-        fileSourceForUri(document.uri),
-      ],
-      'single',
+      new ContentViewSession('single', [fileSourceForUri(document.uri)]),
       this.settingsController,
       this.sourcesDecoder,
       this.windowController,
