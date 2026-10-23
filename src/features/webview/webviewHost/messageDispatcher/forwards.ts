@@ -4,8 +4,9 @@ import { isPresent } from '@guards/valueGuards';
 import type { MessageForwardMap } from '../../messaging';
 import { StoreSliceId } from '../../store/definitions';
 import type { StoreEventMap } from '../../store/types';
+import type { WebviewMessage } from '../types';
 
-export const STORE_EVENT_FORWARDS: MessageForwardMap<StoreEventMap> = {
+export const STORE_EVENT_FORWARDS: MessageForwardMap<WebviewMessage, StoreEventMap> = {
   'probe:receive:source-bytes:requested': ({ id, location }, { store }) => ({
     id,
     location,

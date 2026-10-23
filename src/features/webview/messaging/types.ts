@@ -1,36 +1,39 @@
 import type { AppStore } from '../store/types';
-import type { WebviewMessage } from '../webviewHost/types';
 
 import type { EventMap } from './TypedEventTarget';
 
-export type MessagePoster = {
-  post(message: WebviewMessage): void;
+export type MessagePoster<TMessage> = {
+  post(message: TMessage): void;
 };
 
-export type ResolverContext = {
-  readonly bridge: MessagePoster;
+export type ResolverContext<TMessage> = {
+  readonly bridge: MessagePoster<TMessage>;
 };
 
-export type WebviewResolverContext = ResolverContext & {
+export type WebviewResolverContext<TMessage> = ResolverContext<TMessage> & {
   readonly store: AppStore;
 };
 
 export type MessageLike = { readonly type: string };
 
-export type MessageForward<TDetail, TContext extends ResolverContext = WebviewResolverContext> = (
+export type MessageForward<
+  TDetail,
+  TMessage,
+  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>> = (
   detail: TDetail,
   context: TContext,
-) => WebviewMessage | null;
+) => TMessage | null;
 export type MessageForwardMap<
+  TMessage,
   TEvents extends EventMap,
-  TContext extends ResolverContext = WebviewResolverContext,
+  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
 > = {
-  readonly [K in keyof TEvents & string]?: MessageForward<TEvents[K], TContext>;
+  readonly [K in keyof TEvents & string]?: MessageForward<TEvents[K], TMessage, TContext>;
 };
 
 export type MessageResolver<
   TMessage extends MessageLike,
-  TContext extends ResolverContext = WebviewResolverContext,
+  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
   K extends TMessage['type'] = TMessage['type'],
 > = (
   message: Extract<TMessage, { type: K }>,
@@ -39,7 +42,7 @@ export type MessageResolver<
 
 export type MessageResolverMap<
   TMessage extends MessageLike,
-  TContext extends ResolverContext = WebviewResolverContext,
+  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
 > = {
   readonly [K in TMessage['type']]?: MessageResolver<TMessage, TContext, K>;
 };

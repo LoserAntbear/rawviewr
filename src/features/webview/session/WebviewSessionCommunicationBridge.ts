@@ -20,6 +20,7 @@ function acquireApiOnce(): VSCodeWebviewApi {
   return acquiredApi;
 }
 
+type WebviewSessionContext<TExtra extends object = object> = ResolverContext<WebviewHostMessage> & TExtra;
 export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewHostMessageEvents> {
   private readonly CHANNEL_ID = 'Host message';
 
@@ -32,10 +33,10 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   }
 
   public subscribeResolvers<TExtra extends object = object>(
-    resolvers: MessageResolverMap<WebviewHostMessage, ResolverContext & TExtra>,
+    resolvers: MessageResolverMap<WebviewHostMessage, WebviewSessionContext<TExtra>>,
     extra: TExtra = {} as TExtra,
   ): WebviewDisposable {
-    const context = { bridge: this, ...extra } as ResolverContext & TExtra;
+    const context = { bridge: this, ...extra } as WebviewSessionContext<TExtra>;
 
     const disposables = Object.entries(resolvers).map(([type, resolve]) => this.on(
       type as WebviewHostMessageType,
@@ -51,10 +52,10 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   // TODO: Uninfy with subscribeResolvers
   public forwardFrom<TEvents extends EventMap, TExtra extends object = object>(
     bus: TypedEventTarget<TEvents>,
-    forwards: MessageForwardMap<TEvents, ResolverContext & TExtra>,
+    forwards: MessageForwardMap<TEvents, WebviewSessionContext<TExtra>>,
     extra: TExtra = {} as TExtra,
   ): WebviewDisposable {
-    const context = { bridge: this, ...extra } as ResolverContext & TExtra;
+    const context = { bridge: this, ...extra } as WebviewSessionContext<TExtra>;
 
     const disposables = Object.entries(forwards).map(([type, forward]) => bus.on(
       type as keyof TEvents & string,
