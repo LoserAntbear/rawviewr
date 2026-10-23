@@ -13,24 +13,26 @@ type ResolverInvariant<TMessage, TContext> =
 export abstract class MessageDispatcher<
   TMessage extends MessageLike,
   TContext extends object = object,
+  TBridge extends MessagePoster<TMessage> = MessagePoster<TMessage>,
+  TDispatch extends MessageLike = TMessage,
 > {
   protected abstract get channelId(): string;
 
-  protected readonly context: ResolverContext<TMessage> & TContext;
+  protected readonly context: ResolverContext<TMessage, TBridge> & TContext;
 
   constructor(
     private readonly resolvers: MessageResolverMap<TMessage, ResolverContext<TMessage> & TContext>,
-    bridge: MessagePoster<TMessage>,
+    bridge: TBridge,
     extra: TContext = {} as TContext,
   ) {
-    this.context = { bridge, ...extra } as ResolverContext<TMessage> & TContext;
+    this.context = { bridge, ...extra } as ResolverContext<TMessage, TBridge> & TContext;
   }
 
   // WARNING: Do not forget to dispose!
   public abstract listen(target?: EventTarget): WebviewDisposable;
 
-  public dispatch(message: TMessage): void {
-    const resolver = this.resolvers[message.type as TMessage['type']] as ResolverInvariant<TMessage, TContext>;
+  public dispatch(message: TDispatch): void {
+    const resolver = this.resolvers[message.type as TDispatch['type']] as ResolverInvariant<TDispatch, TContext>;
 
     attemptDetached(
       () => {
