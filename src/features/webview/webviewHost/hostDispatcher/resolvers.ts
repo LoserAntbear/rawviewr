@@ -13,25 +13,21 @@ type ProbeRequestMessage = {
 };
 
 async function startSession({ bridge, session, settings }: HostResolverContext): Promise<void> {
-  try {
-    const snapshot = settings.toolbarSnapshot;
+  const snapshot = settings.toolbarSnapshot;
 
-    await bridge.post({
-      viewMode: session.viewMode,
-      type: 'session:start',
-      decodeOptions: settings.readSessionDecodeOptions(),
-      background: settings.readDefaultBackground(),
-    });
+  await bridge.post({
+    viewMode: session.viewMode,
+    type: 'session:start',
+    decodeOptions: settings.readSessionDecodeOptions(),
+    background: settings.readDefaultBackground(),
+  });
 
-    if (snapshot) {
-      await bridge.post({ type: 'decode:options:preserved', snapshot });
-    }
-
-    await bridge.post({ type: 'view:config:update', config: settings.readViewerConfiguration() });
-    await bridge.post({ type: 'sources:update', sources: [...session.sources] });
-  } catch (error) {
-    console.error('Failed to start session:', error);
+  if (snapshot) {
+    await bridge.post({ type: 'decode:options:preserved', snapshot });
   }
+
+  await bridge.post({ type: 'view:config:update', config: settings.readViewerConfiguration() });
+  await bridge.post({ type: 'sources:update', sources: [...session.sources] });
 }
 
 async function decode(
@@ -39,41 +35,36 @@ async function decode(
   options: DecodeOptions,
   { bridge, decodes }: HostResolverContext,
 ): Promise<void> {
-  try {
-    await Promise.allSettled(
-      decodes.run(sources, options)
-        .map(async (result) => {
-          const images = await result;
+  // `allSettled` already absorbs a chunk that could not be read — it comes back as a `null`
+  // instalment, which is the one thing there is nothing to post for.
+  await Promise.allSettled(
+    decodes.run(sources, options)
+      .map(async (result) => {
+        const images = await result;
 
-          return images
-            ? await bridge.post({ type: 'images:decode:ready', images })
-            : Promise.resolve();
-        }));
-  } catch (error) {
-    console.error('Failed to decode images:', error);
-  }
+        return images
+          ? await bridge.post({ type: 'images:decode:ready', images })
+          : Promise.resolve();
+      }));
 }
 
 async function readSourceBytes(
   { id, location, endian }: ProbeRequestMessage,
   { bridge, session, reader }: HostResolverContext,
 ): Promise<void> {
-  try {
-    const source = session.sourceFor(id);
+  const source = session.sourceFor(id);
 
-    if (source) {
-      await bridge.post({
-        id,
-        location,
-        type: 'probe:receive:source-bytes',
-        result: await attemptAsync<SourceBytesResult>(
-          async () => ({ kind: 'received', bytes: await reader.readFromFileSource(source, location, endian) }),
-          (error) => ({ kind: 'failed', message: error instanceof Error ? error.message : String(error) }),
-        ),
-      });
-    }
-  } catch (error) {
-    console.error('Failed to read source bytes:', error);
+  if (source) {
+    await bridge.post({
+      id,
+      location,
+      type: 'probe:receive:source-bytes',
+      // A failed read is an answer too: without one the view waits on a reply never coming.
+      result: await attemptAsync<SourceBytesResult>(
+        async () => ({ kind: 'received', bytes: await reader.readFromFileSource(source, location, endian) }),
+        (error) => ({ kind: 'failed', message: error instanceof Error ? error.message : String(error) }),
+      ),
+    });
   }
 }
 
@@ -86,14 +77,10 @@ export const WEBVIEW_MESSAGE_RESOLVERS: HostMessageResolverMap = {
   'export:png': ({ id, name, data }, { session, exporter }) => exporter.savePng(session.sourceFor(id)?.uri, name, data),
   'probe:request': (message, context) => readSourceBytes(message, context),
   'gallery:openItem': async ({ id }, { session, uriOpener }) => {
-    try {
-      const source = session.sourceFor(id);
+    const source = session.sourceFor(id);
 
-      if (source) {
-        await uriOpener?.openSingle([source.uri]);
-      }
-    } catch (error) {
-      console.error('Failed to open item:', error);
+    if (source) {
+      await uriOpener?.openSingle([source.uri]);
     }
   },
   'view:fieldFocus': ({ focused }, { contextKeys }) => contextKeys.set(contextKeys.KEYS.FieldFocus, focused),
