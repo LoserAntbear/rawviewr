@@ -4,4 +4,4 @@ export enum ContextKeys {
   FieldFocus = 'fieldFocus',
 }
 
-export const EXTENSION_CONTEXT_PREFIX = 'rawviewr' as const;
+export const EXTENSION_CONTEXT_PREFIX = 'rawImageViewer' as const;
