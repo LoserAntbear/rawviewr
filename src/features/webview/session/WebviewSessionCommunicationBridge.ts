@@ -21,6 +21,7 @@ function acquireApiOnce(): VSCodeWebviewApi {
 }
 
 type WebviewSessionContext<TExtra extends object = object> = ResolverContext<WebviewHostMessage> & TExtra;
+
 export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewHostMessageEvents> {
   private readonly CHANNEL_ID = 'Host message';
 
@@ -28,7 +29,7 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
     super();
   }
 
-  public postToWebviewHost(message: WebviewMessage): void {
+  public post(message: WebviewMessage): void {
     this.api.postMessage(message);
   }
 
@@ -80,7 +81,7 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   /** A forward that has nothing to say returns `null`, and nothing is sent. */
   private postForwarded(message: WebviewMessage | null): void {
     if (message) {
-      this.postToWebviewHost(message);
+      this.post(message);
     }
   }
 }
