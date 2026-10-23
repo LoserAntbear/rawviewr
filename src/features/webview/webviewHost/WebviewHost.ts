@@ -17,22 +17,66 @@ import type { ContentViewSession } from '../../viewer/contentViewSession';
 
 import { WebviewAppRenderShell } from './appShell';
 import { HostMessageBridge } from './bridge';
-import { HOST_MESSAGE_RESOLVERS, HostMessageDispatcher } from './hostDispatcher';
-import type { WebviewHostMessage } from './types';
+import { HostMessageDispatcher, WEBVIEW_MESSAGE_RESOLVERS } from './hostDispatcher';
 
-/**
- * One view: the page it runs, the wire it talks over, and the table that answers it.
- *
- * Composition and the face the rest of the extension calls — the viewer registry asks a view to
- * zoom or to export, and everything coming the other way is the dispatcher's.
- */
 export class WebviewHost extends DisposableStore {
   constructor(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
+    session: ContentViewSession,
+    settingsController: SettingsController,
+    sourcesDecoder: SourcesDecoder,
+    uriOpener?: UriOpener,
+    exporter: ImageExporter = new ImageExporter(),
+    sourceReader: SourceReader = new SourceReader(),
+    contextKeys: ContextKeyController = new ContextKeyController(),
   ) {
     super();
 
+    const bridge = new HostMessageBridge(webview);
+    const dispatcher = new HostMessageDispatcher(
+      WEBVIEW_MESSAGE_RESOLVERS,
+      bridge,
+      {
+        session,
+        exporter,
+        uriOpener,
+        contextKeys,
+        reader: sourceReader,
+        settings: settingsController,
+        messages: InfoMessageController,
+        decodes: new DecodeRunner(sourcesDecoder),
+      },
+    );
+
+    this.disposables.push(
+      dispatcher.listen(),
+      // If we want to share the options b/w all views, we listen for changes and propagate them.
+      settingsController.onToolbarSnapshotChange((snapshot) => attemptDetached(
+        () => bridge.post({ type: 'decode:options:preserved', snapshot }),
+        (error) => console.error('WebviewHost: failed to push the toolbar snapshot:', error),
+      )),
+      // A setting the user changes while looking at a view should reach that view. So we must subscribe to it
+      settingsController.onViewerConfigurationChange((config) => attemptDetached(
+        () => bridge.post({ type: 'view:config:update', config }),
+        (error) => console.error('WebviewHost: failed to push the viewer configuration:', error),
+      )),
+      { dispose: () => attemptDetached(
+        () => contextKeys.releaseAll(),
+        (error) => console.error('WebviewHost: failed to release the field-focus context:', error),
+      ) },
+    );
+
     new WebviewAppRenderShell(context.extensionUri).render(webview);
+  }
+
+  // FIXME: Scope to the webview message, not global extension command
+  public requestExport(format: ExportFormat): Promise<void> {
+    return this.post({ type: 'export', format });
+  }
+
+  // FIXME: Scope to the webview message, not global extension command
+  public requestZoom(direction: ZoomDirection): Promise<void> {
+    return this.post({ type: 'view:zoom', direction });
   }
 }
