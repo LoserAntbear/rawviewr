@@ -3,7 +3,7 @@ import type { AppStore } from '../store/types';
 import type { EventMap } from './TypedEventTarget';
 
 export type MessagePoster<TMessage> = {
-  post(message: TMessage): void;
+  post(message: TMessage): Promise<void>;
 };
 
 export type ResolverContext<TMessage> = {
@@ -45,4 +45,11 @@ export type MessageResolverMap<
   TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
 > = {
   readonly [K in TMessage['type']]?: MessageResolver<TMessage, TContext, K>;
+};
+export type ForwardMessageResolverMap<
+  TFromMessage extends MessageLike,
+  TToMessage extends MessageLike,
+  TContext extends ResolverContext<TToMessage> = WebviewResolverContext<TToMessage>,
+> = {
+  readonly [K in TFromMessage['type']]?: MessageResolver<TToMessage, TContext, K>;
 };
