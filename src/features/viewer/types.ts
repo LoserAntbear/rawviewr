@@ -15,3 +15,8 @@ export type FileSource = {
 
   detail?: string;
 };
+
+export type UriOpener = {
+  openSingle(targets: readonly vscode.Uri[]): Promise<void>;
+};
+

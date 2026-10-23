@@ -1,5 +1,3 @@
-import type * as vscode from 'vscode';
-
 import type { Endian } from '@definitions/bits';
 import type { ExportFormat } from '@definitions/exportFormats';
 import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
@@ -36,7 +34,3 @@ export type WebviewMessage =
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string }
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
   | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
-
-export type UriOpener = {
-  openSingle(targets: readonly vscode.Uri[]): Promise<void>;
-};
