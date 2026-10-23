@@ -4,11 +4,11 @@ import { MessageDispatcher } from '../../messaging';
 import type { HostMessageBridge } from '../bridge';
 import type { WebviewHostMessage, WebviewMessage } from '../types';
 
-import type { HostResolverContext } from './types';
+import type { HostMessageResolverInjectedContext } from './types';
 
 export class HostMessageDispatcher extends MessageDispatcher<
   WebviewHostMessage,
-  HostResolverContext,
+  HostMessageResolverInjectedContext,
   HostMessageBridge,
   WebviewMessage
 > {

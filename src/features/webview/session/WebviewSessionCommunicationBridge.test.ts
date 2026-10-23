@@ -69,7 +69,7 @@ describe('WebviewSessionCommunicationBridge: the channel', () => {
   });
 
   it('posts outbound messages through the webview api', () => {
-    bridge.postToWebviewHost({ type: 'app:ready' });
+    await bridge.post({ type: 'app:ready' });
 
     expect(post).toHaveBeenCalledWith({ type: 'app:ready' });
   });
