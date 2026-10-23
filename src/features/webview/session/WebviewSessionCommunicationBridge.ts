@@ -29,8 +29,8 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
     super();
   }
 
-  public post(message: WebviewMessage): void {
-    this.api.postMessage(message);
+  public post(message: WebviewMessage): Promise<void> {
+    return Promise.resolve(this.api.postMessage(message));
   }
 
   public subscribeResolvers<TExtra extends object = object>(
@@ -79,9 +79,9 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   }
 
   /** A forward that has nothing to say returns `null`, and nothing is sent. */
-  private postForwarded(message: WebviewMessage | null): void {
+  private async postForwarded(message: WebviewMessage | null): Promise<void> {
     if (message) {
-      this.post(message);
+      await this.post(message);
     }
   }
 }

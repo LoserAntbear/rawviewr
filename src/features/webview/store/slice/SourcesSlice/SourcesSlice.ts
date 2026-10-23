@@ -1,4 +1,4 @@
-import type { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/viewer/types';
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';

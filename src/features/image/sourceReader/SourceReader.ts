@@ -1,7 +1,7 @@
 import type { Endian } from '@definitions/bits';
 import { BufferItem } from '@features/buffer/BufferItem';
 import { BITS_PER_BYTE } from '@features/image/format/definitions';
-import type { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/viewer/types';
 import { readWord } from '@utils/bits';
 
 import type { SourceBytes, SourceLocation } from './types';

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import type { FileSource } from '../webview/types';
+import type { FileSource } from '@features/viewer/types';
 
 import type { BufferBuildPayload, BufferItemData } from './types';
 

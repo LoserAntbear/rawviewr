@@ -72,7 +72,7 @@ function reportFailure(error: unknown): WebviewMessage {
 
 export async function exportSelected(
   store: AppStore,
-  bridge: MessagePoster,
+  bridge: MessagePoster<WebviewMessage>,
 ): Promise<void> {
-  bridge.post(await attemptAsync(() => resolveExportMessage(store), reportFailure));
+  return bridge.post(await attemptAsync(() => resolveExportMessage(store), reportFailure));
 }

@@ -3,7 +3,7 @@ import { window, workspace } from 'vscode';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppContextProvider } from '@features/appContext/AppContextProvider';
-import type { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/viewer';
 
 import { DEFAULT_DECODE_OPTIONS } from './definitions';
 import { SourcesDecoder } from './SourcesDecoder';

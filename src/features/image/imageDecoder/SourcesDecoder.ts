@@ -3,7 +3,7 @@ import { FileValidator } from '@features/file/FileValidator';
 import { ImageDecoder } from '@features/image/imageDecoder/ImageDecoder';
 import type { DecodeOptions } from '@features/image/imageDecoder/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
-import type { FileSource } from '@features/webview/types';
+import type { FileSource } from '@features/viewer/types';
 import { withAbortSignalCheck, withAbortSignalCheckSync } from '@utils/abort';
 
 import type { Geometry } from './imagePreparation/types';

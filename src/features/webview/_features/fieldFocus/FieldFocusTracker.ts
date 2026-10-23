@@ -1,3 +1,6 @@
+import type { WebviewMessage } from '@features/webview/webviewHost/types';
+import { attemptDetached } from '@utils/attempt';
+
 import { WebviewDisposableUtils } from '../../disposable';
 import type { WebviewDisposable } from '../../disposable/types';
 import { WebviewDisposableStore } from '../../disposable/WebviewDisposableStore';
@@ -23,7 +26,7 @@ const FOCUS_EVENTS = ['focus', 'focusin', 'focusout'] as const;
 export class FieldFocusTracker {
   private isAnyFieldFocused: boolean = false;
 
-  constructor(private readonly bridge: MessagePoster) {}
+  constructor(private readonly bridge: MessagePoster<WebviewMessage>) {}
 
   public watch(target: Window): WebviewDisposable {
     const store = new WebviewDisposableStore();
@@ -54,6 +57,11 @@ export class FieldFocusTracker {
 
     this.isAnyFieldFocused = focused;
 
-    this.bridge.post({ type: 'view:fieldFocus', focused: this.isAnyFieldFocused });
+    attemptDetached(
+      () => this.bridge.post({ type: 'view:fieldFocus', focused: this.isAnyFieldFocused }),
+      (error) => {
+        console.error('Failed to post field focus state:', error);
+      },
+    )
   }
 }
