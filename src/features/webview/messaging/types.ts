@@ -4,7 +4,7 @@ import type { WebviewMessage } from '../webviewHost/types';
 import type { EventMap } from './TypedEventTarget';
 
 export type MessagePoster = {
-  postToWebviewHost(message: WebviewMessage): void;
+  post(message: WebviewMessage): void;
 };
 
 export type ResolverContext = {

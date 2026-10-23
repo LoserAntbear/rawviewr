@@ -10,12 +10,12 @@ import type { WebviewCommandResolversMap } from './types';
  * Usually you just pass them through to the host.
  */
 export const WEBVIEW_COMMAND_RESOLVERS: WebviewCommandResolversMap = {
-  'app:ready': (message, { bridge }) => bridge.postToWebviewHost(message),
-  'gallery:openItem': (message, { bridge }) => bridge.postToWebviewHost(message),
+  'app:ready': (message, { bridge }) => bridge.post(message),
+  'gallery:openItem': (message, { bridge }) => bridge.post(message),
   'export:request': (_message, { store, bridge }) => exportSelected(store, bridge),
-  'sources:request:decode': (message, { bridge }) => bridge.postToWebviewHost(message),
+  'sources:request:decode': (message, { bridge }) => bridge.post(message),
   'view:zoom': ({ direction }, { store }) => store.get(StoreSliceId.View).setZoom(direction),
-  'decode:options:preserve': ({ preserved }, { store, bridge }) => bridge.postToWebviewHost({
+  'decode:options:preserve': ({ preserved }, { store, bridge }) => bridge.post({
     type: 'decode:options:snapshot',
     snapshot: { preserved, options: toPreservedOptions(store.get(StoreSliceId.DecodeOptions).options) },
   }),

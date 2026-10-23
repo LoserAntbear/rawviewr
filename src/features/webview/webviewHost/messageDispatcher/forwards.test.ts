@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 const forward = (ids: readonly string[]) =>
-  STORE_EVENT_FORWARDS['images:decode:requested']?.({ ids }, { store, bridge: { postToWebviewHost: () => undefined } });
+  STORE_EVENT_FORWARDS['images:decode:requested']?.({ ids }, { store, bridge: { post: () => undefined } });
 
 describe('STORE_EVENT_FORWARDS: images:decode:requested', () => {
   it('asks the host to decode those sources, under the options of the moment', () => {
@@ -52,7 +52,7 @@ describe('STORE_EVENT_FORWARDS: probe:receive:source-bytes:requested', () => {
 
   const forwardProbe = () => STORE_EVENT_FORWARDS['probe:receive:source-bytes:requested']?.(
     { id: 'a', location },
-    { store, bridge: { postToWebviewHost: () => undefined } },
+    { store, bridge: { post: () => undefined } },
   );
 
   it('asks the host to read that location, under the byte order in force', () => {
@@ -76,7 +76,7 @@ describe('STORE_EVENT_FORWARDS: probe:receive:source-bytes:requested', () => {
 describe('STORE_EVENT_FORWARDS: decodeOptions:snapshot:requested', () => {
   const forwardSnapshot = () => STORE_EVENT_FORWARDS['decodeOptions:snapshot:requested']?.(
     { options: store.get(StoreSliceId.DecodeOptions).options },
-    { store, bridge: { postToWebviewHost: () => undefined } },
+    { store, bridge: { post: () => undefined } },
   );
 
   it('sends the toolbar on with the toggle that asked for it to be kept', () => {

@@ -54,6 +54,6 @@ export class FieldFocusTracker {
 
     this.isAnyFieldFocused = focused;
 
-    this.bridge.postToWebviewHost({ type: 'view:fieldFocus', focused: this.isAnyFieldFocused });
+    this.bridge.post({ type: 'view:fieldFocus', focused: this.isAnyFieldFocused });
   }
 }

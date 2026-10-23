@@ -74,5 +74,5 @@ export async function exportSelected(
   store: AppStore,
   bridge: MessagePoster,
 ): Promise<void> {
-  bridge.postToWebviewHost(await attemptAsync(() => resolveExportMessage(store), reportFailure));
+  bridge.post(await attemptAsync(() => resolveExportMessage(store), reportFailure));
 }
