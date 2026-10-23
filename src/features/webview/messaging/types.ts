@@ -20,21 +20,22 @@ export type MessageLike = { readonly type: string };
 export type MessageForward<
   TDetail,
   TMessage,
-  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>> = (
+  TContext extends object = WebviewResolverContext,
+> = (
   detail: TDetail,
   context: TContext,
 ) => TMessage | null;
 export type MessageForwardMap<
   TMessage,
   TEvents extends EventMap,
-  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
+  TContext extends object = WebviewResolverContext,
 > = {
   readonly [K in keyof TEvents & string]?: MessageForward<TEvents[K], TMessage, TContext>;
 };
 
 export type MessageResolver<
   TMessage extends MessageLike,
-  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
+  TContext extends object = WebviewResolverContext,
   K extends TMessage['type'] = TMessage['type'],
 > = (
   message: Extract<TMessage, { type: K }>,
@@ -43,14 +44,7 @@ export type MessageResolver<
 
 export type MessageResolverMap<
   TMessage extends MessageLike,
-  TContext extends ResolverContext<TMessage> = WebviewResolverContext<TMessage>,
+  TContext extends object = WebviewResolverContext,
 > = {
   readonly [K in TMessage['type']]?: MessageResolver<TMessage, TContext, K>;
-};
-export type ForwardMessageResolverMap<
-  TFromMessage extends MessageLike,
-  TToMessage extends MessageLike,
-  TContext extends ResolverContext<TToMessage> = WebviewResolverContext<TToMessage>,
-> = {
-  readonly [K in TFromMessage['type']]?: MessageResolver<TToMessage, TContext, K>;
 };

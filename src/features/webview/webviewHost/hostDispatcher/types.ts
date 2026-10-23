@@ -6,7 +6,7 @@ import type { SettingsController } from '@features/settings/SettingsController';
 import type { ContentViewSession, UriOpener } from '@features/viewer';
 import type { ContextKeyController } from '@features/vscode/contextKeys';
 
-import type { ForwardMessageResolverMap, ResolverContext } from '../../messaging/types';
+import type { MessageResolver, MessageResolverMap, ResolverContext } from '../../messaging/types';
 import type { WebviewHostMessage, WebviewMessage } from '../types';
 
 export type StatusReporter = {
@@ -26,8 +26,7 @@ export type HostMessageResolverInjectedContext = {
 
 export type HostResolverContext = HostMessageResolverInjectedContext & ResolverContext<WebviewHostMessage>;
 
-export type HostMessageResolverMap = ForwardMessageResolverMap<
-  WebviewMessage,
-  WebviewHostMessage,
-  HostResolverContext
->;
+export type HostMessageResolverMap = MessageResolverMap<WebviewMessage, HostResolverContext>;
+
+export type HostMessageResolver<K extends WebviewMessage['type'] = WebviewMessage['type']> =
+  MessageResolver<WebviewMessage, HostResolverContext, K>;
