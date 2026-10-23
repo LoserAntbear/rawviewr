@@ -37,6 +37,6 @@ export type WebviewMessage =
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
   | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
 
-export type ItemOpener = {
+export type UriOpener = {
   openSingle(targets: readonly vscode.Uri[]): Promise<void>;
 };
