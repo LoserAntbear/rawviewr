@@ -20,7 +20,7 @@ function acquireApiOnce(): VSCodeWebviewApi {
   return acquiredApi;
 }
 
-type WebviewSessionContext<TExtra extends object = object> = ResolverContext<WebviewHostMessage> & TExtra;
+type WebviewSessionContext<TExtra extends object = object> = ResolverContext<WebviewMessage> & TExtra;
 
 export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewHostMessageEvents> {
   private readonly CHANNEL_ID = 'Host message';
@@ -53,7 +53,7 @@ export class WebviewSessionCommunicationBridge extends TypedEventTarget<WebviewH
   // TODO: Uninfy with subscribeResolvers
   public forwardFrom<TEvents extends EventMap, TExtra extends object = object>(
     bus: TypedEventTarget<TEvents>,
-    forwards: MessageForwardMap<TEvents, WebviewSessionContext<TExtra>>,
+    forwards: MessageForwardMap<WebviewMessage, TEvents, WebviewSessionContext<TExtra>>,
     extra: TExtra = {} as TExtra,
   ): WebviewDisposable {
     const context = { bridge: this, ...extra } as WebviewSessionContext<TExtra>;

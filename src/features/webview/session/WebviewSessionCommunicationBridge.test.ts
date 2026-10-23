@@ -68,7 +68,7 @@ describe('WebviewSessionCommunicationBridge: the channel', () => {
     expect(heard).not.toHaveBeenCalled();
   });
 
-  it('posts outbound messages through the webview api', () => {
+  it('posts outbound messages through the webview api', async () => {
     await bridge.post({ type: 'app:ready' });
 
     expect(post).toHaveBeenCalledWith({ type: 'app:ready' });

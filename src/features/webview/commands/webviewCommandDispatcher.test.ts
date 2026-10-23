@@ -37,7 +37,7 @@ function dispatcherWith(exportRequest: WebviewCommandResolver<'export:request'>)
     'gallery:openItem': vi.fn(),
   };
 
-  return new WebviewCommandDispatcher(resolvers, { postToWebviewHost: vi.fn() }, { store: {} as never });
+  return new WebviewCommandDispatcher(resolvers, { post: vi.fn(async () => undefined) }, { store: {} as never });
 }
 
 describe('WebviewCommandDispatcher: the last-resort boundary', () => {
@@ -87,7 +87,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     const post = vi.fn();
     const target = new EventTarget();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store }).listen(target);
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { post }, { store }).listen(target);
     target.dispatchEvent(new CustomEvent(RIV_COMMAND_EVENT_ID, { detail: { type: 'export:request' } }));
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -102,7 +102,7 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
     vi.stubGlobal('OffscreenCanvas', ContextlessOffscreenCanvas);
     const post = vi.fn();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store })
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { post }, { store })
       .dispatch({ type: 'export:request' });
 
     await vi.waitFor(() => expect(post).toHaveBeenCalledOnce());
@@ -115,7 +115,7 @@ describe('WebviewCommandDispatcher: a command the host never hears about', () =>
   it('a zoom moves the view and posts nothing, since zoom is this webview\'s layout', () => {
     const post = vi.fn();
     const { store } = createWebviewStore();
-    const dispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store });
+    const dispatcher = new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { post }, { store });
 
     dispatcher.dispatch({ type: 'view:zoom', direction: 'in' });
 
@@ -129,7 +129,7 @@ describe('WebviewCommandDispatcher: the backdrop', () => {
     const post = vi.fn();
     const { store } = createWebviewStore();
 
-    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { postToWebviewHost: post }, { store })
+    new WebviewCommandDispatcher(WEBVIEW_COMMAND_RESOLVERS, { post }, { store })
       .dispatch({ type: 'view:background:update', background: ViewerBackground.white });
 
     expect(store.get(StoreSliceId.View).background).toBe(ViewerBackground.white);
@@ -140,7 +140,7 @@ describe('WebviewCommandDispatcher: the backdrop', () => {
 describe('WebviewCommandDispatcher: the context', () => {
   it('hands each resolver what it acts through, so a table needs no constructing', async () => {
     const resolve = vi.fn();
-    const bridge = { postToWebviewHost: vi.fn() };
+    const bridge = { post: vi.fn(async () => undefined) };
     const store = { marker: 'store' } as never;
 
     new WebviewCommandDispatcher({ 'app:ready': resolve }, bridge, { store }).dispatch({ type: 'app:ready' });
@@ -152,7 +152,7 @@ describe('WebviewCommandDispatcher: the context', () => {
 
 describe('WebviewCommandDispatcher: a message nobody resolves', () => {
   it('says so rather than passing it over in silence', async () => {
-    new WebviewCommandDispatcher({}, { postToWebviewHost: vi.fn() }, { store: {} as never }).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
+    new WebviewCommandDispatcher({}, { post: vi.fn(async () => undefined) }, { store: {} as never }).dispatch({ type: 'app:status', level: 'info', message: 'hi' });
 
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(
       'Command: "app:status" failed:',

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PixelFormatPresets } from '@features/image/format/presets';
+import type { FileSource } from '@features/viewer';
 
 import { WebviewSessionCommunicationBridge } from '../../session/WebviewSessionCommunicationBridge';
-import type { FileSource } from '../../types';
 import { STORE_EVENT_FORWARDS } from '../../webviewHost/messageDispatcher';
 import { createWebviewStore } from '../createWebviewStore';
 import { StoreSliceId } from '../definitions';

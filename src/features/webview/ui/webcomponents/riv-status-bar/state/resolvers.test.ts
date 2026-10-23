@@ -4,11 +4,11 @@ import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
 import type { Geometry } from '@features/image/imageDecoder/imagePreparation/types';
+import type { FileSource } from '@features/viewer';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
 import { StoreSliceId } from '@features/webview/store/definitions';
 import type { ImageItem } from '@features/webview/store/slice/ImagesSlice';
 import type { AppStore } from '@features/webview/store/types';
-import type { FileSource } from '@features/webview/types';
 
 import { SEGMENT_RESOLVERS } from '../view/segment/resolvers';
 

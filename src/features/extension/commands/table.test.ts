@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CommandNames } from '@definitions/commands';
 import { IntentKind } from '@definitions/intent';
+import { ContextKeys, EXTENSION_CONTEXT_PREFIX } from '@features/vscode/contextKeys/definitions';
 
 import { parseZoomIn, parseZoomOut, parseZoomReset } from './parsers';
 import { COMMANDS } from './table';
@@ -63,6 +64,18 @@ describe('the zoom keybindings', () => {
     expect(when).toContain('!rawImageViewer.fieldFocus');
     expect(when).toContain('activeCustomEditorId =~ /^rawImageViewer\\.editor/');
     expect(when).toContain("activeWebviewPanelId == 'rawImageViewer.gallery'");
+  });
+
+  /**
+   * The guard above checks the manifest names a key; this checks the extension sets the one it
+   * names. They drifted once — the code set `rawviewr.fieldFocus` while the manifest guarded
+   * `rawImageViewer.fieldFocus`, so the guard was permanently true and a bare `0` reset the
+   * zoom while someone was typing a zero into Width.
+   */
+  it('guards on the key the extension actually sets', () => {
+    const key = `${EXTENSION_CONTEXT_PREFIX}.${ContextKeys.FieldFocus}`;
+
+    expect(keybindings.every(({ when }) => when.includes(`!${key}`))).toBe(true);
   });
 
   /** The palette takes focus off the webview, so the field guard would hide the entries. */

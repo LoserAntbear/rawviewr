@@ -39,7 +39,7 @@ beforeAll(() => {
 
   new WebviewCommandDispatcher(
     WEBVIEW_COMMAND_RESOLVERS,
-    { postToWebviewHost: () => undefined },
+    { post: async () => undefined },
     { store },
   ).listen(document);
 });

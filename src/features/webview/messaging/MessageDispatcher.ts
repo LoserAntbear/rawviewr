@@ -10,6 +10,10 @@ type ResolverInvariant<TMessage, TContext> =
   | ((message: TMessage, context: TContext) => void | Promise<void>)
   | undefined;
 
+/**
+ * `TMessage` is what this channel posts; `TDispatch` is what arrives on it. They are the same
+ * union only for a channel that talks to itself — the command bus does, the two bridges do not.
+ */
 export abstract class MessageDispatcher<
   TMessage extends MessageLike,
   TContext extends object = object,
@@ -21,7 +25,7 @@ export abstract class MessageDispatcher<
   protected readonly context: ResolverContext<TMessage, TBridge> & TContext;
 
   constructor(
-    private readonly resolvers: MessageResolverMap<TMessage, ResolverContext<TMessage> & TContext>,
+    private readonly resolvers: MessageResolverMap<TDispatch, ResolverContext<TMessage, TBridge> & TContext>,
     bridge: TBridge,
     extra: TContext = {} as TContext,
   ) {

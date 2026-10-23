@@ -3,6 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { FormatRegistry } from '@features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@features/image/imageDecoder/definitions';
+import type { FileSource } from '@features/viewer';
 import { CROSSCHECK_DELAY_MS } from '@features/webview/_features/listVirtualization/ListVirtualizationObserver';
 import { WebviewSessionCommunicationBridge } from '@features/webview/session/WebviewSessionCommunicationBridge';
 import { createWebviewStore } from '@features/webview/store/createWebviewStore';
@@ -15,7 +16,6 @@ import {
   type FakeIntersectionObserver,
   installFakeIntersectionObserver,
 } from '../../../../../test/mocks/intersectionObserver';
-import type { FileSource } from '../../../types';
 
 import { RIVGallery } from './index';
 

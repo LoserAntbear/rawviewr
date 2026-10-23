@@ -117,7 +117,7 @@ describe('exportSelected', () => {
   ])('posts exactly once on %s', async (_label, store) => {
     const post = vi.fn();
 
-    await exportSelected(store, { postToWebviewHost: post } as never);
+    await exportSelected(store, { post } as never);
 
     expect(post).toHaveBeenCalledOnce();
   });
@@ -125,7 +125,7 @@ describe('exportSelected', () => {
   it('exports what is on screen when nothing was ever picked, as in single mode', async () => {
     const post = vi.fn();
 
-    await exportSelected(storeFor(null, ready(), ['a']), { postToWebviewHost: post } as never);
+    await exportSelected(storeFor(null, ready(), ['a']), { post } as never);
 
     expect(post).toHaveBeenCalledWith(expect.objectContaining({ type: 'export:png', name: 'frame.raw.png' }));
   });
@@ -135,7 +135,7 @@ describe('exportSelected', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const post = vi.fn();
 
-    await expect(exportSelected(storeFor('a', ready()), { postToWebviewHost: post } as never))
+    await expect(exportSelected(storeFor('a', ready()), { post } as never))
       .resolves.toBeUndefined();
 
     expect(post).toHaveBeenCalledOnce();
@@ -150,7 +150,7 @@ describe('exportSelected', () => {
     encodeFails = true;
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    await exportSelected(storeFor('a', ready()), { postToWebviewHost: vi.fn() } as never);
+    await exportSelected(storeFor('a', ready()), { post: vi.fn(async () => undefined) } as never);
 
     expect(consoleError).toHaveBeenCalledWith('Raw Image Viewer: export failed', expect.any(Error));
   });

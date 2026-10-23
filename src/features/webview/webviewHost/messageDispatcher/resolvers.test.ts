@@ -28,7 +28,7 @@ beforeEach(() => {
 async function zoom(direction: ZoomDirection): Promise<void> {
   await WEBVIEW_HOST_MESSAGE_RESOLVERS['view:zoom'](
     { type: 'view:zoom', direction },
-    { store, bridge: { post: () => undefined } },
+    { store, bridge: { post: async () => undefined } },
   );
 }
 
@@ -62,7 +62,7 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: probe:receive:source-bytes', () => {
   const answer = async (result: SourceBytesResult = { kind: 'received', bytes: { bytes: [0x3c, 0x1f], value: 0x1f3c } }) =>
     WEBVIEW_HOST_MESSAGE_RESOLVERS['probe:receive:source-bytes'](
       { type: 'probe:receive:source-bytes', id: 'a', location, result },
-      { store, bridge: { post: () => undefined } },
+      { store, bridge: { post: async () => undefined } },
     );
 
   it('fills in the bytes the webview could not read for itself', async () => {
@@ -91,7 +91,7 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: session:start', () => {
         background: ViewerBackground.magenta,
         decodeOptions: DEFAULT_DECODE_OPTIONS,
       },
-      { store, bridge: { post: () => undefined } },
+      { store, bridge: { post: async () => undefined } },
     );
 
     expect(store.get(StoreSliceId.View).background).toBe(ViewerBackground.magenta);
@@ -117,7 +117,7 @@ describe('WEBVIEW_HOST_MESSAGE_RESOLVERS: decode:options:preserved', () => {
   const preserved = async (value: boolean, flipY?: boolean) =>
     WEBVIEW_HOST_MESSAGE_RESOLVERS['decode:options:preserved'](
       { type: 'decode:options:preserved', snapshot: snapshot(value, flipY) },
-      { store, bridge: { post: () => undefined } },
+      { store, bridge: { post: async () => undefined } },
     );
 
   it('shows the toggle as the host has it', async () => {

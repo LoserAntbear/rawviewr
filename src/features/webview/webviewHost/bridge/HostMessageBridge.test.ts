@@ -46,7 +46,7 @@ describe('HostMessageBridge.listen', () => {
 
         return { dispose };
       },
-    } as never).listen({ dispatch });
+    } as never).listen(dispatch);
 
     received?.({ type: 'app:ready' });
 

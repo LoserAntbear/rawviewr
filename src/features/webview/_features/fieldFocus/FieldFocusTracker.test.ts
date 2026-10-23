@@ -21,7 +21,7 @@ let root: ShadowRoot;
 let input: HTMLInputElement;
 let button: HTMLButtonElement;
 
-const bridge = { postToWebviewHost: (message: WebviewMessage) => posted.push(message) };
+const bridge = { post: async (message: WebviewMessage) => void posted.push(message) };
 const focusState = () => posted
   .filter((message) => message.type === 'view:fieldFocus')
   .map((message) => (message as Extract<WebviewMessage, { type: 'view:fieldFocus' }>).focused);
@@ -144,7 +144,7 @@ describe('FieldFocusTracker: a selection of controls', () => {
 
 describe('FieldFocusTracker: the dedupe', () => {
   it('says nothing when the same field is focused twice over', () => {
-    const spy = vi.spyOn(bridge, 'postToWebviewHost');
+    const spy = vi.spyOn(bridge, 'post');
 
     watch();
     input.focus();
