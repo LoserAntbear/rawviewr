@@ -2,7 +2,9 @@ import type { MessageResolver, MessageResolverMap, WebviewResolverContext } from
 import type { WebviewHostMessage, WebviewHostMessageType } from '../types';
 
 export type WebviewHostMessageResolver<K extends WebviewHostMessageType = WebviewHostMessageType> =
-  MessageResolver<WebviewHostMessage, WebviewResolverContext, K>;
+  MessageResolver<WebviewHostMessage, WebviewResolverContext<WebviewHostMessage>, K>;
 
-/** `Required` at the table: everything the host can send has to be answered. */
-export type WebviewHostMessageResolverMap = MessageResolverMap<WebviewHostMessage, WebviewResolverContext>;
+export type WebviewHostMessageResolverMap = MessageResolverMap<
+  WebviewHostMessage,
+  WebviewResolverContext<WebviewHostMessage>
+>;
