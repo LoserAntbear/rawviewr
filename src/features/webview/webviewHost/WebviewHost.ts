@@ -1,255 +1,38 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
-import type { Endian } from '@definitions/bits';
 import type { ExportFormat } from '@definitions/exportFormats';
-import { ContextKeys, VSCodeCommands } from '@definitions/vscode';
 import { DisposableStore } from '@features/disposable/DisposableStore';
+import { DecodeRunner } from '@features/image/imageDecoder/DecodeRunner';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
-import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
 import { ImageExporter } from '@features/image/imageExport/ImageExporter';
 import { SourceReader } from '@features/image/sourceReader/SourceReader';
-import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import { InfoMessageController } from '@features/infoMessage/InfoMessageController';
 import type { SettingsController } from '@features/settings/SettingsController';
+import type { UriOpener } from '@features/viewer/types';
+import { ContextKeyController } from '@features/vscode/contextKeys';
 import type { ZoomDirection } from '@features/zoom';
-import { toChunks } from '@utils/array';
-import { attemptAsync, attemptDetached } from '@utils/attempt';
-import { StringTemplate } from '@utils/string/StringTemplate';
+import { attemptDetached } from '@utils/attempt';
 
-import type { FileSource } from '../types';
-import type { GalleryViewMode } from '../ui/webcomponents/types';
-import { getNonce } from '../utils';
+import type { ContentViewSession } from '../../viewer/contentViewSession';
 
-import appShellHtml from './app-shell.html';
-import type { ItemOpener, WebviewHostMessage, WebviewMessage } from './types';
+import { WebviewAppRenderShell } from './appShell';
+import { HostMessageBridge } from './bridge';
+import { HOST_MESSAGE_RESOLVERS, HostMessageDispatcher } from './hostDispatcher';
+import type { WebviewHostMessage } from './types';
 
-// More or less guessed and impercallly fits
-const DECODE_CHUNK_SIZE = 24 as const;
-
-// TODO: Extract webview posting and handlers into a separate messaging layer
-// TODO: Add decode runner and decompose it from here.
-// TODO: Remove sources from host and manage them from store. I already pass them and kip them there.
+/**
+ * One view: the page it runs, the wire it talks over, and the table that answers it.
+ *
+ * Composition and the face the rest of the extension calls — the viewer registry asks a view to
+ * zoom or to export, and everything coming the other way is the dispatcher's.
+ */
 export class WebviewHost extends DisposableStore {
-  /** The decode in flight, if any. A newer request takes its place and cancels it. */
-  private decodeRun?: AbortController;
-
   constructor(
-    private readonly context: vscode.ExtensionContext,
-    private readonly webview: vscode.Webview,
-    private readonly sources: FileSource[],
-    private readonly viewMode: GalleryViewMode,
-    private readonly settingsController: SettingsController,
-    private readonly sourcesDecoder: SourcesDecoder,
-    private readonly itemOpener?: ItemOpener,
-    private readonly exporter: ImageExporter = new ImageExporter(),
-    private readonly sourceReader: SourceReader = new SourceReader(),
+    context: vscode.ExtensionContext,
+    webview: vscode.Webview,
   ) {
     super();
 
-    this.setWebviewOptions();
-
-    // The listener is a sync edge: VS Code does not await it, so it is the last-resort boundary.
-    this.disposables.push(
-      this.webview.onDidReceiveMessage((message: WebviewMessage) => attemptDetached(
-        () => this.handleWebviewMessage(message),
-        (error) => console.error(`WebviewHost: handling "${message.type}" failed:`, error),
-      )),
-      // If we want to share the options b/w all views, we listen for changes and propagate them.
-      this.settingsController.onToolbarSnapshotChange((snapshot) => attemptDetached(
-        () => this.post({ type: 'decode:options:preserved', snapshot }),
-        (error) => console.error('WebviewHost: failed to push the toolbar snapshot:', error),
-      )),
-      // A setting the user changes while looking at a view should reach that view. So we must subscribe to it
-      this.settingsController.onViewerConfigurationChange((config) => attemptDetached(
-        () => this.post({ type: 'view:config:update', config }),
-        (error) => console.error('WebviewHost: failed to push the viewer configuration:', error),
-      )),
-      { dispose: () => attemptDetached(
-        () => this.setFieldFocusContext(false),
-        (error) => console.error('WebviewHost: failed to release the field-focus context:', error),
-      ) },
-    );
-
-    this.updateWebviewHtml();
-  }
-
-  public requestExport(format: ExportFormat): Promise<void> {
-    return this.post({ type: 'export', format });
-  }
-
-  public requestZoom(direction: ZoomDirection): Promise<void> {
-    return this.post({ type: 'view:zoom', direction });
-  }
-
-  public async post(message: WebviewHostMessage): Promise<void> {
-    if (!(await this.webview.postMessage(message))) {
-      console.error('WebviewHost: Failed to post message to webview:', message);
-    }
-  }
-
-  private updateWebviewHtml(): void {
-    const script = this.webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview', 'main.js'),
-    ).toString();
-    const nonce = getNonce();
-    const appHostTemplate = new StringTemplate(appShellHtml, ['script', 'nonce', 'cspSource']);
-
-    this.webview.html = appHostTemplate.render({
-      nonce,
-      script,
-      cspSource: this.webview.cspSource,
-    });
-  }
-
-  private setWebviewOptions(): void {
-    this.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [this.context.extensionUri],
-    };
-  }
-
-  private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
-    try {
-      switch (message.type) {
-        case 'app:ready':
-          await this.handleAppReady();
-          break;
-        case 'gallery:openItem':
-          await this.handleOpenItem(message.id);
-          break;
-        case 'export:png':
-        //FIXME: Currently only exports the first source. Should handle the correct source based on the message context.
-          await this.exporter.savePng(this.sources[0]?.uri, message.name, message.data);
-          break;
-        case 'sources:request:decode':
-          await this.handleRequestDecode(message.ids, message.options);
-          break;
-        case 'probe:request':
-          await this.handleProbeRequest(message.id, message.location, message.endian);
-          break;
-        case 'decode:options:snapshot':
-          await this.settingsController.writeToolbarSnapshot(message.snapshot);
-          break;
-        case 'view:fieldFocus':
-          await this.setFieldFocusContext(message.focused);
-          break;
-        case 'app:status':
-          InfoMessageController.handleMessage({
-            level: message.level,
-            message: message.message,
-          });
-          break;
-      }
-    } catch (error) {
-      InfoMessageController.handleMessage({
-        level: 'error',
-        message: 'Failed to handle webview message: ' + (error instanceof Error ? error.message : String(error)),
-      });
-    }
-  }
-
-  // TODO: Move out to the dedicated context controller.
-  private async setFieldFocusContext(focused: boolean): Promise<void> {
-    await vscode.commands.executeCommand(VSCodeCommands.SetContext, ContextKeys.FieldFocus, focused);
-  }
-
-  private async handleProbeRequest(id: string, location: SourceLocation, endian: Endian): Promise<void> {
-    const source = this.sources.find((candidate) => candidate.id === id);
-
-    if (!source) {
-      return;
-    }
-
-    await this.post({
-      id,
-      location,
-      type: 'probe:receive:source-bytes',
-      // A failed read is an answer too: without one the view waits on a reply never coming.
-      result: await attemptAsync<SourceBytesResult>(
-        async () => ({ kind: 'received', bytes: await this.sourceReader.readFromFileSource(source, location, endian) }),
-        (error) => ({ kind: 'failed', message: error instanceof Error ? error.message : String(error) }),
-      ),
-    });
-  }
-
-  private async handleOpenItem(id: string): Promise<void> {
-    try {
-      const source = this.sources.find((candidate) => candidate.id === id);
-
-      if (source) {
-        await this.itemOpener?.openSingle([source.uri]);
-      }
-    } catch (error) {
-      console.error('Failed to handle open item:', error);
-    }
-  }
-
-  private async handleAppReady(): Promise<void> {
-    try {
-      const decodeOptions = this.settingsController.readSessionDecodeOptions();
-
-      await this.initializeSession(this.viewMode, decodeOptions);
-      await this.postToolbarSnapshot();
-      await this.postViewerConfiguration();
-      await this.postSources();
-    } catch (error) {
-      InfoMessageController.handleMessage({
-        level: 'error',
-        message: 'Failed to handle app ready: ' + (error instanceof Error ? error.message : String(error)),
-      });
-    }
-  }
-
-  private initializeSession(viewMode: GalleryViewMode, decodeOptions: DecodeOptions): Promise<void> {
-    // TODO: Should it include the ID? No use for it as I see, but MAYBE?
-    return this.post({
-      viewMode,
-      decodeOptions,
-      type: 'session:start',
-      background: this.settingsController.readDefaultBackground(),
-    });
-  }
-
-  private postToolbarSnapshot(): Promise<void> {
-    const snapshot = this.settingsController.toolbarSnapshot;
-
-    return snapshot ? this.post({ type: 'decode:options:preserved', snapshot }) : Promise.resolve();
-  }
-
-  private postViewerConfiguration(): Promise<void> {
-    return this.post({ type: 'view:config:update', config: this.settingsController.readViewerConfiguration() });
-  }
-
-  private postSources(): Promise<void> {
-    return this.post({
-      type: 'sources:update',
-      sources: this.sources,
-    });
-  }
-
-  /**
-   * Due to chunking I can abort pending requests, when they're being asked too frequently.
-   * Thus anything captured mid-decode will be aborted and safely ignored.
-   */
-  private async handleRequestDecode(sources: FileSource[], options: DecodeOptions): Promise<void> {
-    this.decodeRun?.abort();
-
-    const run = new AbortController();
-
-    this.decodeRun = run;
-
-    for (const chunk of toChunks(sources, DECODE_CHUNK_SIZE)) {
-      // Only an abort comes back as a throw; a file that cannot be read is a failure item.
-      const decoded = await attemptAsync<DecodedFileSource[] | null>(
-        () => this.sourcesDecoder.decodeFromSource(chunk, options, run.signal),
-        () => null,
-      );
-
-      if (decoded === null || run.signal.aborted) {
-        break;
-      }
-
-      await this.post({ type: 'images:decode:ready', images: decoded });
-    }
+    new WebviewAppRenderShell(context.extensionUri).render(webview);
   }
 }
