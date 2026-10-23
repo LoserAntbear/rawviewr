@@ -11,6 +11,10 @@ import { ContextKeys, EXTENSION_CONTEXT_PREFIX } from './definitions';
  * This way different windows, for example, can be aware of the extension's state without directly querying it.
  */
 export class ContextKeyController {
+  private get keysList(): ContextKeys[] {
+    return Object.values(this.KEYS);
+  }
+
   public readonly KEYS = ContextKeys;
 
   constructor(
@@ -25,5 +29,9 @@ export class ContextKeyController {
 
   public release(key: ContextKeys): Promise<void> {
     return this.set(key, false);
+  }
+
+  public releaseAll(): Promise<void[]> {
+    return Promise.all(this.keysList.map(this.release.bind(this)));
   }
 }
