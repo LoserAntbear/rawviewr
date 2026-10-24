@@ -65,6 +65,15 @@
           },
           {
             "filenamePattern": "*.tex"
+          },
+          {
+            "filenamePattern": "*.yuv"
+          },
+          {
+            "filenamePattern": "*.yv12"
+          },
+          {
+            "filenamePattern": "*.yuv444"
           }
         ],
         "priority": "default"
@@ -219,6 +228,12 @@
             "xrgb8888",
             "bgrx8888",
             "xbgr8888",
+            "yuyv",
+            "uyvy",
+            "yvyu",
+            "vyuy",
+            "yuv444",
+            "vuy444",
             "gray8",
             "alpha8",
             "gray16",
@@ -232,33 +247,39 @@
             "ARGB4444",
             "ABGR4444",
             "BGRA4444",
-            "RGBX4444 — alpha nibble ignored",
-            "XRGB4444 — alpha nibble ignored",
+            "RGBX4444 \u2014 alpha nibble ignored",
+            "XRGB4444 \u2014 alpha nibble ignored",
             "RGB565",
             "BGR565",
             "RGBA5551",
             "BGRA5551",
             "ARGB1555",
             "ABGR1555",
-            "XRGB1555 — top bit ignored",
+            "XRGB1555 \u2014 top bit ignored",
             "RGB332",
             "BGR233",
-            "RGB888 — bytes R,G,B",
-            "BGR888 — bytes B,G,R",
-            "RGBA8888 — bytes R,G,B,A",
-            "ARGB8888 — bytes A,R,G,B",
-            "ABGR8888 — bytes A,B,G,R",
-            "BGRA8888 — bytes B,G,R,A",
-            "RGBX8888 — bytes R,G,B,pad",
-            "XRGB8888 — bytes pad,R,G,B",
-            "BGRX8888 — bytes B,G,R,pad",
-            "XBGR8888 — bytes pad,B,G,R",
-            "GRAY8 — 8-bit luminance",
-            "A8 — 8-bit alpha only",
-            "GRAY16 — 16-bit luminance (high byte shown)",
-            "GRAY4 — 4-bit, 2 px/byte",
-            "GRAY2 — 2-bit, 4 px/byte",
-            "GRAY1 — 1-bit mono, 8 px/byte"
+            "RGB888 \u2014 bytes R,G,B",
+            "BGR888 \u2014 bytes B,G,R",
+            "RGBA8888 \u2014 bytes R,G,B,A",
+            "ARGB8888 \u2014 bytes A,R,G,B",
+            "ABGR8888 \u2014 bytes A,B,G,R",
+            "BGRA8888 \u2014 bytes B,G,R,A",
+            "RGBX8888 \u2014 bytes R,G,B,pad",
+            "XRGB8888 \u2014 bytes pad,R,G,B",
+            "BGRX8888 \u2014 bytes B,G,R,pad",
+            "XBGR8888 \u2014 bytes pad,B,G,R",
+            "YUYV / YUY2 \u2014 4:2:2, bytes Y0,U,Y1,V",
+            "UYVY \u2014 4:2:2, bytes U,Y0,V,Y1",
+            "YVYU \u2014 4:2:2, bytes Y0,V,Y1,U",
+            "VYUY \u2014 4:2:2, bytes V,Y0,U,Y1",
+            "YUV444 \u2014 4:4:4 packed, bytes Y,U,V",
+            "VUY444 \u2014 4:4:4 packed, bytes V,U,Y",
+            "GRAY8 \u2014 8-bit luminance",
+            "A8 \u2014 8-bit alpha only",
+            "GRAY16 \u2014 16-bit luminance (high byte shown)",
+            "GRAY4 \u2014 4-bit, 2 px/byte",
+            "GRAY2 \u2014 2-bit, 4 px/byte",
+            "GRAY1 \u2014 1-bit mono, 8 px/byte"
           ]
         },
         "rawImageViewer.defaultWidth": {
@@ -324,7 +345,7 @@
         },
         "rawImageViewer.galleryIncludeGlob": {
           "type": "string",
-          "default": "**/*.{raw,imag,bin,dat,data,dump,fb,rgb,rgba,bgra,argb,565,4444,gray,pix,tex,img}",
+          "default": "**/*.{raw,imag,bin,dat,data,dump,fb,rgb,rgba,bgra,argb,565,4444,gray,pix,tex,img,yuv,yv12,yuv444}",
           "description": "Glob used by \"Open Folder as Raw Image Gallery\" to collect files."
         }
       }
