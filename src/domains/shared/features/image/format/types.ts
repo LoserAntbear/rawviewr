@@ -8,7 +8,7 @@ export type RowOptions = {
 }
 
 export type PixelFormat = {
-  bpp: Bits; /** --- Bits per pixel. BEWARE: May be < 8 for the sub-byte formats. */
+  bpp: Bits; /** --- Bits per pixel. BEWARE: Can be < 8 for the sub-byte formats. */
   id: string;
   label: string;
   group: FormatGroup;
@@ -64,20 +64,30 @@ export type PackedChannels = {
   a?: Field;
 }
 
+export type YuvSampleName = 'y0' | 'y1' | 'u' | 'v';
+export type Yuv422Order = readonly [YuvSampleName, YuvSampleName, YuvSampleName, YuvSampleName];
+
+export type Yuv444SampleName = 'y' | 'u' | 'v';
+export type Yuv444Order = readonly [Yuv444SampleName, Yuv444SampleName, Yuv444SampleName];
+
 export enum FormatKind {
   Gray = 'gray',
   Alpha = 'alpha',
   Packed = 'packed',
   ByteOrdered = 'byte-ordered',
   SubByteGray = 'sub-byte-gray',
+  PackedYuv422 = 'packed-yuv-422',
+  PackedYuv444 = 'packed-yuv-444',
 }
 
 export type FormatSpec =
-  | { kind: FormatKind.Packed; bits: PackedWordBits; channels: PackedChannels }
-  | { kind: FormatKind.ByteOrdered; order: readonly ByteOrderEntry[] }
-  | { kind: FormatKind.SubByteGray; bits: SubBits }
+  | { kind: FormatKind.Alpha }
   | { kind: FormatKind.Gray; bits: GrayBits }
-  | { kind: FormatKind.Alpha };
+  | { kind: FormatKind.SubByteGray; bits: SubBits }
+  | { kind: FormatKind.PackedYuv422; order: Yuv422Order }
+  | { kind: FormatKind.PackedYuv444; order: Yuv444Order }
+  | { kind: FormatKind.ByteOrdered; order: readonly ByteOrderEntry[] }
+  | { kind: FormatKind.Packed; bits: PackedWordBits; channels: PackedChannels };
 
 export type FormatDefinition = {
   id: string;
