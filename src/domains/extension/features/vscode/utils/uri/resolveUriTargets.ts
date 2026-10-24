@@ -1,0 +1,38 @@
+
+import * as vscode from 'vscode';
+
+import { InfoMessageController } from '@EXTENSION/features/infoMessage/InfoMessageController';
+import { asLocalAllowedUri } from '@EXTENSION/features/vscode/guards/uri/asLocalAllowedUri';
+
+function activeDocumentUri(): vscode.Uri | null {
+  return asLocalAllowedUri(vscode.window.activeTextEditor?.document.uri);
+}
+
+async function pickTargets(): Promise<vscode.Uri[]> {
+  try {
+    const picked = await vscode.window.showOpenDialog({
+      canSelectMany: true,
+      title: 'Select raw image buffers',
+    });
+
+    return picked ?? [];
+  } catch (err) {
+    InfoMessageController.showError(`Failed to open raw image selection dialog: ${err}`);
+
+    return [];
+  }
+}
+
+function resolveParsedUris(parsed: readonly vscode.Uri[]): vscode.Uri[] | null {
+  return (parsed.length === 0) ? null : [...parsed];
+}
+
+function resolveActiveDocumentUri(): vscode.Uri[] | null {
+  const active = activeDocumentUri();
+
+  return active ? [active] : null;
+}
+
+export async function resolveUriTargets(parsed: readonly vscode.Uri[]): Promise<vscode.Uri[]> {
+  return resolveParsedUris(parsed) ?? resolveActiveDocumentUri() ?? await pickTargets();
+}

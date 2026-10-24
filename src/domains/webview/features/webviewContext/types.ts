@@ -1,0 +1,8 @@
+import type { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
+
+import type { AppStore } from '../store/types';
+
+export type WebviewContext = {
+  readonly store: AppStore;
+  readonly formatRegistry: FormatRegistry;
+}

@@ -1,0 +1,13 @@
+import { IntentKind } from '@definitions/intent';
+import type { IntentResolverMap } from '@EXTENSION/features/intent/types';
+
+import type { SettingsController } from './SettingsController';
+
+type SettingsIntentKind =
+  | IntentKind.settingsReset;
+
+export const SETTINGS_INTENT_RESOLVERS = (
+  settingsController: SettingsController,
+): Pick<IntentResolverMap, SettingsIntentKind> => ({
+  [IntentKind.settingsReset]: () => settingsController.resetSettings(),
+});

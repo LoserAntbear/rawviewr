@@ -426,10 +426,152 @@ path already turns into a readable message. And the preserved toolbar is let go 
 viewer closes: `ViewerRegistry` says when nothing is open, and the extension clears the
 snapshot, so a bad toolbar cannot greet the next launch.
 
-**Still open:** a *gallery* of legitimately-sized images is not bounded by that ceiling. The
-whole of `samples/raw` — 4757 files, 149 MB — decodes to 297 MB of RGBA and peaks at 1.3 GB
-RSS, because `decodeFromSource` runs every source through `Promise.all` and posts them in one
-message. That is the parked wire-cost finding, and virtualisation is what answers it.
+**Since closed by virtualisation.** A *gallery* of legitimately-sized images was not bounded by
+that ceiling: the whole of `samples/raw` — 4757 files, 149 MB — decoded to 297 MB of RGBA and
+peaked at 1.3 GB RSS, because `decodeFromSource` ran every source through one `Promise.all` and
+posted them in a single message. The gallery now decodes only what the observer can see; see
+*Gallery virtualisation* below.
+
+### The host, recomposed
+
+`WebviewHost` was 255 lines doing nine jobs. It is 91 now, and what it does is compose: build
+the page, build the wire, build the table that answers it, and expose the face the viewer
+registry calls (`postToWebview`, `post`). Everything arriving the other way
+belongs to the table.
+
+| piece | what it owns |
+| --- | --- |
+| `viewSession/ViewSession` | the sources and the view mode, and the only path from an id to a file |
+| `webviewHost/hostDispatcher` | the resolver table, its context, and the failure boundary |
+| `webviewHost/appShell` | the page, its CSP nonce and the webview's permissions |
+| `webviewHost/bridge` | posting, and the `onDidReceiveMessage` subscription |
+| `imageDecoder/DecodeRunner` | one decode at a time, delivered a chunk at a time |
+| `vscode/contextKeys` | setting and releasing `rawImageViewer.fieldFocus` |
+
+**Two defects fell out of it.**
+
+*Export saved beside the wrong file.* `export:png` carried a name and bytes but not which
+image, so the host reached for `sources[0]`, and `ImageExporter.getTargetUri` derives the save
+dialog's default directory from it. A flat folder hides that completely; `findGalleryTargets`
+globs `**/*` recursively, so a gallery spanning folders offered the wrong one with the right
+filename on it. `exportSelected` knew the id all along and dropped it.
+
+*An unroutable message was swallowed.* The routing `switch` had no `default`, so a type nobody
+handled did nothing and said nothing. The dispatcher reports it.
+
+**Payloads carry ids, never paths.** The webview is a renderer and its messages are
+attacker-shaped in principle: a payload-supplied uri would have the host read whatever it named
+(`probe:request`) or write wherever it pointed (`export:png`). An id is resolved against the
+session the opener built, so a view can only ever name a source it was opened with, and an
+invented id comes to nothing. `asLocalAllowedUri` remains the gate for uris that genuinely
+cross, which these do not.
+
+**What the table buys at compile time.** `WebviewMessage` is two unions wearing one name:
+commands the webview raises on its own DOM, and messages it sends over the wire. Only the
+second kind arrives at the host, so `HostBoundMessageType` names that half and the resolver map
+is `Required` over it — add a host-bound type and the table fails to compile until something
+answers it. That is the small version of the union split, which is still worth doing properly.
+
+**One behaviour changed on purpose.** A failed `gallery:openItem` used to be caught locally and
+logged, so a double-click did nothing with nothing said about it; every other message already
+raised a notification. They all go through one boundary now, and it names the message —
+`Failed to handle "gallery:openItem": …`.
+
+`MessageDispatcher` lost its opinions in the move: it takes an assembled context rather than a
+poster plus extras, so it carries no view on which way its channel points, and `reportFailure`
+is a hook rather than a hardcoded `console.error`. The host overrides it; without that the
+recomposition would have quietly downgraded every host-side failure to a log line.
+
+### Two things the restructure broke, and how they are held now
+
+**The field-focus guard was inert.** `EXTENSION_CONTEXT_PREFIX` became `rawviewr` while the
+manifest's keybindings still guard on `!rawImageViewer.fieldFocus`. A `when` clause naming a key
+nobody sets reads as false, so the negation was permanently true: a bare `0` reset the zoom
+*while someone was typing a zero into Width*, which is the single thing the whole FieldFocus
+mechanism exists to stop. Every other contributed identifier is `rawImageViewer` — the commands,
+the configuration section, the memento prefix — so the prefix was the outlier and is back.
+
+`table.test.ts` already checked that the manifest *names* a key; it never checked the extension
+*sets* the one it names, which is exactly the gap the two drifted through. It now derives the key
+from `EXTENSION_CONTEXT_PREFIX` and `ContextKeys` and asserts the manifest guards on that.
+
+**Resolvers were swallowing their own failures.** Each one had grown a local `try`/`catch` that
+logged, so nothing reached `HostMessageDispatcher.reportFailure` — the override that puts a
+failure in front of the user — and a view that never started said nothing at all. The local
+catches are gone; the boundary reports. The bridge keeps *its* catch deliberately: posting into a
+view that is going away is ordinary, and a notification per undelivered message would be noise,
+so a failed delivery is logged and nothing more.
+
+### Where the decode bound lives
+
+`DecodeRunner.run` hands back an async generator — one instalment per chunk, pulled:
+
+```ts
+for await (const images of decodes.run(sources, options)) {
+  await bridge.post({ type: 'images:decode:ready', images });
+}
+```
+
+**The laziness is the bound.** A generator body does not advance until the caller takes the last
+instalment, so the chunk behind this one is not read until this one has gone out. That makes
+whatever consumes the instalments the thing that paces the decode — posting governs decoding —
+and a folder's worth of pixels is never alive at once. Measured over the real `samples/raw`:
+
+| one request for | started promises | pulled instalments |
+| --- | --- | --- |
+| one window (24) | 58 MB | 58 MB |
+| ten windows (240) | 107 MB | 78 MB |
+| the whole folder (4757) | **623 MB** | **103 MB** |
+
+Handing back started promises had read everything in parallel and only staggered the messages,
+so chunking bounded the message and nothing bounded the work. The cap used to be the caller's
+restraint — a future "decode all" would have read the whole folder at once. It is structural now.
+
+Two things about it are easy to get wrong and are pinned by tests:
+
+- **Superseding is not lazy.** A generator body waits for its first pull, and the run being
+  replaced may be one nobody ever iterates, so the previous run is abandoned on the *call*.
+- **The consumer has to await each delivery.** Collecting the posts and awaiting them at the end
+  reads everything while they are still in flight and holds every decoded image until they land.
+  That property lives in the resolver rather than the runner, so it has its own test there.
+
+An abort is the one thing that comes back from the decoder as a throw — a file that cannot be
+read is a `failure` item — so anything else carries upward to the dispatcher's boundary instead
+of ending the iteration quietly. Swallowed, a decoder fault showed up as tiles that never arrived.
+
+### Export stopped being an extension command
+
+Export used to be reachable two ways: the toolbar button, which raises `export:request` inside
+the view, and a `rawImageViewer.exportPng` palette command, which went out through an intent
+resolver, looked up `ViewerRegistry.activeViewer`, posted an `export` message at it, and landed
+in the same `exportSelected`. The second route carried a question the first does not have to
+ask — *which view?* — and answered it by asking which one has focus.
+
+Nothing else wanted it, so the chain is gone: the command and its palette row, `CommandNames
+.exportPng`, `IntentKind.fileExportRequest`, `parseExport`, `EXPORT_INTENT_RESOLVERS`,
+`WebviewHost.requestExport`, the `export` member of `WebviewHostMessage` and its resolver, and
+the one-member `ExportFormat` enum that nothing referenced afterwards. What is left is the
+button raising `export:request` in the view that owns the pixels.
+
+The cost, stated plainly: export is toolbar-only now. No palette entry, and nothing to bind a
+chord to.
+
+**Zoom deliberately kept its commands.** The same argument does not carry, because the keystroke
+is not the webview's to begin with: `contributes.keybindings` is the only extension-level
+keyboard entry point, and VS Code's webview preamble ends `handleInnerKeydown` with an
+unconditional `forwardKeyEvent('did-keydown', e)` — verified in the installed app. So a webview
+that handled `=` itself could not stop the workbench dispatching the keybinding as well, and
+zoom would fire twice. It is one or the other, and keeping the commands keeps the Keyboard
+Shortcuts UI, user rebinding and conflict handling — along with the `fieldFocus` context key
+that exists precisely because the view receives the keystroke either way.
+
+`ViewerRegistry.activeViewer` therefore stays too: zoom is its last caller.
+
+`requestZoom` is now `postToWebview(message)` — named for the direction rather than the errand,
+with the message shape given at the call site. A method per feature invited exactly the question
+that kept coming up ("why is this here at all?"); a channel does not. Why the channel exists is
+written down once, in `docs/overview/messaging.md`, which is where durable how-and-why goes from
+here rather than this file.
 
 ### Testing
 
@@ -520,8 +662,8 @@ APIs it will never have. The fix is to decide what crosses the bridge:
 
 A host-only tsconfig without `DOM` would catch this class of mistake at compile time.
 
-**Still open — virtualisation.** Every source is treated as visible, so a folder gallery
-decodes all at once. The measurements that set the budget (2026-09-21, `ImageDecoder` over
+**Closed — virtualisation.** Every source used to be treated as visible, so a folder gallery
+decoded all at once. The measurements that set the budget (2026-09-21, `ImageDecoder` over
 `samples/`, 3,931 files / 122.7 MB raw):
 
 | | cost |
@@ -530,8 +672,94 @@ decodes all at once. The measurements that set the budget (2026-09-21, `ImageDec
 | Decoding the ~24 tiles on screen | 6.9 ms, 1.5 MB |
 | One probe pixel from the source bytes | 1.1 us |
 
-The gallery needs to ask for what is on screen and drop what is not
+The gallery now asks for what is on screen and drops what is not
 (`ImagesSlice.clearAllExcept`), which is the same input both halves need.
+
+### Gallery virtualisation
+
+**What decides the window: `IntersectionObserver`, not arithmetic.** The grid is uniform —
+`repeat(auto-fill, minmax(var(--riv-tile), 1fr))` with a fixed row height — so a visible range
+*could* be computed from `scrollTop`, the row height, the gap and the padding. It is not, on
+purpose: that would tie decode correctness to four numbers a stylesheet edit can invalidate
+with nothing to say so. The browser already does intersection correctly.
+
+Three spec facts the design leans on, checked against w3c.github.io/IntersectionObserver rather
+than assumed:
+
+- `observe()` initialises the registration with `previousThresholdIndex = -1`, so **the first
+  processed pass queues an entry for every target**, each carrying a real `isIntersecting`.
+  Filtering that first callback *is* the initial window — there is no startup special case, and
+  no hardcoded first-N.
+- Entries are **deltas**: only a target whose threshold index changed is reported. The current
+  window is therefore accumulated in `RIVGallery.onScreen`, never read off one callback.
+- `delay` **skips rather than defers**: "If `(time - registration.lastUpdateTime <
+  observer.delay)`, skip further processing for target." Nothing is computed and nothing is
+  queued, and `lastUpdateTime` only advances on passes that run — so every delivered entry was
+  measured when it arrived, and a transition missed inside a window is corrected on the next
+  pass. Late, never wrong.
+
+Verified in Chromium directly (headless, 300 tiles): `delay: 150` is accepted on its own and
+reflected on the instance with `trackVisibility: false`, and the first pass reported all 300
+targets with 48 intersecting. Whether `delay` measurably throttles a real fling could not be
+measured headlessly — virtual time does not run the rAF/scroll lifecycle — but nothing depends
+on it: if Chromium ignored `delay` entirely the only cost is more callbacks, each a Set update
+plus a slice write that no-ops when the window has not moved.
+
+**`rootMargin: '100% 0px'` is the prefetch**, and it is what makes tracking scroll speed
+unnecessary — a tile is decoded a screen before it arrives. With `threshold: 0`, a single pixel
+counts. Both live in one declaration (`riv-gallery/definitions.ts`) so tuning is a one-line
+change. TypeScript's DOM library has no IO v2, so `delay` and `trackVisibility` are added manually in `IntersectionObserverInit`.
+
+**The DOM is not windowed.** A tile has to exist to be observed, so there is still one `<li>`
+per source. That is also not where the cost was: an unpainted canvas is 0×0, and the gigabyte
+was pixels in `ImagesSlice`.
+
+**What it is wired to.** The observed set lands in a `ViewportSlice` of its own rather than on
+`ViewSlice` — for event granularity, not taxonomy: the gallery re-renders on `view:change`, so a
+scroll-driven value there would rebuild the list on every observer pass. `setIds` compares by
+content and copies what it is given, because the gallery hands it the same mutable set each
+pass. Two reactions then read it, and the decisions they make are pure functions in
+`reactions/decodeWindow.ts`, since happy-dom ships `IntersectionObserver` *and* `ResizeObserver`
+as stubs whose callbacks never fire (`observe()` is a literal `// TODO: Implement`).
+
+Eviction keeps the window **plus the selected id and the pinned probe sample** — load-bearing,
+not politeness: `exportSelected` requires `isReadyImageItem` for `selectedId`, and
+`ProbeInputHandler` reads `item.image` straight out of the store, so dropping either because it
+scrolled away would break both with nothing on screen to explain it. Eviction is also gated on
+gallery mode: a single view holds one image and has nothing to window, which is what keeps the
+status bar describing it after an options change.
+
+An options change invalidates differently from a scroll. Everything decoded is stale, so what
+nothing is looking at is dropped (scrolling back asks again, rather than showing pixels decoded
+under options that no longer apply), while the targets are re-asked unconditionally and left on
+screen until the new pixels overwrite them — blanking every visible tile on a toolbar click was
+worse.
+
+**The host side.** `app:ready` no longer decodes anything: it posts the sources and waits to be
+asked, because the view knows what it can see and the host does not. `handleRequestDecode` keeps
+one `AbortController` per run and aborts the previous — the `AbortSignal` had been threaded
+through `decodeFromSource` → `withAbortSignalCheck` → `decodeSingle` all along with nobody ever
+passing one. Results post a chunk at a time (24, roughly a screenful), which caps what a single
+structured clone copies and starts paint earlier. `decodeSingle` recognises an abort and leaves
+silently: reported as an ordinary failure it would raise one VS Code notification per file and
+paint every tile of the abandoned window as broken.
+
+Virtualisation also made three things reachable that had been written and never called: the
+`'pending'` `ImageItem` kind (its renderer in `RivImageState.ts` was dead, because `toImageItem`
+only ever produced `ready`/`failed`), `ImagesSlice.clearAllExcept`, and that `AbortSignal`.
+
+**Measured** (host-side decode of real `samples/raw` files, chunked as the host now posts them):
+
+| | decoded | peak RSS |
+| --- | --- | --- |
+| One window | 24 | 57 MB |
+| Ten windows, a chunk at a time | 240 | 75 MB |
+| The old way, all at once | 4757 | 624 MB |
+
+Ten windows cost barely more than one because the host never holds more than a chunk's results.
+The 624 MB is lower than the 1.3 GB recorded earlier because this measures only the host side —
+the earlier figure included the structured clone into the webview and what the webview then
+retained.
 
 ### Async discipline
 
@@ -580,5 +808,5 @@ The gallery needs to ask for what is on screen and drop what is not
 7. Guess picker → V
 8. Remember options -> V
 9. Parallel HEX view (pixel-to-byte mapping) ->
-10. Gallery virtualization ->
+10. Gallery virtualization → V
 11. Image dynamic streaming.

@@ -47,7 +47,7 @@ export default defineConfig({
         test: {
           name: 'webview',
           environment: 'happy-dom',
-          include: ['src/features/webview/**/*.test.ts'],
+          include: ['src/domains/webview/**/*.test.ts'],
         },
       },
       {
@@ -56,7 +56,7 @@ export default defineConfig({
           name: 'host',
           environment: 'node',
           include: ['src/**/*.test.ts'],
-          exclude: ['src/features/webview/**'],
+          exclude: ['src/domains/webview/**'],
         },
       },
     ],

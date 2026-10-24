@@ -1,0 +1,61 @@
+import { WebviewDisposableUtils } from '@SHARED/features/disposable';
+import { WebviewDisposableStore } from '@SHARED/features/disposable/WebviewDisposableStore';
+import type { WebviewMessage } from '@SHARED/features/messaging/protocol';
+
+import { RIV_COMMAND_EVENT_ID } from '../../commands/definitions';
+import { StyleSheets } from '../styleSheets';
+
+import { RIVView } from './RIVView';
+import type { ReadonlyViewState } from './RIVViewState';
+
+export abstract class RIVHTMLElement extends HTMLElement {
+  public static readonly tagName: string;
+
+  protected readonly disposableStore = new WebviewDisposableStore();
+  protected view?: RIVView;
+  protected viewState?: ReadonlyViewState;
+
+  public disconnectedCallback(): void {
+    this.disposableStore.dispose();
+  }
+
+  protected emitCommand(command: WebviewMessage): void {
+    this.dispatchEvent(
+      new CustomEvent<WebviewMessage>(RIV_COMMAND_EVENT_ID, {
+        bubbles: true,
+        composed: true, // To allow the event to cross shadow DOM boundaries
+        detail: command,
+      }),
+    );
+  }
+
+  // TODO: Add mapping to store events
+  // Just a convenience method to observe events and automatically manage their disposal.
+  protected observe(...args: Parameters<typeof WebviewDisposableUtils.listenTo>): void {
+    this.disposableStore.add(WebviewDisposableUtils.listenTo(...args));
+  }
+
+  // RIVView mount point
+  protected mount(template: string, styles?: string): ShadowRoot {
+    const templateElement = document.createElement('template');
+
+    templateElement.innerHTML = template;
+
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+
+    // Content, then style. So the first paint is already styled.
+    if (styles) {
+      StyleSheets.adoptStyleSheet(shadowRoot, styles);
+    }
+
+    shadowRoot.appendChild(document.importNode(templateElement.content, true));
+
+    this.view = new RIVView(shadowRoot);
+
+    return shadowRoot;
+  }
+
+  protected ref<T extends HTMLElement>(id: string): T | null {
+    return this.view?.ref<T>(id) ?? null;
+  }
+}

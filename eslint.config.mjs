@@ -134,22 +134,46 @@ export default defineConfig({
     }],
   },
 }, {
-  /**
-   * The webview is its own bundle: no `vscode` API, no file system, no app context. Reaching
-   * for one of them fails at build time with `Could not resolve "vscode"` or, worse, at
-   * runtime when a host-only singleton throws inside the webview. Ask the host over the
-   * message bridge instead — `SourceLoader` is the example.
-   *
-   * The exceptions are the host's own half of the bridge, which lives under this root because
-   * it is the other end of the same conversation. Listed file by file rather than by folder on
-   * purpose: `webviewHost/messageDispatcher` holds what the WEBVIEW does with host messages,
-   * so it is webview code sitting in the same directory and it keeps the restriction.
-   */
-  files: ['src/features/webview/**/*.ts'],
-  ignores: [
-    '**/*.test.ts',
-    'src/features/webview/webviewHost/**',
-  ],
+  files: ['src/domains/**/*.ts'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [
+        {
+          group: ['@EXTENSION/*', '@WEBVIEW/*'],
+          message: 'Shared code belongs to neither side. Move what both need into @SHARED.',
+        },
+      ],
+    }],
+  },
+}, {
+  files: ['src/domains/webview/**/*.ts'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [
+        {
+          group: ['@EXTENSION/*'],
+          message: 'The webview cannot reach the host. Ask over the bridge, or move the shared part into @SHARED.',
+        },
+      ],
+    }],
+  },
+}, {
+  files: ['src/domains/extension/**/*.ts'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [
+        {
+          group: ['@WEBVIEW/*'],
+          message: 'The view\'s internals are its own. Post it a message, or move the shared part into @SHARED.',
+        },
+      ],
+    }],
+  },
+}, {
+  files: ['src/domains/webview/**/*.ts'],
+  // No carve-out for the host's half any more: it is `@EXTENSION/features/webviewHost` now,
+  // so everything this points at really is webview code.
+  ignores: ['**/*.test.ts'],
   rules: {
     '@typescript-eslint/no-restricted-imports': ['error', {
       paths: [
@@ -172,14 +196,9 @@ export default defineConfig({
     }],
   },
 }, {
-  /**
-   * The two classes the `disposables` restriction exists to point at. Naming the files rather
-   * than the class names means a rename cannot quietly re-enable the rule on them, and a move
-   * shows up as the rule firing on its own owner.
-   */
   files: [
-    'src/features/disposable/DisposableStore.ts',
-    'src/features/webview/disposable/WebviewDisposableStore.ts',
+    'src/domains/extension/features/disposable/DisposableStore.ts',
+    'src/domains/shared/features/disposable/WebviewDisposableStore.ts',
   ],
   rules: { 'no-restricted-syntax': 'off' },
 });

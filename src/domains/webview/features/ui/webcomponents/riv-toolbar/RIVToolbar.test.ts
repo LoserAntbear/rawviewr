@@ -1,0 +1,503 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
+import { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
+import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
+import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@SHARED/features/image/imageDecoder/definitions';
+import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
+import type { WebviewMessage } from '@SHARED/features/messaging/protocol';
+import { ViewerBackground } from '@SHARED/features/viewer/definitions';
+import { RIV_COMMAND_EVENT_ID } from '@WEBVIEW/features/commands/definitions';
+import { WEBVIEW_COMMAND_RESOLVERS } from '@WEBVIEW/features/commands/resolvers';
+import { WebviewCommandDispatcher } from '@WEBVIEW/features/commands/webviewCommandDispatcher';
+import { createWebviewStore } from '@WEBVIEW/features/store/createWebviewStore';
+import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
+import { ZOOM } from '@WEBVIEW/features/store/slice/ViewSlice';
+import type { AppStore } from '@WEBVIEW/features/store/types';
+import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
+
+import { RIVToolbar } from './index';
+
+/**
+ * The toolbar mounted as a real custom element, driven the way a user drives it.
+ *
+ * Every interaction goes the whole way: a real event inside the shadow root, the delegated
+ * listener, `readElementValue`, the control table, the command it names, the dispatcher that
+ * resolves it, the store write, and the re-render. The dispatcher is part of that path now —
+ * a control performs nothing itself, so without one nothing would land.
+ */
+
+let store: AppStore;
+let formatRegistry: FormatRegistry;
+let toolbar: RIVToolbar;
+
+beforeAll(() => {
+  formatRegistry = new FormatRegistry(PixelFormatPresets.PRESETS, DEFAULT_DECODE_OPTIONS.format.id);
+  ({ store } = createWebviewStore());
+
+  WebviewContextProvider.create({ store, formatRegistry });
+  customElements.define(RIVToolbar.tagName, RIVToolbar);
+
+  new WebviewCommandDispatcher(
+    WEBVIEW_COMMAND_RESOLVERS,
+    { post: async () => undefined },
+    { store },
+  ).listen(document);
+});
+
+beforeEach(() => {
+  store.get(StoreSliceId.DecodeOptions).reset();
+  store.get(StoreSliceId.View).reset();
+
+  toolbar = document.createElement(RIVToolbar.tagName) as RIVToolbar;
+  document.body.replaceChildren(toolbar);
+});
+
+const options = () => store.get(StoreSliceId.DecodeOptions).options;
+
+function control<T extends HTMLElement>(id: string): T {
+  const element = toolbar.shadowRoot?.getElementById(id);
+
+  if (!element) {
+    throw new Error(`riv-toolbar has no control #${id}`);
+  }
+
+  return element as T;
+}
+
+function fieldOf(id: string): HTMLElement {
+  return control(id).closest('.field') as HTMLElement;
+}
+
+/** A `change` as a browser fires it: bubbling, but not composed out of the shadow root. */
+function fireChange(element: HTMLElement): void {
+  element.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+/** Selects an option rather than assigning `.value` — see `ElementBuilder/utils.test.ts`. */
+function pick(id: string, value: string): void {
+  const select = control<HTMLSelectElement>(id);
+
+  for (const option of select.options) {
+    option.selected = option.value === value;
+  }
+
+  fireChange(select);
+}
+
+function type(id: string, value: string): void {
+  const input = control<HTMLInputElement>(id);
+
+  input.value = value;
+  fireChange(input);
+}
+
+function toggle(id: string): void {
+  const box = control<HTMLInputElement>(id);
+
+  box.checked = !box.checked;
+  fireChange(box);
+}
+
+describe('riv-toolbar: controls write to the store', () => {
+  /**
+   * Known blind spot: this cannot catch code that probes `Object.hasOwn(select, 'value')`.
+   * happy-dom wraps selects in a Proxy whose method binder copies `value` onto the instance
+   * the first time it is read or written — and the toolbar's own render reads it. Browsers
+   * never do that. `ElementBuilder/utils.test.ts` covers the case, because there the
+   * function under test is the first thing to touch the element.
+   */
+  it('a dropdown updates its option', () => {
+    pick('format', 'rgb565');
+
+    expect(options().format.id).toBe('rgb565');
+  });
+
+  it('a number input updates its option', () => {
+    type('width', '640');
+
+    expect(options().width).toBe(640);
+  });
+
+  it('a checkbox updates its option', () => {
+    toggle('flipY');
+
+    expect(options().flipY).toBe(true);
+  });
+
+  it('anything unparseable in a number field means "auto"', () => {
+    type('width', '640');
+    type('width', 'abc');
+
+    expect(options().width).toBe(0);
+  });
+});
+
+describe('riv-toolbar: the store writes to the controls', () => {
+  it('reflects options changed from elsewhere', () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: PixelFormatPresets.getPreset('bgra8888'), width: 320, flipY: true });
+
+    expect(control<HTMLSelectElement>('format').value).toBe('bgra8888');
+    expect(control<HTMLInputElement>('width').value).toBe('320');
+    expect(control<HTMLInputElement>('flipY').checked).toBe(true);
+  });
+
+  it('shows the bit-order control only for formats that care about it', () => {
+    const subByte = formatRegistry.list().find((format) => format.bitOrderSensitive);
+    const packed = formatRegistry.list().find((format) => !format.bitOrderSensitive);
+
+    pick('format', subByte!.id);
+    expect(fieldOf('bitOrderMsb').hidden).toBe(false);
+
+    pick('format', packed!.id);
+    expect(fieldOf('bitOrderMsb').hidden).toBe(true);
+  });
+
+  it('locks width and height when a header preset supplies them', () => {
+    pick('headerPreset', HeaderPreset.U16LE);
+
+    expect(control<HTMLInputElement>('width').disabled).toBe(true);
+    expect(control<HTMLInputElement>('width').placeholder).toBe('header');
+
+    pick('headerPreset', HeaderPreset.None);
+
+    expect(control<HTMLInputElement>('width').disabled).toBe(false);
+    expect(control<HTMLInputElement>('width').placeholder).toBe('auto');
+  });
+});
+
+describe('riv-toolbar: the zoom dial', () => {
+  /** The buttons raise a command; moving the view is the resolver's job, not theirs. */
+  function emitted(): WebviewMessage[] {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { once: false, signal: controller.signal });
+
+    return commands;
+  }
+
+  let controller: AbortController;
+
+  beforeEach(() => {
+    controller = new AbortController();
+  });
+
+  afterEach(() => {
+    controller.abort();
+  });
+
+  const zoom = () => store.get(StoreSliceId.View).zoom;
+
+  it.each([
+    ['zoomIn', 'in'],
+    ['zoomOut', 'out'],
+    ['zoomReset', 'reset'],
+  ])('%s asks the view to zoom %s, and leaves the decode alone', (id, direction) => {
+    // Off 1:1, where all three buttons are live — at rest, `1:1` is inert by design.
+    store.get(StoreSliceId.View).setZoom('in');
+
+    const commands = emitted();
+    const before = options();
+
+    control<HTMLButtonElement>(id).click();
+
+    expect(commands).toEqual([{ type: 'view:zoom', direction }]);
+    expect(options()).toBe(before);
+  });
+
+  it('reads as inert at the far end of the dial, in the direction that cannot move', () => {
+    while (zoom() < ZOOM.max) {
+      store.get(StoreSliceId.View).setZoom('in');
+    }
+
+    expect(control<HTMLButtonElement>('zoomIn').disabled).toBe(true);
+    expect(control<HTMLButtonElement>('zoomOut').disabled).toBe(false);
+
+    while (zoom() > ZOOM.min) {
+      store.get(StoreSliceId.View).setZoom('out');
+    }
+
+    expect(control<HTMLButtonElement>('zoomOut').disabled).toBe(true);
+    expect(control<HTMLButtonElement>('zoomIn').disabled).toBe(false);
+  });
+
+  it('offers 1:1 only when the view is not already there', () => {
+    expect(control<HTMLButtonElement>('zoomReset').disabled).toBe(true);
+
+    store.get(StoreSliceId.View).setZoom('in');
+
+    expect(control<HTMLButtonElement>('zoomReset').disabled).toBe(false);
+  });
+});
+
+describe('riv-toolbar: actions', () => {
+  it('the export button emits its command and leaves the options alone', () => {
+    const emitted: WebviewMessage[] = [];
+    const before = options();
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      emitted.push((event as CustomEvent<WebviewMessage>).detail);
+    });
+
+    control<HTMLButtonElement>('exportPng').click();
+
+    expect(emitted.filter(({ type }) => type === 'export:request')).toHaveLength(1);
+    expect(options()).toBe(before);
+  });
+});
+
+/**
+ * A control the decoder has no opinion about. It reads the view rather than the options, and
+ * asks for its change as a command — the view owns the backdrop, and the setting only says
+ * which one a view opens with.
+ */
+describe('riv-toolbar: the backdrop', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it('shows what the view is painted with', () => {
+    store.get(StoreSliceId.View).setBackground(ViewerBackground.magenta);
+
+    expect(control<HTMLSelectElement>('background').value).toBe('magenta');
+  });
+
+  it.each([
+    [ViewerBackground.black],
+    [ViewerBackground.magenta],
+    [ViewerBackground.editor],
+  ])('asks the view for the %s it was given, and leaves the decode alone', (background) => {
+    const commands = emitted();
+    const before = options();
+
+    pick('background', background);
+
+    expect(commands).toEqual([{ type: 'view:background:update', background }]);
+    expect(options()).toBe(before);
+  });
+
+  it('offers every backdrop there is', () => {
+    const offered = [...control<HTMLSelectElement>('background').options].map((option) => option.value);
+
+    expect(new Set(offered)).toEqual(new Set(Object.values(ViewerBackground)));
+  });
+});
+
+/**
+ * One handler serves both interactions, so what keeps them apart is the control table rather
+ * than the component. Without that, the click that merely opens a select would be taken for
+ * a choice, and a checkbox would speak twice for one toggle.
+ */
+describe('riv-toolbar: which interaction a control answers to', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it.each([
+    ['a select', 'format'],
+    ['a number input', 'width'],
+    ['a checkbox', 'flipY'],
+  ])('says nothing when %s is merely clicked', (_label, id) => {
+    const commands = emitted();
+
+    control(id).dispatchEvent(new Event('click', { bubbles: true }));
+
+    expect(commands).toEqual([]);
+  });
+
+  it('says nothing when a button reports a change it cannot have', () => {
+    const commands = emitted();
+
+    control('exportPng').dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(commands).toEqual([]);
+  });
+
+  it('still answers each on the interaction it does speak', () => {
+    const commands = emitted();
+
+    control('exportPng').dispatchEvent(new Event('click', { bubbles: true }));
+    pick('format', 'rgb565');
+
+    expect(commands.map(({ type }) => type)).toEqual(['export:request', 'decode:options:update']);
+  });
+});
+
+/**
+ * The picker mounted for real: the candidate list is a function of what is decoded, so the
+ * options are filled per render rather than at build, and picking one fills Width and Height.
+ */
+describe('riv-toolbar: the dimension picker', () => {
+  const geometry = (availableBytes: number): Geometry => ({
+    width: 4,
+    height: 3,
+    frameCount: 1,
+    bytesPerRow: 8,
+    bytesPerFrame: 24,
+    availableBytes,
+    baseOffset: 0,
+    lockedByHeader: false,
+  });
+
+  const show = (availableBytes = 24) => {
+    store.get(StoreSliceId.Sources).upsert([{ id: 'a', name: 'a.raw', uri: { path: '/a.raw' } as never }]);
+    store.get(StoreSliceId.Images).put('a', {
+      id: 'a',
+      kind: 'ready',
+      status: 'success',
+      name: 'a.raw',
+      detail: null,
+      byteLength: availableBytes,
+      geometry: geometry(availableBytes),
+      image: { width: 4, height: 3, data: new Uint8ClampedArray(48) },
+    });
+  };
+
+  const offered = () => [...control<HTMLSelectElement>('dimensions').options].map((option) => option.value);
+
+  it('offers only auto until something is decoded to measure', () => {
+    expect(offered()).toEqual(['']);
+  });
+
+  it('offers the candidates once an image is on show', () => {
+    show();
+
+    expect(offered()).toContain('4x3');
+    expect(offered().length).toBeGreaterThan(2);
+  });
+
+  it('fills both dimensions from the one that was picked', () => {
+    show();
+    pick('dimensions', '4x3');
+
+    expect([options().width, options().height]).toEqual([4, 3]);
+  });
+
+  it('hands the decision back to the decoder on auto', () => {
+    show();
+    pick('dimensions', '4x3');
+    pick('dimensions', '');
+
+    expect([options().width, options().height]).toEqual([0, 0]);
+  });
+
+  it('stands down while a header dictates the geometry', () => {
+    show();
+    pick('headerPreset', HeaderPreset.U16LE);
+
+    expect(control<HTMLSelectElement>('dimensions').disabled).toBe(true);
+  });
+
+  /**
+   * Rebuilding a select's options throws away its nodes — which in a real window closes the
+   * dropdown under the user's cursor and loses the highlight.
+   */
+  it('leaves the options alone when the offer has not changed', () => {
+    const before = control<HTMLSelectElement>('format').options[0];
+
+    type('width', '7');
+
+    expect(control<HTMLSelectElement>('format').options[0]).toBe(before);
+  });
+
+  it('re-offers when the format changes the pixel count', () => {
+    show();
+
+    const before = offered();
+
+    pick('format', 'gray8');
+
+    // Half the bits a pixel means twice the pixels, and a different set of divisors.
+    expect(offered()).not.toEqual(before);
+  });
+});
+
+/**
+ * The toggle that makes this toolbar everyone's. It shows what the host keeps rather than
+ * what was last clicked, so a second view turning it off is reflected here.
+ */
+describe('riv-toolbar: preserving the options', () => {
+  let listening: AbortController;
+
+  const emitted = (): WebviewMessage[] => {
+    const commands: WebviewMessage[] = [];
+
+    document.addEventListener(RIV_COMMAND_EVENT_ID, (event) => {
+      commands.push((event as CustomEvent<WebviewMessage>).detail);
+    }, { signal: listening.signal });
+
+    return commands;
+  };
+
+  beforeEach(() => {
+    listening = new AbortController();
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(false);
+  });
+
+  afterEach(() => {
+    listening.abort();
+  });
+
+  it('starts unchecked, since nothing is being kept', () => {
+    expect(control<HTMLInputElement>('preserveOptions').checked).toBe(false);
+  });
+
+  it('shows what the host keeps, which another view can have set', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+
+    expect(control<HTMLInputElement>('preserveOptions').checked).toBe(true);
+  });
+
+  it('asks for the toolbar to be kept, and leaves the decode alone', () => {
+    const commands = emitted();
+    const before = options();
+
+    toggle('preserveOptions');
+
+    expect(commands).toEqual([{ type: 'decode:options:preserve', preserved: true }]);
+    expect(options()).toBe(before);
+  });
+
+  it('asks for it to be let go again', () => {
+    store.get(StoreSliceId.Config).setPreserveOptionsForAllWindows(true);
+
+    const commands = emitted();
+
+    toggle('preserveOptions');
+
+    expect(commands).toEqual([{ type: 'decode:options:preserve', preserved: false }]);
+  });
+});

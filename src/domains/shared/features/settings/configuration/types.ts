@@ -1,0 +1,54 @@
+import type { AlphaMode } from '@SHARED/features/image/imageDecoder/definitions';
+import type {
+  ConfigChangeKind,
+  EXTENSION_CONFIGURATION_KEY,
+  VIEWER_CONFIG_KEYS,
+} from '@SHARED/features/settings/configuration/definitions';
+import type { ViewerBackground } from '@SHARED/features/viewer/definitions';
+
+/**
+ * Inline `import()` on purpose: a top-level import would pull package.json into the program,
+ * and it sits outside `rootDir`.
+ */
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type ManifestProps = typeof import('@packageRoot/package.json')['contributes']['configuration']['properties'];
+
+/**
+ * Every setting contributed in package.json, prefix stripped. Type-only import: nothing
+ * is emitted, so the manifest never enters the bundle and `rootDir` is not violated.
+ */
+export type ConfigKey = Strip<keyof ManifestProps & string, typeof EXTENSION_CONFIGURATION_KEY>;
+
+/**
+ * We've got to define config schema as well by hand
+ * Since parsing package.json cannot return concrete types (returns strings),
+ * and we need to validate the values at runtime.
+ */
+export type ViewerConfigSchema = {
+  tileSize: number;
+  defaultWidth: number;
+  defaultFormat: string;
+  defaultHeight: number;
+  defaultOffset: number;
+  maxFileSizeMB: number;
+  galleryIncludeGlob: string;
+  defaultAlphaMode: AlphaMode;
+  defaultLittleEndian: boolean;
+  defaultBackground: ViewerBackground;
+}
+
+export type ConfigValidator<K extends ConfigKey> = (raw: unknown) => ViewerConfigSchema[K] | null;
+export type ConfigValidatorsMap = { [K in ConfigKey]: ConfigValidator<K> };
+
+export type ViewerConfigKeySet<
+  Kinds extends ConfigChangeKind = ConfigChangeKind,
+  Keys extends ConfigKey = ConfigKey,
+> = { all: Keys[]; } & { [K in Kinds]: Keys[] };
+
+export type WatchedConfigKey = typeof VIEWER_CONFIG_KEYS[ConfigChangeKind.ViewerWatched][number];
+export type ViewerConfiguration = Pick<ViewerConfigSchema, WatchedConfigKey>;
+
+export type ConfigChangePayload = {
+  kind: ConfigChangeKind;
+  keys: readonly ConfigKey[];
+}
