@@ -35,17 +35,10 @@ async function decode(
   options: DecodeOptions,
   { bridge, decodes }: HostResolverContext,
 ): Promise<void> {
-  // `allSettled` already absorbs a chunk that could not be read — it comes back as a `null`
-  // instalment, which is the one thing there is nothing to post for.
-  await Promise.allSettled(
-    decodes.run(sources, options)
-      .map(async (result) => {
-        const images = await result;
-
-        return images
-          ? await bridge.post({ type: 'images:decode:ready', images })
-          : Promise.resolve();
-      }));
+  // Await each to chain the calls: one after the other.
+  for await (const images of decodes.run(sources, options)) {
+    await bridge.post({ type: 'images:decode:ready', images });
+  }
 }
 
 async function readSourceBytes(
