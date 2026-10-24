@@ -10,10 +10,13 @@ import type {
   PackedWordBits,
   RowDecoder,
   SubBits,
+  Yuv422Order,
+  Yuv444Order,
 } from '../types';
 import { FormatKind } from '../types';
 
 import { buildChannelReaders, buildEmptyRow } from './utils';
+import { writeYuvPixel } from './yuv';
 
 function buildPackedRowDecoder(bits: PackedWordBits, spec: PackedChannels): RowDecoder {
   const byteCount = bits / BITS_PER_BYTE;
@@ -160,9 +163,88 @@ function buildAlphaRowDecoder(): RowDecoder {
   };
 }
 
+// Four bytes carry two pixels, and they share one chroma pair. That is what 4:2:2 means.
+const YUV422_GROUP_BYTES = 4 as const;
+const ROW_SLOTS_PER_PIXEL = 4 as const;
+
+function buildYuv422RowDecoder(order: Yuv422Order): RowDecoder {
+  const y0At = order.indexOf('y0');
+  const y1At = order.indexOf('y1');
+  const uAt = order.indexOf('u');
+  const vAt = order.indexOf('v');
+
+  return (source, byteOffset, pixelCount) => {
+    const row = buildEmptyRow(pixelCount);
+    const lastReadableByte = source.length - YUV422_GROUP_BYTES;
+
+    let sourceIndex = byteOffset;
+    let rowIndex = 0;
+
+    for (
+      let pixel = 0;
+      pixel < pixelCount;
+      pixel += 2, sourceIndex += YUV422_GROUP_BYTES, rowIndex += ROW_SLOTS_PER_PIXEL * 2
+    ) {
+      if (sourceIndex < 0 || sourceIndex > lastReadableByte) {
+        continue;
+      }
+
+      const u = source[sourceIndex + uAt];
+      const v = source[sourceIndex + vAt];
+
+      writeYuvPixel(row, rowIndex, source[sourceIndex + y0At], u, v);
+
+      if (pixel + 1 < pixelCount) {
+        writeYuvPixel(row, rowIndex + ROW_SLOTS_PER_PIXEL, source[sourceIndex + y1At], u, v);
+      }
+    }
+
+    return row;
+  };
+}
+
+// One pixel per three bytes: nothing is shared, so there is no pairing to get wrong.
+const YUV444_PIXEL_BYTES = 3 as const;
+
+function buildYuv444RowDecoder(order: Yuv444Order): RowDecoder {
+  const yAt = order.indexOf('y');
+  const uAt = order.indexOf('u');
+  const vAt = order.indexOf('v');
+
+  return (source, byteOffset, pixelCount) => {
+    const row = buildEmptyRow(pixelCount);
+    const lastReadableByte = source.length - YUV444_PIXEL_BYTES;
+
+    let sourceIndex = byteOffset;
+    let rowIndex = 0;
+
+    for (
+      let pixel = 0;
+      pixel < pixelCount;
+      pixel += 1, sourceIndex += YUV444_PIXEL_BYTES, rowIndex += ROW_SLOTS_PER_PIXEL
+    ) {
+      if (sourceIndex < 0 || sourceIndex > lastReadableByte) {
+        continue;
+      }
+
+      writeYuvPixel(
+        row,
+        rowIndex,
+        source[sourceIndex + yAt],
+        source[sourceIndex + uAt],
+        source[sourceIndex + vAt],
+      );
+    }
+
+    return row;
+  };
+}
+
 const ROW_DECODER_BY_SPEC: KindStrategies<FormatSpec, [], RowDecoder> = {
   [FormatKind.Alpha]: () => buildAlphaRowDecoder(),
   [FormatKind.Gray]: ({ bits }) => buildGrayRowDecoder(bits),
+  [FormatKind.PackedYuv422]: ({ order }) => buildYuv422RowDecoder(order),
+  [FormatKind.PackedYuv444]: ({ order }) => buildYuv444RowDecoder(order),
   [FormatKind.SubByteGray]: ({ bits }) => buildSubByteGrayRowDecoder(bits),
   [FormatKind.ByteOrdered]: ({ order }) => buildByteOrderedRowDecoder(order),
   [FormatKind.Packed]: ({ bits, channels }) => buildPackedRowDecoder(bits, channels),
