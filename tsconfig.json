@@ -8,8 +8,11 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@common/*": ["src/common/*"],
+      "@EXTENSION/*": ["src/domains/extension/*"],
+      "@SHARED/*": ["src/domains/shared/*"],
+      "@WEBVIEW/*": ["src/domains/webview/*"],
       "@definitions/*": ["src/definitions/*"],
+      "@domains/*": ["src/domains/*"],
       "@extensions/*": ["src/extensions/*"],
       "@features/*": ["src/features/*"],
       "@guards/*": ["src/guards/*"],
