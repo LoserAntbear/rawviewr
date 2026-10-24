@@ -106,7 +106,7 @@ describe('WebviewHost: the outward requests', () => {
     const postMessage = vi.fn(async () => true);
     const { host } = mount(postMessage);
 
-    await host.requestZoom('out');
+    await host.postToWebview({ type: 'view:zoom', direction: 'out' });
 
     expect(postMessage).toHaveBeenCalledWith({ type: 'view:zoom', direction: 'out' });
   });
@@ -428,7 +428,7 @@ describe('WebviewHost: failures end handled', () => {
   it('reports a message the webview dropped — it awaits the delivery, not the promise', async () => {
     const { host } = mount(async () => false);
 
-    await host.requestZoom('in');
+    await host.postToWebview({ type: 'view:zoom', direction: 'in' });
 
     expect(consoleError).toHaveBeenCalledWith(
       'WebviewHost: Failed to post message to webview:',

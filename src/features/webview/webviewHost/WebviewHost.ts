@@ -9,7 +9,6 @@ import { InfoMessageController } from '@features/infoMessage/InfoMessageControll
 import type { SettingsController } from '@features/settings/SettingsController';
 import type { UriOpener } from '@features/viewer/types';
 import { ContextKeyController } from '@features/vscode/contextKeys';
-import type { ZoomDirection } from '@features/zoom';
 import { attemptDetached } from '@utils/attempt';
 
 import type { ContentViewSession } from '../../viewer/contentViewSession';
@@ -17,6 +16,7 @@ import type { ContentViewSession } from '../../viewer/contentViewSession';
 import { WebviewAppRenderShell } from './appShell';
 import { HostMessageBridge } from './bridge';
 import { HostMessageDispatcher, WEBVIEW_MESSAGE_RESOLVERS } from './hostDispatcher';
+import type { WebviewHostMessage } from './types';
 
 export class WebviewHost extends DisposableStore {
   private readonly bridge: HostMessageBridge;
@@ -74,8 +74,7 @@ export class WebviewHost extends DisposableStore {
     new WebviewAppRenderShell(context.extensionUri).render(webview);
   }
 
-  // FIXME: Scope to the webview message, not global extension command
-  public requestZoom(direction: ZoomDirection): Promise<void> {
-    return this.bridge.post({ type: 'view:zoom', direction });
+  public postToWebview(message: WebviewHostMessage): Promise<void> {
+    return this.bridge.post(message);
   }
 }

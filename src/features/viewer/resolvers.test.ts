@@ -21,11 +21,12 @@ function resolverFor(activeViewer: Partial<WebviewHost> | undefined) {
 
 describe('VIEW_INTENT_RESOLVERS: view/zoom', () => {
   it('asks the active view to zoom the way the command said', async () => {
-    const requestZoom = vi.fn(async () => undefined);
+    const postToWebview = vi.fn(async () => undefined);
 
-    await resolverFor({ requestZoom })({ kind: IntentKind.viewZoom, direction: 'out' });
+    await resolverFor({ postToWebview })({ kind: IntentKind.viewZoom, direction: 'out' });
 
-    expect(requestZoom).toHaveBeenCalledWith('out');
+    // The message shape is the errand; the channel only knows where it goes.
+    expect(postToWebview).toHaveBeenCalledWith({ type: 'view:zoom', direction: 'out' });
   });
 
   it('does nothing, and says nothing, when no view is focused', async () => {
@@ -36,9 +37,9 @@ describe('VIEW_INTENT_RESOLVERS: view/zoom', () => {
   });
 
   it('reports a view that could not be reached, rather than leaving a rejection loose', async () => {
-    const requestZoom = vi.fn(() => Promise.reject(new Error('webview is gone')));
+    const postToWebview = vi.fn(() => Promise.reject(new Error('webview is gone')));
 
-    await resolverFor({ requestZoom })({ kind: IntentKind.viewZoom, direction: 'in' });
+    await resolverFor({ postToWebview })({ kind: IntentKind.viewZoom, direction: 'in' });
 
     expect(window.showErrorMessage).toHaveBeenCalledWith(
       'Failed to zoom the view: webview is gone',

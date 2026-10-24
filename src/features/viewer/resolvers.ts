@@ -60,7 +60,7 @@ export const VIEW_INTENT_RESOLVERS = (
 ): Pick<IntentResolverMap, IntentKind.viewZoom> => ({
   [IntentKind.viewZoom]: async ({ direction }) => {
     try {
-      await viewerRegistry.activeViewer?.requestZoom(direction);
+      await viewerRegistry.activeViewer?.postToWebview({ type: 'view:zoom', direction });
     } catch (error) {
       InfoMessageController.showError(
         `Failed to zoom the view: ${error instanceof Error ? error.message : String(error)}`,

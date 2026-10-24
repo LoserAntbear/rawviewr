@@ -26,7 +26,23 @@ export type HostMessageResolverInjectedContext = {
 
 export type HostResolverContext = HostMessageResolverInjectedContext & ResolverContext<WebviewHostMessage>;
 
-export type HostMessageResolverMap = MessageResolverMap<WebviewMessage, HostResolverContext>;
+/**
+ * A discriminated set to keep a more precise control
+ * Probable can be done better, keeping as such for now.
+ */
+export type HostBoundMessageType =
+  | 'app:ready'
+  | 'app:status'
+  | 'export:png'
+  | 'probe:request'
+  | 'gallery:openItem'
+  | 'view:fieldFocus'
+  | 'sources:request:decode'
+  | 'decode:options:snapshot';
+
+type HostResolvers = MessageResolverMap<WebviewMessage, HostResolverContext>;
+
+export type HostMessageResolverMap = HostResolvers & Required<Pick<HostResolvers, HostBoundMessageType>>;
 
 export type HostMessageResolver<K extends WebviewMessage['type'] = WebviewMessage['type']> =
   MessageResolver<WebviewMessage, HostResolverContext, K>;
