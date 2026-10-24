@@ -3,6 +3,8 @@ import { FormatKind } from './types';
 
 export enum FormatGroup {
   SubByte = 'sub-byte',
+  Yuv422 = 'YUV 4:2:2',
+  Yuv444 = 'YUV 4:4:4',
   Grayscale = 'grayscale',
   Packed8 = '8-bit packed',
   Packed16 = '16-bit packed',
@@ -240,6 +242,21 @@ export const FORMAT_DEFINITIONS: readonly FormatDefinition[] = [
   { id: 'xrgb8888', spec: { kind: FormatKind.ByteOrdered, order: [PAD_CHANNEL, Red, Green, Blue] } },
   { id: 'bgrx8888', spec: { kind: FormatKind.ByteOrdered, order: [Blue, Green, Red, PAD_CHANNEL] } },
   { id: 'xbgr8888', spec: { kind: FormatKind.ByteOrdered, order: [PAD_CHANNEL, Blue, Green, Red] } },
+
+  // ---- packed YUV 4:2:2 ----------------------------------------------------
+  /**
+   * Two pixels per four bytes, sharing one chroma pair. Named by the byte order of the group,
+   * which is how capture APIs name them — `yuyv` is V4L2's YUYV and Windows' YUY2.
+   */
+  { id: 'yuyv', label: 'YUYV / YUY2 — 4:2:2, Y0 U Y1 V', spec: { kind: FormatKind.PackedYuv422, order: ['y0', 'u', 'y1', 'v'] } },
+  { id: 'uyvy', label: 'UYVY — 4:2:2, U Y0 V Y1', spec: { kind: FormatKind.PackedYuv422, order: ['u', 'y0', 'v', 'y1'] } },
+  { id: 'yvyu', label: 'YVYU — 4:2:2, Y0 V Y1 U', spec: { kind: FormatKind.PackedYuv422, order: ['y0', 'v', 'y1', 'u'] } },
+  { id: 'vyuy', label: 'VYUY — 4:2:2, V Y0 U Y1', spec: { kind: FormatKind.PackedYuv422, order: ['v', 'y0', 'u', 'y1'] } },
+
+  // ---- packed YUV 4:4:4 ----------------------------------------------------
+  /** Three bytes a pixel, full chroma. The two orders are the YUV answer to RGB and BGR. */
+  { id: 'yuv444', label: 'YUV444 — 4:4:4, bytes Y,U,V', spec: { kind: FormatKind.PackedYuv444, order: ['y', 'u', 'v'] } },
+  { id: 'vuy444', label: 'VUY444 — 4:4:4, bytes V,U,Y', spec: { kind: FormatKind.PackedYuv444, order: ['v', 'u', 'y'] } },
 
   // ---- grayscale -----------------------------------------------------------
   { id: 'gray8', spec: { kind: FormatKind.Gray, bits: 8 } },
