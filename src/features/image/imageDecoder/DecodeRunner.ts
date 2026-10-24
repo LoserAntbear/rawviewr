@@ -20,21 +20,44 @@ export class DecodeRunner {
   public run(
     sources: readonly FileSource[],
     options: DecodeOptions,
-  ): Promise<DecodedFileSource[] | null>[] {
-    const run = this.startNewRun();
-    const results: Promise<DecodedFileSource[] | null>[] = [];
+  ): AsyncGenerator<DecodedFileSource[]> {
+    return this.readChunks(sources, options, this.startNewRun());
+  }
 
+  private async *readChunks(
+    sources: readonly FileSource[],
+    options: DecodeOptions,
+    run: AbortController,
+  ): AsyncGenerator<DecodedFileSource[]> {
     for (const chunk of toChunks(sources, this.chunkSize)) {
-      // Only an abort comes back as a throw; a file that cannot be read is a failure item.
-      const decodeCall = attemptAsync<DecodedFileSource[] | null>(
-        () => this.decoder.decodeFromSource([...chunk], options, run.signal),
-        () => null,
-      );
+      const images = await this.readChunk(chunk, options, run.signal);
 
-      results.push(decodeCall);
+      // Stop if the read failed or the run was aborted.
+      if (images === null || run.signal.aborted) {
+        return;
+      }
+
+      yield images;
     }
+  }
 
-    return results;
+  private readChunk(
+    chunk: readonly FileSource[],
+    options: DecodeOptions,
+    signal: AbortSignal,
+  ): Promise<DecodedFileSource[] | null> {
+    return attemptAsync<DecodedFileSource[] | null>(
+      () => this.decoder.decodeFromSource([...chunk], options, signal),
+      (error) => {
+        // Only abort actually throws
+        // Other errors are propagated
+        if (!signal.aborted) {
+          throw error;
+        }
+
+        return null;
+      },
+    );
   }
 
   private startNewRun(): AbortController {
