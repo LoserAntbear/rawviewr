@@ -17,4 +17,6 @@
 
 - Add toolbar or the whole UI caching to avoid redundant recalculations and avoid flickering during switching views.
 
-- Add YUV format support
+- ~~Add YUV format support~~ **Landed for the packed families.**
+  yuv420 is planar. I don't have support for it yet.
+  Will require new row decoders, bpp and probe for planes, not packed pixels.
