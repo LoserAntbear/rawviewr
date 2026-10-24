@@ -20,6 +20,8 @@ import { HostMessageBridge } from './bridge';
 import { HostMessageDispatcher, WEBVIEW_MESSAGE_RESOLVERS } from './hostDispatcher';
 
 export class WebviewHost extends DisposableStore {
+  private readonly bridge: HostMessageBridge;
+
   constructor(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
@@ -34,6 +36,9 @@ export class WebviewHost extends DisposableStore {
     super();
 
     const bridge = new HostMessageBridge(webview);
+
+    this.bridge = bridge;
+
     const dispatcher = new HostMessageDispatcher(
       WEBVIEW_MESSAGE_RESOLVERS,
       bridge,
@@ -72,11 +77,11 @@ export class WebviewHost extends DisposableStore {
 
   // FIXME: Scope to the webview message, not global extension command
   public requestExport(format: ExportFormat): Promise<void> {
-    return this.post({ type: 'export', format });
+    return this.bridge.post({ type: 'export', format });
   }
 
   // FIXME: Scope to the webview message, not global extension command
   public requestZoom(direction: ZoomDirection): Promise<void> {
-    return this.post({ type: 'view:zoom', direction });
+    return this.bridge.post({ type: 'view:zoom', direction });
   }
 }

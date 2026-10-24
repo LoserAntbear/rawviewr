@@ -94,6 +94,13 @@ function mount(
 const postedTypes = (posted: ReturnType<typeof vi.fn>): string[] => posted.mock.calls
   .map(([message]) => (message as WebviewHostMessage).type);
 
+/** Lets every queued continuation run, so "has not happened" means it was never going to. */
+const drain = async (): Promise<void> => {
+  for (let pass = 0; pass < 5; pass += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+};
+
 describe('WebviewHost: the outward requests', () => {
   it('asks the view to export, which only the view can do', async () => {
     const postMessage = vi.fn(async () => true);
@@ -280,6 +287,62 @@ describe('WebviewHost: answering the webview', () => {
 
     await vi.waitFor(() => expect(postedTypes(posted)).toContain('images:decode:ready'));
     expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS, expect.any(AbortSignal));
+  });
+
+  /**
+   * The instalments are pulled, so this side is what paces the decode: awaiting each delivery
+   * before taking the next chunk is what keeps a folder's worth of pixels from being alive at
+   * once. Collecting the deliveries and awaiting them at the end would read everything while
+   * they were still in flight, and hold every decoded image until they landed.
+   */
+  it('waits for a delivery before reading the chunk behind it', async () => {
+    const reads: number[] = [];
+    let releaseFirstPost: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+      releaseFirstPost = resolve;
+    });
+    let posts = 0;
+
+    const many = Array.from({ length: 30 }, (_, index) => ({
+      id: `s${index}`,
+      name: `${index}.raw`,
+      uri: Uri.file(`/${index}.raw`) as never,
+    }));
+
+    const { receive } = mount(
+      async () => {
+        posts += 1;
+
+        if (posts === 1) {
+          await held;
+        }
+
+        return true;
+      },
+      undefined,
+      many,
+      {
+        decodeFromSource: async (given: FileSource[]) => {
+          reads.push(given.length);
+
+          return given.map(({ id }) => ({ status: 'failure', id, message: 'stubbed' }));
+        },
+      },
+    );
+
+    receive({ type: 'sources:request:decode', ids: many, options: DEFAULT_DECODE_OPTIONS });
+
+    // The first delivery has been attempted and is held, so a reader that paces itself is now
+    // stuck on it. Draining the queue gives one that does not every chance to run ahead.
+    await vi.waitFor(() => expect(posts).toBe(1));
+    await drain();
+
+    // Thirty sources at a chunk of 24 is two instalments, and only the first has been read.
+    expect(reads).toEqual([24]);
+
+    releaseFirstPost?.();
+
+    await vi.waitFor(() => expect(reads).toEqual([24, 6]));
   });
 });
 
