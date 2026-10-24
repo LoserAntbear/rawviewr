@@ -101,6 +101,37 @@ export function buildAlphaFormat(id: string, label?: string): PixelFormat {
   };
 }
 
+/**
+ * Sixteen bits a pixel on average:
+ * chroma is shared
+ * Byte order is in the layout – thus endianness does not apply.
+ */
+export function buildYuv422Format(id: string, label?: string): PixelFormat {
+  return {
+    id,
+    bpp: 16,
+    label: label ?? buildLabel(id, '4:2:2'),
+    group: FormatGroup.Yuv422,
+    hasAlpha: false,
+    endianSensitive: false,
+    bitOrderSensitive: false,
+  };
+}
+
+// Three bytes per pixel + no sharing
+// it sizes like `rgb888` without alpha
+export function buildYuv444Format(id: string, label?: string): PixelFormat {
+  return {
+    id,
+    bpp: 24,
+    label: label ?? buildLabel(id, '4:4:4'),
+    group: FormatGroup.Yuv444,
+    hasAlpha: false,
+    endianSensitive: false,
+    bitOrderSensitive: false,
+  };
+}
+
 export function buildFormat({ id, spec, label }: FormatDefinition): PixelFormat {
   switch (spec.kind) {
     case FormatKind.Packed:
@@ -114,6 +145,12 @@ export function buildFormat({ id, spec, label }: FormatDefinition): PixelFormat 
 
     case FormatKind.Gray:
       return buildGrayFormat(id, spec.bits, label);
+
+    case FormatKind.PackedYuv422:
+      return buildYuv422Format(id, label);
+
+    case FormatKind.PackedYuv444:
+      return buildYuv444Format(id, label);
 
     case FormatKind.Alpha:
       return buildAlphaFormat(id, label);
