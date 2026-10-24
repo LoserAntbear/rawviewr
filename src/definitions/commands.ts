@@ -4,7 +4,6 @@ export enum CommandNames {
   zoomIn = 'rawImageViewer.zoomIn',
   zoomOut = 'rawImageViewer.zoomOut',
   zoomReset = 'rawImageViewer.zoomReset',
-  exportPng = 'rawImageViewer.exportPng',
   openGallery = 'rawImageViewer.openGallery',
   resetSettings = 'rawImageViewer.resetSettings',
   openFolderGallery = 'rawImageViewer.openFolderGallery',

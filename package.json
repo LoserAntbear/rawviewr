@@ -112,11 +112,6 @@
         "category": "Raw Image"
       },
       {
-        "command": "rawImageViewer.exportPng",
-        "title": "Export Decoded Image as PNG",
-        "category": "Raw Image"
-      },
-      {
         "command": "rawImageViewer.zoomIn",
         "title": "Zoom In",
         "category": "Raw Image"
@@ -156,10 +151,6 @@
         }
       ],
       "commandPalette": [
-        {
-          "command": "rawImageViewer.exportPng",
-          "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
-        },
         {
           "command": "rawImageViewer.zoomIn",
           "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"

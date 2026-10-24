@@ -1,11 +1,9 @@
 import type * as vscode from 'vscode';
 
-import { ExportFormat } from '@definitions/exportFormats';
 import { IntentKind } from '@definitions/intent';
 import type { IntentParser } from '@features/intent/types';
 import { asLocalAllowedUri, asLocalUris, dedupeUris } from '@features/vscode/guards/uri';
 import type { ZoomDirection } from '@features/zoom';
-import { asEnumMember } from '@utils/enum';
 
 function parseTargets(args: readonly unknown[]): readonly vscode.Uri[] {
   const [first, second] = args;
@@ -28,12 +26,6 @@ export const parseOpenFolderGallery: IntentParser = (...args) => ({
   kind: IntentKind.viewerOpenFolderGallery,
   folder: asLocalAllowedUri(args[0]),
 });
-
-export const parseExport: IntentParser = (...args) => {
-  const format = asEnumMember(ExportFormat, args[0]) || ExportFormat.Png;
-
-  return { kind: IntentKind.fileExportRequest, format };
-};
 
 export const parseResetSettings: IntentParser = () => ({ kind: IntentKind.settingsReset });
 

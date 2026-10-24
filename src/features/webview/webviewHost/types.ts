@@ -1,5 +1,4 @@
 import type { Endian } from '@definitions/bits';
-import type { ExportFormat } from '@definitions/exportFormats';
 import type { DecodedFileSource, DecodeOptions } from '@features/image/imageDecoder/types';
 import type { SourceBytesResult, SourceLocation } from '@features/image/sourceReader/types';
 import type { ToolbarOptionsSnapshot } from '@features/settings/snapshot';
@@ -9,7 +8,6 @@ import type { ZoomDirection } from '@features/zoom';
 
 export type WebviewHostMessageType = WebviewHostMessage['type'];
 export type WebviewHostMessage =
-  | { type: 'export'; format: ExportFormat; }
   | { type: 'status:error'; message: string; }
   | { type: 'view:zoom'; direction: ZoomDirection; }
   | { type: 'sources:update'; sources: FileSource[]; }

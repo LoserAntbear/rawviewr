@@ -7,5 +7,4 @@ export enum IntentKind {
 
   settingsReset = 'settings/reset',
 
-  fileExportRequest = 'fileExport/request',
 }

@@ -6,7 +6,6 @@ import { DisposableStore } from '@features/disposable/DisposableStore';
 import { RawEditorProvider } from '@features/editor/RawEditorProvider';
 import { ExtensionHost } from '@features/extension/ExtensionHost';
 import { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
-import { EXPORT_INTENT_RESOLVERS } from '@features/image/imageExport/resolvers';
 import { IntentDispatcher } from '@features/intent/IntentDispatcher';
 import { SETTINGS_INTENT_RESOLVERS } from '@features/settings/resolvers';
 import { SettingsController } from '@features/settings/SettingsController';
@@ -53,7 +52,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const dispatcher = new IntentDispatcher({
     ...VIEW_INTENT_RESOLVERS(viewerRegistry),
-    ...EXPORT_INTENT_RESOLVERS(viewerRegistry),
     ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });

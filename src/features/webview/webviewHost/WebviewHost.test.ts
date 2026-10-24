@@ -102,15 +102,6 @@ const drain = async (): Promise<void> => {
 };
 
 describe('WebviewHost: the outward requests', () => {
-  it('asks the view to export, which only the view can do', async () => {
-    const postMessage = vi.fn(async () => true);
-    const { host } = mount(postMessage);
-
-    await host.requestExport('png' as never);
-
-    expect(postMessage).toHaveBeenCalledWith({ type: 'export', format: 'png' });
-  });
-
   it('asks the view to zoom, on the same slice every other way in uses', async () => {
     const postMessage = vi.fn(async () => true);
     const { host } = mount(postMessage);

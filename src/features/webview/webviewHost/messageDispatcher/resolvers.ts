@@ -1,6 +1,5 @@
 import { SnapshotValidator } from '@features/settings/snapshot';
 
-import { exportSelected } from '../../image/export/exportSelected';
 import { StoreSliceId } from '../../store/definitions';
 
 import type { WebviewHostMessageResolverMap } from './types';
@@ -18,10 +17,6 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
     store.get(StoreSliceId.View).setMode(message.viewMode);
     store.get(StoreSliceId.View).setBackground(message.background);
     store.get(StoreSliceId.DecodeOptions).setOptions(message.decodeOptions);
-  },
-
-  export: (_message, { store, bridge }) => {
-    return exportSelected(store, bridge);
   },
 
   'images:decode:ready': (message, { store }) => {

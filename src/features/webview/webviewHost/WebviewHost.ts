@@ -1,6 +1,5 @@
 import type * as vscode from 'vscode';
 
-import type { ExportFormat } from '@definitions/exportFormats';
 import { DisposableStore } from '@features/disposable/DisposableStore';
 import { DecodeRunner } from '@features/image/imageDecoder/DecodeRunner';
 import type { SourcesDecoder } from '@features/image/imageDecoder/SourcesDecoder';
@@ -73,11 +72,6 @@ export class WebviewHost extends DisposableStore {
     );
 
     new WebviewAppRenderShell(context.extensionUri).render(webview);
-  }
-
-  // FIXME: Scope to the webview message, not global extension command
-  public requestExport(format: ExportFormat): Promise<void> {
-    return this.bridge.post({ type: 'export', format });
   }
 
   // FIXME: Scope to the webview message, not global extension command

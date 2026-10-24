@@ -1,6 +1,5 @@
 import type * as vscode from 'vscode';
 
-import type { ExportFormat } from '@definitions/exportFormats';
 import type { IntentKind } from '@definitions/intent';
 import type { ZoomDirection } from '@features/zoom';
 
@@ -13,7 +12,6 @@ export type IntentResolverMap = { readonly [K in IntentKind]: IntentResolver<K> 
 export type Intent =
   | { readonly kind: IntentKind.settingsReset }
   | { readonly kind: IntentKind.viewZoom; readonly direction: ZoomDirection }
-  | { readonly kind: IntentKind.fileExportRequest; readonly format: ExportFormat }
   | { readonly kind: IntentKind.viewerOpenSingle; readonly targets: readonly vscode.Uri[] }
   | { readonly kind: IntentKind.viewerOpenGallery; readonly targets: readonly vscode.Uri[] }
   | { readonly kind: IntentKind.viewerOpenFolderGallery; readonly folder: vscode.Uri | null };
