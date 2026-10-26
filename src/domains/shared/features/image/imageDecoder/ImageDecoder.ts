@@ -1,8 +1,9 @@
 import { FormatDecodersLibrary } from '@SHARED/features/image/format/rowDecoders';
-import { shiftRowIndices } from '@utils/array';
+import { byKey } from '@utils/strategy/utils';
 
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 
+import { ALPHA_STRATEGIES } from './alphaModeResolution';
 import { DecodedSizeExceededError } from './decodeErrors';
 import { MAX_DECODED_PIXELS } from './definitions';
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
@@ -30,15 +31,14 @@ export class ImageDecoder {
   ): DecodeResult {
     this.assertDecodableSize(geometry);
 
-    const data = this.applyAlphaMode(
-      this.decodeSource(source, geometry, options),
-      options,
-    );
-
     return {
       source,
       geometry,
-      image: { data, width: geometry.width, height: geometry.height },
+      image: {
+        width: geometry.width,
+        height: geometry.height,
+        data: this.decodeSource(source, geometry, options),
+      },
     };
   }
 
@@ -58,35 +58,18 @@ export class ImageDecoder {
     const decodeRow = FormatDecodersLibrary.getRowDecoder(options.format.id);
     const locator = new PixelLocator(geometry, options, options.format.bpp);
     const result = new Uint8ClampedArray(geometry.width * geometry.height * 4);
+    const alphaStrategy = options.alphaMode === 'ignore' ? 'ignore' : 'unpremultiply';
 
     for (let y = 0; y < geometry.height; y++) {
-      const row = decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions);
+      // Alpha is applied in place, with mutation
+      // To avoid useless allocations, since huge images will eat up all the memory
+      const row = byKey(
+        ALPHA_STRATEGIES,
+        alphaStrategy,
+        decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions),
+      )
 
       result.set(row, y * geometry.width * 4);
-    }
-
-    return result;
-  }
-
-  private applyAlphaMode(source: Uint8ClampedArray, options: DecodeOptions): Uint8ClampedArray<ArrayBuffer> {
-    const result = new Uint8ClampedArray(source);
-
-    if (options.alphaMode === 'ignore') {
-      for (let i = 3; i < result.length; i += 4) {
-        result[i] = 255;
-      }
-    } else if (options.unpremultiply) {
-      for (let i = 0; i < result.length; i += 4) {
-        const alpha = result[i + 3];
-
-        if (alpha > 0 && alpha < 255) {
-          const scale = 255 / alpha;
-
-          for (const j of shiftRowIndices(i)) {
-            result[j] = result[j] * scale;
-          }
-        }
-      }
     }
 
     return result;

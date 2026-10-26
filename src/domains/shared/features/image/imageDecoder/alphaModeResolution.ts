@@ -1,0 +1,29 @@
+import { shiftRowIndices } from '@utils/array';
+import type { Strategies } from '@utils/strategy';
+
+type AlphaModeStrategy = 'ignore' | 'unpremultiply';
+
+export const ALPHA_STRATEGIES: Strategies<AlphaModeStrategy, [Uint8ClampedArray], Uint8ClampedArray<ArrayBuffer>> = {
+  ignore: (source) =>{
+    for (let i = 3; i < source.length; i += 4) {
+      source[i] = 255;
+    }
+
+    return source as Uint8ClampedArray<ArrayBuffer>;
+  },
+  unpremultiply: (source: Uint8ClampedArray) => {
+    for (let i = 0; i < source.length; i += 4) {
+      const alpha = source[i + 3];
+
+      if (alpha > 0 && alpha < 255) {
+        const scale = 255 / alpha;
+
+        for (const j of shiftRowIndices(i)) {
+          source[j] = source[j] * scale;
+        }
+      }
+    }
+
+    return source as Uint8ClampedArray<ArrayBuffer>;
+  },
+};
