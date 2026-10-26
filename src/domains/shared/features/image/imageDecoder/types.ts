@@ -23,6 +23,8 @@ export type DecodeOptions = {
  * Decoded to RGBA8888, row-major, top-left origin — and self-contained, so
  * anything that only wants pixels needs nothing else to use them.
  * The caller can then convert to whatever format they want.
+ *
+ * DISCLAIMER: CAN BE A PART OF AN IMAGE, e.g., when decoding progressively.
  */
 export type DecodedImage = {
   width: number;
@@ -35,7 +37,7 @@ export type DecodedImage = {
 };
 
 export type DecodedFileSource = {
-  readonly status: 'success';
+  readonly status: 'progress';
 
   readonly id: string;
   readonly name: string;
@@ -43,7 +45,27 @@ export type DecodedFileSource = {
   readonly geometry: Geometry;
   readonly image: DecodedImage;
   readonly detail: string | null;
-} | { readonly status: 'failure'; readonly id: string; readonly message: string; };
+} | {
+    readonly status: 'failure';
+
+    readonly id: string;
+    readonly message: string;
+  } | {
+    // Success is sent as a FINAL confirmation of decoding sequence/decoding call
+    // Thus it implies that all the data is already received via `progress` updates.
+    readonly status: 'success';
+
+    readonly id: string;
+    readonly name: string;
+    readonly byteLength: number;
+    readonly detail: string | null;
+  };
+
+export type DecodedSegment = {
+  readonly row: number;
+  readonly totalRows: number;
+  readonly data: Uint8ClampedArray<ArrayBuffer>;
+};
 
 export type DecodedArrayBuffer = {
   geometry: Geometry;
