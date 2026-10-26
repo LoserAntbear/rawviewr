@@ -2,6 +2,7 @@ import { Uri, window } from 'vscode';
 
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
+import { DECODE_CHUNK_SIZE } from '@EXTENSION/features/image/imageDecoder/DecodeRunner';
 import { ContentViewSession } from '@EXTENSION/features/viewer/contentViewSession';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { WebviewHostMessage, WebviewMessage } from '@SHARED/features/messaging/protocol';
@@ -294,7 +295,7 @@ describe('WebviewHost: answering the webview', () => {
     });
     let posts = 0;
 
-    const many = Array.from({ length: 30 }, (_, index) => ({
+    const many = Array.from({ length: DECODE_CHUNK_SIZE + 2 }, (_, index) => ({
       id: `s${index}`,
       name: `${index}.raw`,
       uri: Uri.file(`/${index}.raw`) as never,
@@ -328,12 +329,12 @@ describe('WebviewHost: answering the webview', () => {
     await vi.waitFor(() => expect(posts).toBe(1));
     await drain();
 
-    // Thirty sources at a chunk of 24 is two instalments, and only the first has been read.
-    expect(reads).toEqual([24]);
+    // Two over a whole chunk is two instalments, and only the first has been read.
+    expect(reads).toEqual([DECODE_CHUNK_SIZE]);
 
     releaseFirstPost?.();
 
-    await vi.waitFor(() => expect(reads).toEqual([24, 6]));
+    await vi.waitFor(() => expect(reads).toEqual([DECODE_CHUNK_SIZE, 2]));
   });
 });
 

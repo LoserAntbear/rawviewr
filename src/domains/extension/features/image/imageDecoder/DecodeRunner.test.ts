@@ -39,9 +39,9 @@ describe('DecodeRunner.run', () => {
   it('gives one instalment per chunk', async () => {
     const runner = runnerOver(async (given) => decodedFor(given));
 
-    const seen = await collect(runner.run(sources(DECODE_CHUNK_SIZE + 6), DEFAULT_DECODE_OPTIONS));
+    const seen = await collect(runner.run(sources(DECODE_CHUNK_SIZE + 1), DEFAULT_DECODE_OPTIONS));
 
-    expect(seen.map((chunk) => chunk.length)).toEqual([DECODE_CHUNK_SIZE, 6]);
+    expect(seen.map((chunk) => chunk.length)).toEqual([DECODE_CHUNK_SIZE, 1]);
   });
 
   it('takes the chunk size it was given', async () => {
