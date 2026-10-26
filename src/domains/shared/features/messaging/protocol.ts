@@ -12,7 +12,9 @@ export type WebviewHostMessage =
   | { type: 'view:zoom'; direction: ZoomDirection; }
   | { type: 'sources:update'; sources: FileSource[]; }
   | { type: 'view:config:update'; config: ViewerConfiguration; }
+  | { type: 'images:decode:start'; images: DecodedFileSource[]; }
   | { type: 'images:decode:ready'; images: DecodedFileSource[]; }
+  | { type: 'images:decode:progress'; images: DecodedFileSource[]; }
   | { type: 'decode:options:preserved'; snapshot: ToolbarOptionsSnapshot; }
   | { type: 'probe:receive:source-bytes'; id: string; location: SourceLocation; result: SourceBytesResult; }
   | { type: 'session:start'; viewMode: ContentViewMode; decodeOptions: DecodeOptions; background: ViewerBackground; };
