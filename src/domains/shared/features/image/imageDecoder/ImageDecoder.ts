@@ -3,12 +3,12 @@ import { byKey } from '@utils/strategy/utils';
 
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 
-import { ALPHA_STRATEGIES } from './alphaModeResolution';
+import { ALPHA_STRATEGIES, resolveAlphaStrategy } from './alphaModeResolution';
 import { DecodedSizeExceededError } from './decodeErrors';
-import { MAX_DECODED_PIXELS } from './definitions';
+import { DEFAULT_ROWS_PER_SEGMENT, MAX_DECODED_PIXELS } from './definitions';
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
 import type { Geometry } from './imagePreparation/types';
-import type { DecodeOptions, DecodeResult } from './types';
+import type { DecodedSegment, DecodeOptions, DecodeResult } from './types';
 
 // TODO: Extract `GeometryResolver` if the geometry resolution logic needs to be reused independently.
 export class ImageDecoder {
@@ -20,10 +20,6 @@ export class ImageDecoder {
     return this.geometryResolver.resolveGeometry(source, options);
   }
 
-  /**
-   * Takes the geometry when the caller already has it — the webview resolves it once, when
-   * the item arrives — and falls back to resolving it for callers that do not.
-   */
   public decode(
     source: Uint8Array,
     options: DecodeOptions,
@@ -42,6 +38,39 @@ export class ImageDecoder {
     };
   }
 
+  public *decodeSegments(
+    source: Uint8Array,
+    options: DecodeOptions,
+    geometry: Geometry = this.resolveGeometry(source, options),
+    rowsPerSegment: number = DEFAULT_ROWS_PER_SEGMENT,
+  ): Generator<DecodedSegment> {
+    this.assertDecodableSize(geometry);
+
+    const rowDecoder = FormatDecodersLibrary.getRowDecoder(options.format.id);
+    const locator = new PixelLocator(geometry, options, options.format.bpp);
+    const alphaStrategy = resolveAlphaStrategy(options);
+    const rowByteLength = geometry.width * 4;
+    const band = Math.max(1, Math.floor(rowsPerSegment));
+
+    for (let row = 0; row < geometry.height; row += band) {
+      const totalRows = Math.min(band, geometry.height - row);
+      const data = new Uint8ClampedArray(rowByteLength * totalRows);
+
+      for (let offset = 0; offset < totalRows; offset++) {
+        const sourceRow = rowDecoder(
+          source,
+          locator.locateRow(row + offset),
+          geometry.width,
+          locator.rowOptions,
+        );
+
+        data.set(sourceRow, offset * rowByteLength);
+      }
+
+      yield { row, totalRows, data: byKey(ALPHA_STRATEGIES, alphaStrategy, data) };
+    }
+  }
+
   // To avoid OS itself from running out of memory and killing the process,
   // we refuse to decode images that exceed the maximum allowed pixel count.
   private assertDecodableSize({ width, height }: Geometry): void {
@@ -55,22 +84,11 @@ export class ImageDecoder {
     geometry: Geometry,
     options: DecodeOptions,
   ): Uint8ClampedArray<ArrayBuffer> {
-    const decodeRow = FormatDecodersLibrary.getRowDecoder(options.format.id);
-    const locator = new PixelLocator(geometry, options, options.format.bpp);
-    const bitWidth = geometry.width * 4;
-    const result = new Uint8ClampedArray(bitWidth * geometry.height);
-    const alphaStrategy = options.alphaMode === 'ignore' ? 'ignore' : 'unpremultiply';
+    const rowByteLength = geometry.width * 4;
+    const result = new Uint8ClampedArray(rowByteLength * geometry.height);
 
-    for (let y = 0; y < geometry.height; y++) {
-      // Alpha is applied in place, with mutation
-      // To avoid useless allocations, since huge images will eat up all the memory
-      const row = byKey(
-        ALPHA_STRATEGIES,
-        alphaStrategy,
-        decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions),
-      )
-
-      result.set(row, y * bitWidth);
+    for (const segment of this.decodeSegments(source, options, geometry)) {
+      result.set(segment.data, segment.row * rowByteLength);
     }
 
     return result;
