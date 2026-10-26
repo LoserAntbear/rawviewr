@@ -5,9 +5,13 @@ import { attemptAsync } from '@utils/attempt';
 
 import type { SourcesDecoder } from './SourcesDecoder';
 
-// More or less guessed and impercally fits
 // TODO: Consider adding to options
-export const DECODE_CHUNK_SIZE = 24 as const;
+// For now the whole chunk is processed at once
+// Thus the number defines amount of files processed at once.
+// Ideally I must stream them 1 by 1, I guess. Will measure.
+// Probably, with workers introduced I could implement isolated decoding with multiple threads
+// Hence multiple files.
+export const DECODE_CHUNK_SIZE = 4 as const;
 
 export class DecodeRunner {
   private currentRun?: AbortController;
