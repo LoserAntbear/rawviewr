@@ -1,10 +1,14 @@
 import { shiftRowIndices } from '@utils/array';
 import type { Strategies } from '@utils/strategy';
 
-type AlphaModeStrategy = 'ignore' | 'unpremultiply';
+import { AlphaMode } from './definitions';
+import type { DecodeOptions } from './types';
+
+type AlphaModeStrategy = 'keep' | 'ignore' | 'unpremultiply';
 
 export const ALPHA_STRATEGIES: Strategies<AlphaModeStrategy, [Uint8ClampedArray], Uint8ClampedArray<ArrayBuffer>> = {
-  ignore: (source) =>{
+  keep: (source) => source as Uint8ClampedArray<ArrayBuffer>,
+  ignore: (source) => {
     for (let i = 3; i < source.length; i += 4) {
       source[i] = 255;
     }
@@ -27,3 +31,15 @@ export const ALPHA_STRATEGIES: Strategies<AlphaModeStrategy, [Uint8ClampedArray]
     return source as Uint8ClampedArray<ArrayBuffer>;
   },
 };
+
+export function resolveAlphaStrategy(options: DecodeOptions): AlphaModeStrategy {
+  let strategy: AlphaModeStrategy = 'keep';
+
+  if (options.alphaMode === AlphaMode.Ignore) {
+    strategy = 'ignore';
+  } else if (options.unpremultiply) {
+    strategy = 'unpremultiply';
+  }
+
+  return strategy;
+}
