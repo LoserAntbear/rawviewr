@@ -57,7 +57,8 @@ export class ImageDecoder {
   ): Uint8ClampedArray<ArrayBuffer> {
     const decodeRow = FormatDecodersLibrary.getRowDecoder(options.format.id);
     const locator = new PixelLocator(geometry, options, options.format.bpp);
-    const result = new Uint8ClampedArray(geometry.width * geometry.height * 4);
+    const bitWidth = geometry.width * 4;
+    const result = new Uint8ClampedArray(bitWidth * geometry.height);
     const alphaStrategy = options.alphaMode === 'ignore' ? 'ignore' : 'unpremultiply';
 
     for (let y = 0; y < geometry.height; y++) {
@@ -69,7 +70,7 @@ export class ImageDecoder {
         decodeRow(source, locator.locateRow(y), geometry.width, locator.rowOptions),
       )
 
-      result.set(row, y * geometry.width * 4);
+      result.set(row, y * bitWidth);
     }
 
     return result;
