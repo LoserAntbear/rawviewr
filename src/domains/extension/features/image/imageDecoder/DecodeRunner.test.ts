@@ -4,73 +4,114 @@ import type { FileSource } from '@EXTENSION/features/viewer';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { DecodedFileSource } from '@SHARED/features/image/imageDecoder/types';
 
-import { DECODE_CHUNK_SIZE, DecodeRunner } from './DecodeRunner';
+import { DecodeRunner } from './DecodeRunner';
 
 /**
  * A viewport asks for every window a fling passes through, and all but the last are wasted.
  * The runner answers that with two rules: a newer run supersedes the one still reading, and
- * instalments are pulled rather than pushed — so whoever consumes them sets the pace.
+ * messages are pulled rather than pushed — so whoever consumes them sets the pace.
+ *
+ * Files are streamed one at a time, which is what keeps the peak at a single source and a
+ * single band however many files were asked for.
  */
-type Decode = (given: FileSource[], options: unknown, signal: AbortSignal) => Promise<DecodedFileSource[]>;
+type Stream = (
+  source: FileSource,
+  options: unknown,
+  runId: string,
+  signal: AbortSignal,
+) => AsyncGenerator<DecodedFileSource>;
 
 const sources = (count: number): FileSource[] => Array.from(
   { length: count },
   (_, index) => ({ id: `s${index}`, name: `${index}.raw`, uri: { path: `/${index}.raw` } as never }),
 );
 
-const decodedFor = (given: readonly FileSource[]): DecodedFileSource[] => given.map(
-  ({ id }) => ({ status: 'failure', id, message: 'stubbed' }),
-);
+/** The shortest honest sequence: open, one band, close. */
+function sequenceFor(source: FileSource, runId: string): DecodedFileSource[] {
+  return [
+    {
+      status: 'start',
+      runId,
+      id: source.id,
+      name: source.name,
+      detail: null,
+      byteLength: 4,
+      geometry: {
+        width: 1,
+        height: 1,
+        frameCount: 1,
+        bytesPerRow: 4,
+        bytesPerFrame: 4,
+        availableBytes: 4,
+        baseOffset: 0,
+        lockedByHeader: false,
+      },
+    },
+    { status: 'progress', runId, id: source.id, segment: { row: 0, totalRows: 1, data: new Uint8ClampedArray(4) } },
+    { status: 'success', runId, id: source.id },
+  ];
+}
 
-const runnerOver = (decodeFromSource: Decode, chunkSize?: number) =>
-  new DecodeRunner({ decodeFromSource } as never, chunkSize);
+const streamsOf = (stream: Stream) => new DecodeRunner({ streamFromSource: stream } as never);
 
-const collect = async (instalments: AsyncIterable<DecodedFileSource[]>): Promise<string[][]> => {
-  const seen: string[][] = [];
+const plainStream: Stream = async function* (source, _options, runId) {
+  yield* sequenceFor(source, runId);
+};
 
-  for await (const images of instalments) {
-    seen.push(images.map(({ id }) => id));
+const collect = async (messages: AsyncIterable<DecodedFileSource[]>): Promise<DecodedFileSource[]> => {
+  const seen: DecodedFileSource[] = [];
+
+  for await (const batch of messages) {
+    seen.push(...batch);
   }
 
   return seen;
 };
 
 describe('DecodeRunner.run', () => {
-  it('gives one instalment per chunk', async () => {
-    const runner = runnerOver(async (given) => decodedFor(given));
+  it('gives the whole sequence for each file, in order', async () => {
+    const seen = await collect(streamsOf(plainStream).run(sources(2), DEFAULT_DECODE_OPTIONS));
 
-    const seen = await collect(runner.run(sources(DECODE_CHUNK_SIZE + 1), DEFAULT_DECODE_OPTIONS));
-
-    expect(seen.map((chunk) => chunk.length)).toEqual([DECODE_CHUNK_SIZE, 1]);
-  });
-
-  it('takes the chunk size it was given', async () => {
-    const runner = runnerOver(async (given) => decodedFor(given), 2);
-
-    expect(await collect(runner.run(sources(5), DEFAULT_DECODE_OPTIONS))).toEqual([
-      ['s0', 's1'],
-      ['s2', 's3'],
-      ['s4'],
+    expect(seen.map(({ status, id }) => `${id}:${status}`)).toEqual([
+      's0:start', 's0:progress', 's0:success',
+      's1:start', 's1:progress', 's1:success',
     ]);
   });
 
   it('gives nothing when there is nothing to decode', async () => {
-    expect(await collect(runnerOver(async (given) => decodedFor(given)).run([], DEFAULT_DECODE_OPTIONS)))
-      .toEqual([]);
+    expect(await collect(streamsOf(plainStream).run([], DEFAULT_DECODE_OPTIONS))).toEqual([]);
   });
 
-  it('hands the decoder a signal, which it never used to get', async () => {
+  it('hands the decoder a signal and one run id for the whole request', async () => {
+    const runIds: string[] = [];
     const signals: AbortSignal[] = [];
-    const runner = runnerOver(async (given, _options, signal) => {
+    const stream: Stream = async function* (source, _options, runId, signal) {
+      runIds.push(runId);
       signals.push(signal);
 
-      return decodedFor(given);
-    });
+      yield* sequenceFor(source, runId);
+    };
 
-    await collect(runner.run(sources(1), DEFAULT_DECODE_OPTIONS));
+    await collect(streamsOf(stream).run(sources(3), DEFAULT_DECODE_OPTIONS));
 
+    expect(new Set(runIds).size).toBe(1);
     expect(signals[0]).toBeInstanceOf(AbortSignal);
     expect(signals[0]?.aborted).toBe(false);
+  });
+
+  it('gives a later run a different id, so its bands cannot be mistaken for the old ones', async () => {
+    const runIds: string[] = [];
+    const stream: Stream = async function* (source, _options, runId) {
+      runIds.push(runId);
+
+      yield* sequenceFor(source, runId);
+    };
+    const runner = streamsOf(stream);
+
+    await collect(runner.run(sources(1), DEFAULT_DECODE_OPTIONS));
+    await collect(runner.run(sources(1), DEFAULT_DECODE_OPTIONS));
+
+    expect(runIds[0]).not.toBe(runIds[1]);
   });
 
   /**
@@ -80,42 +121,41 @@ describe('DecodeRunner.run', () => {
    */
   describe('pulling, not pushing', () => {
     it('reads nothing at all until someone asks', async () => {
-      const decode = vi.fn<Decode>(async (given) => decodedFor(given));
+      const stream = vi.fn<Stream>(plainStream);
 
-      runnerOver(decode).run(sources(100), DEFAULT_DECODE_OPTIONS);
+      streamsOf(stream).run(sources(100), DEFAULT_DECODE_OPTIONS);
       await Promise.resolve();
 
-      expect(decode).not.toHaveBeenCalled();
+      expect(stream).not.toHaveBeenCalled();
     });
 
-    it('reads one chunk at a time, never the one behind it', async () => {
+    it('opens one file at a time, never the one behind it', async () => {
       let inFlight = 0;
       let peak = 0;
-      const runner = runnerOver(async (given) => {
+      const stream: Stream = async function* (source, _options, runId) {
         inFlight += 1;
         peak = Math.max(peak, inFlight);
-        await Promise.resolve();
+
+        yield* sequenceFor(source, runId);
+
         inFlight -= 1;
+      };
 
-        return decodedFor(given);
-      }, 2);
-
-      await collect(runner.run(sources(10), DEFAULT_DECODE_OPTIONS));
+      await collect(streamsOf(stream).run(sources(10), DEFAULT_DECODE_OPTIONS));
 
       expect(peak).toBe(1);
     });
 
     it('stops reading when the caller walks away', async () => {
-      const decode = vi.fn<Decode>(async (given) => decodedFor(given));
-      const runner = runnerOver(decode, 1);
+      const stream = vi.fn<Stream>(plainStream);
 
-      for await (const images of runner.run(sources(50), DEFAULT_DECODE_OPTIONS)) {
-        expect(images).toHaveLength(1);
+      for await (const batch of streamsOf(stream).run(sources(50), DEFAULT_DECODE_OPTIONS)) {
+        expect(batch).toHaveLength(1);
         break;
       }
 
-      // One chunk read, forty-nine never touched.
-      expect(decode).toHaveBeenCalledOnce();
+      // One file opened, forty-nine never touched.
+      expect(stream).toHaveBeenCalledOnce();
     });
   });
 
@@ -126,11 +166,12 @@ describe('DecodeRunner.run', () => {
      */
     it('abandons the run in flight the moment a newer one is asked for', async () => {
       const signals: AbortSignal[] = [];
-      const runner = runnerOver(async (given, _options, signal) => {
+      const stream: Stream = async function* (source, _options, runId, signal) {
         signals.push(signal);
 
-        return decodedFor(given);
-      }, 1);
+        yield* sequenceFor(source, runId);
+      };
+      const runner = streamsOf(stream);
 
       // Pulled once, so the first run's signal is in hand.
       const abandoned = runner.run(sources(5), DEFAULT_DECODE_OPTIONS);
@@ -145,67 +186,39 @@ describe('DecodeRunner.run', () => {
       expect(signals[0]?.aborted).toBe(true);
     });
 
-    it('gives the superseded caller nothing further', async () => {
-      let release: (() => void) | undefined;
-      const held = new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      const runner = runnerOver(async (given, _options, signal) => {
-        await held;
+    it('stops moving on to the next file once superseded', async () => {
+      const opened: string[] = [];
+      const stream: Stream = async function* (source, _options, runId) {
+        opened.push(source.id);
 
-        if (signal.aborted) {
-          throw new Error('aborted');
-        }
+        yield* sequenceFor(source, runId);
+      };
+      const runner = streamsOf(stream);
+      const superseded = runner.run(sources(5), DEFAULT_DECODE_OPTIONS);
 
-        return decodedFor(given);
-      }, 1);
+      // Drain the first file's sequence, then supersede before the second is reached.
+      await superseded.next();
+      runner.run(sources(5), DEFAULT_DECODE_OPTIONS);
 
-      const superseded = collect(runner.run(sources(3), DEFAULT_DECODE_OPTIONS));
+      await collect({ [Symbol.asyncIterator]: () => superseded });
 
-      await vi.waitFor(() => expect(release).toBeDefined());
-      runner.run(sources(3), DEFAULT_DECODE_OPTIONS);
-      release?.();
-
-      expect(await superseded).toEqual([]);
-    });
-
-    /**
-     * The abort can land between a chunk coming back and it being handed over, and a decoder
-     * that does not watch its signal returns that chunk quite happily.
-     */
-    it('drops a chunk that finished reading just as it was superseded', async () => {
-      let release: (() => void) | undefined;
-      const held = new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      let first = true;
-      const runner = runnerOver(async (given) => {
-        if (first) {
-          first = false;
-          await held;
-        }
-
-        return decodedFor(given);
-      }, 1);
-
-      const superseded = collect(runner.run(sources(3), DEFAULT_DECODE_OPTIONS));
-
-      await vi.waitFor(() => expect(first).toBe(false));
-      runner.run(sources(3), DEFAULT_DECODE_OPTIONS);
-      release?.();
-
-      expect(await superseded).toEqual([]);
+      expect(opened).toEqual(['s0']);
     });
   });
 
   /**
-   * A read that cannot happen for any reason other than being abandoned is a fault, not a
-   * quiet nothing: swallowed, it shows up as tiles that simply never arrive.
+   * A decode that fails says so as a message — the decoder turns faults into `failure` so the
+   * view hears about them. A throw escaping it is a bug in the decoder, not a failed decode,
+   * and must not be swallowed into tiles that simply never arrive.
    */
-  it('carries a genuine failure upward rather than ending quietly', async () => {
-    const runner = runnerOver(() => Promise.reject(new Error('decoder is broken')));
+  it('carries a thrown fault upward rather than ending quietly', async () => {
+    const stream: Stream = async function* () {
+      throw new Error('decoder is broken');
 
-    await expect(collect(runner.run(sources(1), DEFAULT_DECODE_OPTIONS)))
+      yield undefined as never;
+    };
+
+    await expect(collect(streamsOf(stream).run(sources(1), DEFAULT_DECODE_OPTIONS)))
       .rejects.toThrow('decoder is broken');
   });
 });
