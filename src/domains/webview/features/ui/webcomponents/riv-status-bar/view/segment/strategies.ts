@@ -1,4 +1,4 @@
-import { byKey, byKind } from '@utils/strategy';
+import { byField, byKey } from '@utils/strategy';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 
 import type { StatusBarStateContext } from '../../state/types';
@@ -13,5 +13,5 @@ export function byDisplayedItem<TResult>(
   strategies: DisplayedItemStrategies<TResult>,
   context: StatusBarStateContext,
 ): TResult {
-  return byKind(strategies, context.displayedItem, context);
+  return byField(strategies, 'kind', context.displayedItem, context);
 }

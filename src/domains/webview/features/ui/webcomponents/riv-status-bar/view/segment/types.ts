@@ -1,5 +1,5 @@
 import type { ContentViewMode } from '@SHARED/features/viewer';
-import type { KindStrategies, Strategies } from '@utils/strategy';
+import type { FieldStrategies, Strategies } from '@utils/strategy';
 
 import type { DisplayedItem, StatusBarStateContext } from '../../state/types';
 import type { StatusBarEntry } from '../types';
@@ -19,8 +19,9 @@ export type StatusSegment = {
 };
 
 export type ModeStrategies<TResult> = Strategies<ContentViewMode, [context: StatusBarStateContext], TResult>;
-export type DisplayedItemStrategies<TResult> = KindStrategies<
+export type DisplayedItemStrategies<TResult> = FieldStrategies<
   DisplayedItem,
+  'kind',
   [context: StatusBarStateContext],
   TResult
 >;

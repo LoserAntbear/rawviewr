@@ -1,5 +1,5 @@
 import { expandTable, readWord } from '@utils/bits';
-import { byKind, type KindStrategies } from '@utils/strategy';
+import { byField, type FieldStrategies } from '@utils/strategy';
 
 import { BITS_PER_BYTE, OPAQUE_VALUE, PAD_CHANNEL, RowChannel } from '../definitions';
 import type {
@@ -240,7 +240,7 @@ function buildYuv444RowDecoder(order: Yuv444Order): RowDecoder {
   };
 }
 
-const ROW_DECODER_BY_SPEC: KindStrategies<FormatSpec, [], RowDecoder> = {
+const ROW_DECODER_BY_SPEC: FieldStrategies<FormatSpec, 'kind', [], RowDecoder> = {
   [FormatKind.Alpha]: () => buildAlphaRowDecoder(),
   [FormatKind.Gray]: ({ bits }) => buildGrayRowDecoder(bits),
   [FormatKind.PackedYuv422]: ({ order }) => buildYuv422RowDecoder(order),
@@ -251,5 +251,5 @@ const ROW_DECODER_BY_SPEC: KindStrategies<FormatSpec, [], RowDecoder> = {
 };
 
 export function buildRowDecoder(spec: FormatSpec): RowDecoder {
-  return byKind(ROW_DECODER_BY_SPEC, spec);
+  return byField(ROW_DECODER_BY_SPEC, 'kind', spec);
 }

@@ -1,7 +1,7 @@
 import { BITS_PER_BYTE } from '@SHARED/features/image/format/definitions';
 import type { Rgba } from '@SHARED/features/image/pixelProbe/types';
 import type { SourceBytes, SourceLocation } from '@SHARED/features/image/sourceReader/types';
-import { byKind, type KindStrategies } from '@utils/strategy';
+import { byField, type FieldStrategies } from '@utils/strategy';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 import type { PinnedProbeSample, PinnedSourceBytes, ProbeSample } from '@WEBVIEW/features/store/slice/ProbeSlice';
 
@@ -53,7 +53,7 @@ function formatBytes({ bytes, value }: SourceBytes, bits: number): string {
 }
 
 /** Waiting says nothing of its own: the spinner is what tells the reader it is coming. */
-const PINNED_BYTES: KindStrategies<PinnedSourceBytes, [bits: number], string | null> = {
+const PINNED_BYTES: FieldStrategies<PinnedSourceBytes, 'kind', [bits: number], string | null> = {
   pending: () => null,
   failed: ({ message }) => message,
   received: ({ bytes }, bits) => formatBytes(bytes, bits),
@@ -66,7 +66,7 @@ export function resolvePinnedProbe({ appState }: StatusBarStateContext): StatusB
     return null;
   }
 
-  const read = byKind(PINNED_BYTES, pinned.sourceFileBytes, pinned.location.bits);
+  const read = byField(PINNED_BYTES, 'kind', pinned.sourceFileBytes, pinned.location.bits);
 
   return {
     sample: formatRgba(pinned.rgba),
