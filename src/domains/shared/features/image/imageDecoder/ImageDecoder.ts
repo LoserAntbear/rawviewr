@@ -50,11 +50,11 @@ export class ImageDecoder {
     const locator = new PixelLocator(geometry, options, options.format.bpp);
     const alphaStrategy = resolveAlphaStrategy(options);
     const rowByteLength = geometry.width * 4;
-    const band = Math.max(1, Math.floor(rowsPerSegment));
+    const segmentBandwidth = Math.max(1, Math.floor(rowsPerSegment));
 
-    for (let row = 0; row < geometry.height; row += band) {
-      const totalRows = Math.min(band, geometry.height - row);
-      const data = new Uint8ClampedArray(rowByteLength * totalRows);
+    for (let row = 0; row < geometry.height; row += segmentBandwidth) {
+      const totalRows = Math.min(segmentBandwidth, geometry.height - row);
+      const dataArray = new Uint8ClampedArray(rowByteLength * totalRows);
 
       for (let offset = 0; offset < totalRows; offset++) {
         const sourceRow = rowDecoder(
@@ -64,10 +64,10 @@ export class ImageDecoder {
           locator.rowOptions,
         );
 
-        data.set(sourceRow, offset * rowByteLength);
+        dataArray.set(sourceRow, offset * rowByteLength);
       }
 
-      yield { row, totalRows, data: byKey(ALPHA_STRATEGIES, alphaStrategy, data) };
+      yield { row, totalRows, data: byKey(ALPHA_STRATEGIES, alphaStrategy, dataArray) };
     }
   }
 
