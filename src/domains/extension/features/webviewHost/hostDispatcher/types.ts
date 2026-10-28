@@ -1,3 +1,4 @@
+import type { Endian } from '@definitions/bits';
 import type { DecodeRunner } from '@EXTENSION/features/image/imageDecoder/DecodeRunner';
 import type { ImageExporter } from '@EXTENSION/features/image/imageExport/ImageExporter';
 import type { SourceReader } from '@EXTENSION/features/image/sourceReader/SourceReader';
@@ -5,6 +6,8 @@ import type { InfoMessage } from '@EXTENSION/features/infoMessage';
 import type { SettingsController } from '@EXTENSION/features/settings/SettingsController';
 import type { ContentViewSession, UriOpener } from '@EXTENSION/features/viewer';
 import type { ContextKeyController } from '@EXTENSION/features/vscode/contextKeys';
+import type { DecodedFileOutcome, DecodedFileSegment, DecodedFileStart } from '@SHARED/features/image/imageDecoder/types';
+import type { SourceLocation } from '@SHARED/features/image/sourceReader/types';
 import type { WebviewHostMessage, WebviewMessage } from '@SHARED/features/messaging/protocol';
 import type { MessageResolver, MessageResolverMap, ResolverContext } from '@SHARED/features/messaging/types';
 
@@ -45,3 +48,18 @@ export type HostMessageResolverMap = HostResolvers & Required<Pick<HostResolvers
 
 export type HostMessageResolver<K extends WebviewMessage['type'] = WebviewMessage['type']> =
   MessageResolver<WebviewMessage, HostResolverContext, K>;
+
+export type ProbeRequestMessage = {
+  id: string;
+  endian: Endian;
+  location: SourceLocation;
+};
+export type DecodeStage = 'start' | 'progress' | 'ready';
+export type DecodeMessageByStage = {
+  start: { type: 'images:decode:start'; images: DecodedFileStart[] };
+  ready: { type: 'images:decode:ready'; images: DecodedFileOutcome[] };
+  progress: { type: 'images:decode:progress'; images: DecodedFileSegment[] };
+};
+export type DecodeBatches = {
+  [S in DecodeStage]: DecodeMessageByStage[S]['images'];
+};
