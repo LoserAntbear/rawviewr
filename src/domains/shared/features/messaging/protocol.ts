@@ -1,5 +1,10 @@
 import type { Endian } from '@definitions/bits';
-import type { DecodedFileSource, DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
+import type {
+  DecodedFileOutcome,
+  DecodedFileSegment,
+  DecodedFileStart,
+  DecodeOptions,
+} from '@SHARED/features/image/imageDecoder/types';
 import type { SourceBytesResult, SourceLocation } from '@SHARED/features/image/sourceReader/types';
 import type { ViewerConfiguration } from '@SHARED/features/settings/configuration/types';
 import type { ToolbarOptionsSnapshot } from '@SHARED/features/settings/snapshot';
@@ -12,9 +17,9 @@ export type WebviewHostMessage =
   | { type: 'view:zoom'; direction: ZoomDirection; }
   | { type: 'sources:update'; sources: FileSource[]; }
   | { type: 'view:config:update'; config: ViewerConfiguration; }
-  | { type: 'images:decode:start'; images: DecodedFileSource[]; }
-  | { type: 'images:decode:ready'; images: DecodedFileSource[]; }
-  | { type: 'images:decode:progress'; images: DecodedFileSource[]; }
+  | { type: 'images:decode:start'; images: DecodedFileStart[]; }
+  | { type: 'images:decode:ready'; images: DecodedFileOutcome[]; }
+  | { type: 'images:decode:progress'; images: DecodedFileSegment[]; }
   | { type: 'decode:options:preserved'; snapshot: ToolbarOptionsSnapshot; }
   | { type: 'probe:receive:source-bytes'; id: string; location: SourceLocation; result: SourceBytesResult; }
   | { type: 'session:start'; viewMode: ContentViewMode; decodeOptions: DecodeOptions; background: ViewerBackground; };
