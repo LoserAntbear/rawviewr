@@ -2,7 +2,6 @@ import { Uri, window } from 'vscode';
 
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
-import { DECODE_CHUNK_SIZE } from '@EXTENSION/features/image/imageDecoder/DecodeRunner';
 import { ContentViewSession } from '@EXTENSION/features/viewer/contentViewSession';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { WebviewHostMessage, WebviewMessage } from '@SHARED/features/messaging/protocol';
@@ -41,7 +40,7 @@ function mount(
   postMessage: (message: WebviewHostMessage) => Promise<boolean>,
   uriOpener?: { openSingle(targets: readonly unknown[]): Promise<void> },
   sources: FileSource[] = [],
-  sourcesDecoder: unknown = { decodeFromSource: async () => [] },
+  sourcesDecoder: unknown = { streamFromSource: async function* () { /* nothing to decode */ } },
 ) {
   let receive: (message: WebviewMessage) => void = () => undefined;
 
@@ -261,9 +260,14 @@ describe('WebviewHost: answering the webview', () => {
 
   it('decodes what the view asked for and sends the pixels back', async () => {
     const posted = vi.fn();
-    const decodeFromSource = vi.fn(async (given: FileSource[]) => given.map(
-      ({ id }) => ({ status: 'failure', id, message: 'stubbed' }),
-    ));
+    const streamFromSource = vi.fn(async function* (
+      given: FileSource,
+      _options: unknown,
+      runId: string,
+    ) {
+      yield { status: 'progress', runId, id: given.id, segment: { row: 0, totalRows: 1, data: new Uint8ClampedArray(4) } };
+      yield { status: 'success', runId, id: given.id };
+    });
     const { receive } = mount(
       async (message) => {
         posted(message);
@@ -272,13 +276,20 @@ describe('WebviewHost: answering the webview', () => {
       },
       undefined,
       [source],
-      { decodeFromSource },
+      { streamFromSource },
     );
 
     receive({ type: 'sources:request:decode', ids: [source], options: DEFAULT_DECODE_OPTIONS });
 
+    // The bands and the close arrive as their own messages, which is what streaming means here.
+    await vi.waitFor(() => expect(postedTypes(posted)).toContain('images:decode:progress'));
     await vi.waitFor(() => expect(postedTypes(posted)).toContain('images:decode:ready'));
-    expect(decodeFromSource).toHaveBeenCalledWith([source], DEFAULT_DECODE_OPTIONS, expect.any(AbortSignal));
+    expect(streamFromSource).toHaveBeenCalledWith(
+      source,
+      DEFAULT_DECODE_OPTIONS,
+      expect.any(String),
+      expect.any(AbortSignal),
+    );
   });
 
   /**
@@ -287,15 +298,15 @@ describe('WebviewHost: answering the webview', () => {
    * once. Collecting the deliveries and awaiting them at the end would read everything while
    * they were still in flight, and hold every decoded image until they landed.
    */
-  it('waits for a delivery before reading the chunk behind it', async () => {
-    const reads: number[] = [];
+  it('waits for a delivery before opening the file behind it', async () => {
+    const opened: string[] = [];
     let releaseFirstPost: (() => void) | undefined;
     const held = new Promise<void>((resolve) => {
       releaseFirstPost = resolve;
     });
     let posts = 0;
 
-    const many = Array.from({ length: DECODE_CHUNK_SIZE + 2 }, (_, index) => ({
+    const many = Array.from({ length: 3 }, (_, index) => ({
       id: `s${index}`,
       name: `${index}.raw`,
       uri: Uri.file(`/${index}.raw`) as never,
@@ -314,10 +325,10 @@ describe('WebviewHost: answering the webview', () => {
       undefined,
       many,
       {
-        decodeFromSource: async (given: FileSource[]) => {
-          reads.push(given.length);
+        streamFromSource: async function* (source: FileSource, _options: unknown, runId: string) {
+          opened.push(source.id);
 
-          return given.map(({ id }) => ({ status: 'failure', id, message: 'stubbed' }));
+          yield { status: 'success', runId, id: source.id };
         },
       },
     );
@@ -329,12 +340,12 @@ describe('WebviewHost: answering the webview', () => {
     await vi.waitFor(() => expect(posts).toBe(1));
     await drain();
 
-    // Two over a whole chunk is two instalments, and only the first has been read.
-    expect(reads).toEqual([DECODE_CHUNK_SIZE]);
+    // One file open, and the two behind it never touched.
+    expect(opened).toEqual(['s0']);
 
     releaseFirstPost?.();
 
-    await vi.waitFor(() => expect(reads).toEqual([DECODE_CHUNK_SIZE, 2]));
+    await vi.waitFor(() => expect(opened).toEqual(['s0', 's1', 's2']));
   });
 });
 
