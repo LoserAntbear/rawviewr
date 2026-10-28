@@ -1,6 +1,6 @@
-import type { DecodedImage } from '@SHARED/features/image/imageDecoder/types';
+import type { SegmentedImage } from '@SHARED/features/image/imageDecoder';
 
-export async function encodeImageToPng(image: DecodedImage): Promise<ArrayBuffer> {
+export async function encodeImageToPng(image: SegmentedImage): Promise<ArrayBuffer> {
   const canvas = new OffscreenCanvas(image.width, image.height);
   const context = canvas.getContext('2d');
 
@@ -8,7 +8,9 @@ export async function encodeImageToPng(image: DecodedImage): Promise<ArrayBuffer
     throw new Error('encodePng: could not get a 2d context');
   }
 
-  context.putImageData(new ImageData(image.data, image.width, image.height), 0, 0);
+  for (const { row, totalRows, data } of image.segments) {
+    context.putImageData(new ImageData(data, image.width, totalRows), 0, row);
+  }
 
   try {
     const blob = await canvas.convertToBlob({ type: 'image/png' });

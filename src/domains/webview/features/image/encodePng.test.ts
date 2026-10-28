@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { toSegmentedImage } from '@SHARED/features/image/imageDecoder/segments';
+
 import { encodeImageToPng } from './encodePng';
 
-const image = { width: 2, height: 2, data: new Uint8ClampedArray(16) };
+const image = toSegmentedImage({ width: 2, height: 2, data: new Uint8ClampedArray(16) });
 
 function canvasWith(context: object | null, blob?: Pick<Blob, 'arrayBuffer'>): unknown {
   return class {
