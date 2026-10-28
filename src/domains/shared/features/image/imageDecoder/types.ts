@@ -49,9 +49,9 @@ export type DecodedImage = {
 export type DecodedFileStart = {
   readonly status: 'start';
 
-  readonly runId: string;
   readonly id: string;
   readonly name: string;
+  readonly runId: string;
   readonly byteLength: number;
   readonly geometry: Geometry;
   readonly detail: string | null;
