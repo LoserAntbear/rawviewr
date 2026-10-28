@@ -4,6 +4,16 @@ import type { PixelFormat } from '@SHARED/features/image/format/types';
 import type { AlphaMode, HeaderPreset } from './definitions';
 import type { Geometry } from './imagePreparation/types';
 
+export type SegmentedImage = {
+  readonly width: number;
+  readonly height: number;
+  readonly segments: readonly DecodedSegment[];
+};
+export type SegmentedPixel = {
+  readonly offset: number;
+  readonly data: Uint8ClampedArray<ArrayBuffer>;
+};
+
 export type DecodeOptions = {
   frame: number; /** --- Which frame of a multi-frame buffer to decode. */
   width: number; /** --- Pixels per row. 0 asks the caller to fall back to a guess. */
@@ -36,30 +46,49 @@ export type DecodedImage = {
   data: Uint8ClampedArray<ArrayBuffer>;
 };
 
-export type DecodedFileSource = {
-  readonly status: 'progress';
+export type DecodedFileStart = {
+  readonly status: 'start';
 
+  readonly runId: string;
   readonly id: string;
   readonly name: string;
   readonly byteLength: number;
   readonly geometry: Geometry;
-  readonly image: DecodedImage;
   readonly detail: string | null;
-} | {
-    readonly status: 'failure';
+};
+export type DecodedFileSegment = {
+  readonly status: 'progress';
 
-    readonly id: string;
-    readonly message: string;
-  } | {
-    // Success is sent as a FINAL confirmation of decoding sequence/decoding call
-    // Thus it implies that all the data is already received via `progress` updates.
-    readonly status: 'success';
+  readonly id: string;
+  readonly runId: string;
+  readonly segment: DecodedSegment;
+};
 
-    readonly id: string;
-    readonly name: string;
-    readonly byteLength: number;
-    readonly detail: string | null;
-  };
+// Success is sent as a FINAL confirmation of decoding sequence/decoding call
+// Thus it implies that all the data is already received via `progress` updates.
+export type DecodedFileSuccess = {
+  readonly status: 'success';
+
+  readonly id: string;
+  readonly runId: string;
+};
+
+export type DecodedFileFailure = {
+  readonly status: 'failure';
+
+  readonly id: string;
+  readonly message: string;
+};
+
+export type DecodedFileInterruption = {
+  readonly status: 'interruption';
+
+  readonly id: string;
+  readonly runId: string;
+};
+
+export type DecodedFileSource = DecodedFileStart | DecodedFileSegment | DecodedFileOutcome;
+export type DecodedFileOutcome = DecodedFileSuccess | DecodedFileFailure | DecodedFileInterruption;
 
 export type DecodedSegment = {
   readonly row: number;
