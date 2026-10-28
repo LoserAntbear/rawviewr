@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
+import { type SegmentedImage, toSegmentedImage } from '@SHARED/features/image/imageDecoder';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
-import type { DecodedImage, DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
+import type { DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
 
 import { probePixel } from './PixelProbe';
 
@@ -27,14 +28,14 @@ const geometry = (overrides: Partial<Geometry> = {}): Geometry => ({
 });
 
 /** Each pixel carries its own index, so a misread lands on a recognisable value. */
-function image(width = 4, height = 3): DecodedImage {
+function image(width = 4, height = 3): SegmentedImage {
   const data = new Uint8ClampedArray(width * height * 4);
 
   for (let index = 0; index < width * height; index += 1) {
     data.set([index, index + 100, index + 200, 255], index * 4);
   }
 
-  return { width, height, data };
+  return toSegmentedImage({ width, height, data });
 }
 
 const options = (overrides: Partial<DecodeOptions> = {}): DecodeOptions => ({
