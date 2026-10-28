@@ -1,4 +1,5 @@
-import type { DecodedImage } from '@SHARED/features/image/imageDecoder/types';
+import type { DecodedSegment, SegmentedImage } from '@SHARED/features/image/imageDecoder';
+import type { Dimension } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
 
 import { RIVView } from '../RIVView';
 
@@ -19,7 +20,8 @@ export class RIVImageView extends RIVView {
     }
   }
 
-  private paintToken: symbol = Symbol('paint');
+  private paintedRunId: string | null = null;
+  private paintedSegments = 0;
 
   public renderCaption(caption: RIVImageCaption): void {
     const name = this.ref('name');
@@ -56,31 +58,22 @@ export class RIVImageView extends RIVView {
     }
   }
 
-  public async paint(image: DecodedImage): Promise<void> {
+  public paint(image: SegmentedImage, runId: string): void {
     const ctx = this.canvas?.getContext('2d');
 
     if (!this.canvas || !ctx) {
       throw new Error('Failed to get canvas or its context');
     }
 
-    const sessionToken = this.startPaintSession();
-    const bitmap = await createImageBitmap(new ImageData(image.data, image.width, image.height));
-
-    try {
-      // A newer paint started while this one was being made: that one wins.
-      if (this.isPaintSession(sessionToken)) {
-        this.canvas.width = image.width;
-        this.canvas.height = image.height;
-
-        ctx.drawImage(bitmap, 0, 0);
-
-        this.clearStatus();
-        this.handleCanvasVisibility(true);
-      }
-    } finally {
-      this.clearPaintSession();
-      bitmap.close();
+    if (this.paintedRunId !== runId) {
+      this.openRun(image, runId);
     }
+
+    for (const segment of image.segments.slice(this.paintedSegments)) {
+      this.drawSegment(ctx, image.width, segment);
+    }
+
+    this.paintedSegments = image.segments.length;
   }
 
   /**
@@ -91,24 +84,34 @@ export class RIVImageView extends RIVView {
    * So the user ends up not seeing anything, but the memory is still being used by the hidden canvas content.
    */
   private offloadPaint(): void {
-    this.canvas.width = 0;
-    this.canvas.height = 0;
+    this.prepareRun();
   }
 
-  private startPaintSession(): symbol {
-    const token = Symbol('paint');
+  private openRun(image: SegmentedImage, runId: string): void {
+    this.prepareRun(image, runId);
 
-    this.paintToken = token;
-
-    return token;
+    this.canvas.hidden = false;
   }
 
-  private isPaintSession(token: symbol): boolean {
-    return this.paintToken === token;
+  private prepareRun(
+    canvasDimension: Dimension = { width: 0, height: 0 },
+    runId: string | null = null,
+  ): void {
+    this.canvas.width = canvasDimension.width;
+    this.canvas.height = canvasDimension.height;
+
+    this.paintedRunId = runId;
+    this.paintedSegments = 0;
+
+    this.clearStatus();
   }
 
-  private clearPaintSession(): void {
-    this.paintToken = Symbol('paint');
+  private drawSegment(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    { row, totalRows, data }: DecodedSegment,
+  ): void {
+    ctx.putImageData(new ImageData(data, width, totalRows), 0, row);
   }
 
   private clearStatus(): void {
