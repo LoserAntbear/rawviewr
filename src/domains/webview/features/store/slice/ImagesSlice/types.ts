@@ -1,16 +1,32 @@
-import type { DecodedFileSource } from '@SHARED/features/image/imageDecoder/types';
+import type { Geometry, SegmentedImage } from '@SHARED/features/image/imageDecoder';
 
 import type { StoreSliceId } from '../../definitions';
 import type { StoreSliceEventPayloads } from '../SliceEvents/types';
 
-export type ReadyImageItem = {
+type DecodedImageResult = {
+  readonly id: string;
+  readonly name: string;
+  readonly runId: string;
+  readonly byteLength: number;
+  readonly geometry: Geometry;
+  readonly detail: string | null;
+  readonly image: SegmentedImage;
+};
+
+export type StreamingImageItem = DecodedImageResult & {
+  readonly kind: 'streaming';
+};
+
+export type ReadyImageItem = DecodedImageResult & {
   readonly kind: 'ready';
-} & Extract<DecodedFileSource, { status: 'success' }>;
+};
+
 export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
   | { readonly kind: 'failed'; readonly message: string }
 )
+  | StreamingImageItem
   | ReadyImageItem;
 
 export type ImagesState = {
