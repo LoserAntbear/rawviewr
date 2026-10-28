@@ -38,7 +38,7 @@ export class ImageDecoder {
     };
   }
 
-  public *decodeSegments(
+  public *decodeSequential(
     source: Uint8Array,
     options: DecodeOptions,
     geometry: Geometry = this.resolveGeometry(source, options),
@@ -87,7 +87,7 @@ export class ImageDecoder {
     const rowByteLength = geometry.width * 4;
     const result = new Uint8ClampedArray(rowByteLength * geometry.height);
 
-    for (const segment of this.decodeSegments(source, options, geometry)) {
+    for (const segment of this.decodeSequential(source, options, geometry)) {
       result.set(segment.data, segment.row * rowByteLength);
     }
 

@@ -190,19 +190,19 @@ describe('ImageDecoder.decodeSegments', () => {
   // 3 does not divide 7, so the last band is short — the case an even split would never reach.
   it.each([1, 2, 3, 7, 64])('reassembles into the whole image at a band of %i rows', (band) => {
     const source = rowNumberedRgba8888(3, 7);
-    const segments = [...decoder.decodeSegments(source, rgba8888(), undefined, band)];
+    const segments = [...decoder.decodeSequential(source, rgba8888(), undefined, band)];
 
     expect(concatenated(segments)).toEqual([...decoder.decode(source, rgba8888()).image.data]);
   });
 
   it('tiles the height exactly once, with the short band last', () => {
-    const segments = [...decoder.decodeSegments(rowNumberedRgba8888(3, 7), rgba8888(), undefined, 3)];
+    const segments = [...decoder.decodeSequential(rowNumberedRgba8888(3, 7), rgba8888(), undefined, 3)];
 
     expect(segments.map(({ row, totalRows }) => [row, totalRows])).toEqual([[0, 3], [3, 3], [6, 1]]);
   });
 
   it('sizes each band to its own rows, which is what `ImageData` requires', () => {
-    const segments = [...decoder.decodeSegments(rowNumberedRgba8888(3, 7), rgba8888(), undefined, 3)];
+    const segments = [...decoder.decodeSequential(rowNumberedRgba8888(3, 7), rgba8888(), undefined, 3)];
 
     expect(segments.map(({ totalRows, data }) => data.length === totalRows * 3 * 4)).toEqual([true, true, true]);
   });
@@ -212,7 +212,7 @@ describe('ImageDecoder.decodeSegments', () => {
     const source = rowNumberedRgba8888(3, 7);
     const flipped = rgba8888({ flipY: true });
 
-    expect(concatenated([...decoder.decodeSegments(source, flipped, undefined, 3)]))
+    expect(concatenated([...decoder.decodeSequential(source, flipped, undefined, 3)]))
       .toEqual([...decoder.decode(source, flipped).image.data]);
   });
 
@@ -227,13 +227,13 @@ describe('ImageDecoder.decodeSegments', () => {
     const tall = rgba8888({ height });
 
     expect([...decoder.decode(source, tall).image.data])
-      .toEqual(concatenated([...decoder.decodeSegments(source, tall, undefined, 1)]));
+      .toEqual(concatenated([...decoder.decodeSequential(source, tall, undefined, 1)]));
   });
 
   it('carries the alpha mode into the banded path too', () => {
     const source = rowNumberedRgba8888(3, 7);
     const ignoring = rgba8888({ alphaMode: AlphaMode.Ignore });
-    const alphas = concatenated([...decoder.decodeSegments(source, ignoring, undefined, 3)])
+    const alphas = concatenated([...decoder.decodeSequential(source, ignoring, undefined, 3)])
       .filter((_, index) => index % 4 === 3);
 
     expect(alphas).toEqual(Array.from({ length: 21 }, () => 255));
