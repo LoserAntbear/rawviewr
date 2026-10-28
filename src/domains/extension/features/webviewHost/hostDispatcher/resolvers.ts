@@ -1,16 +1,19 @@
-import type { Endian } from '@definitions/bits';
 import type { FileSource } from '@EXTENSION/features/viewer';
-import type { DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
-import type { SourceBytesResult, SourceLocation } from '@SHARED/features/image/sourceReader/types';
+import type {
+  DecodedFileSource,
+  DecodeOptions,
+} from '@SHARED/features/image/imageDecoder/types';
+import type { SourceBytesResult } from '@SHARED/features/image/sourceReader/types';
 import { attemptAsync } from '@utils/attempt';
 
-import type { HostMessageResolverMap, HostResolverContext } from './types';
-
-type ProbeRequestMessage = {
-  id: string;
-  endian: Endian;
-  location: SourceLocation;
-};
+import type {
+  DecodeBatches,
+  DecodeMessageByStage,
+  DecodeStage,
+  HostMessageResolverMap,
+  HostResolverContext,
+  ProbeRequestMessage,
+} from './types';
 
 async function startSession({ bridge, session, settings }: HostResolverContext): Promise<void> {
   const snapshot = settings.toolbarSnapshot;
@@ -30,14 +33,63 @@ async function startSession({ bridge, session, settings }: HostResolverContext):
   await bridge.post({ type: 'sources:update', sources: [...session.sources] });
 }
 
+function groupByStage(images: readonly DecodedFileSource[]): DecodeBatches {
+  const batches: DecodeBatches = { start: [], progress: [], ready: [] };
+
+  for (const image of images) {
+    switch (image.status) {
+      case 'start':
+        batches.start.push(image);
+        break;
+      case 'progress':
+        batches.progress.push(image);
+        break;
+      // Any other is ready. Error is ready, interruption is ready as well.
+      // They are to be handled respectively on the receiving end.
+      default:
+        batches.ready.push(image);
+        break;
+    }
+  }
+
+  return batches;
+}
+
+async function postStage<S extends DecodeStage>(
+  bridge: HostResolverContext['bridge'],
+  stage: S,
+  images: DecodeBatches[S],
+): Promise<void> {
+  const message = {
+    images,
+    type: `images:decode:${stage}`,
+  } as unknown as DecodeMessageByStage[S];
+
+  await bridge.post(message);
+}
+
+async function postDecoded(
+  bridge: HostResolverContext['bridge'],
+  images: readonly DecodedFileSource[],
+): Promise<void> {
+  const stages = groupByStage(images);
+
+  for (const [stage, images] of Object.entries(stages) as [DecodeStage, DecodeBatches[DecodeStage]][]) {
+    if (!images.length) {
+      continue;
+    }
+
+    await postStage(bridge, stage, images);
+  }
+}
+
 async function decode(
   sources: readonly FileSource[],
   options: DecodeOptions,
   { bridge, decodes }: HostResolverContext,
 ): Promise<void> {
-  // Await each to chain the calls: one after the other.
   for await (const images of decodes.run(sources, options)) {
-    await bridge.post({ type: 'images:decode:ready', images });
+    await postDecoded(bridge, images);
   }
 }
 
