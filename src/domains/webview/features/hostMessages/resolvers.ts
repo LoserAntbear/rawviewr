@@ -18,6 +18,10 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
     store.get(StoreSliceId.DecodeOptions).setOptions(message.decodeOptions);
   },
 
+  'images:decode:reading': (message, { store }) => {
+    store.get(StoreSliceId.Images).markReading(message.images);
+  },
+
   'images:decode:start': (message, { store }) => {
     store.get(StoreSliceId.Images).startDecode(message.images);
   },
