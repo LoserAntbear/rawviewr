@@ -4,6 +4,7 @@ import { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder/SegmentedImage';
 import type { FileSource } from '@SHARED/features/viewer';
 import { createWebviewStore } from '@WEBVIEW/features/store/createWebviewStore';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
@@ -37,12 +38,12 @@ const geometry = (overrides: Partial<Geometry> = {}): Geometry => ({
 const ready = (id: string, overrides: Partial<Geometry> = {}, byteLength = 24): ImageItem => ({
   id,
   kind: 'ready',
-  status: 'success',
+  runId: 'run-1',
   name: `${id}.raw`,
   detail: null,
   byteLength,
   geometry: geometry(overrides),
-  image: { width: 4, height: 3, data: new Uint8ClampedArray(48) },
+  image: SegmentedImage.fromDecodedImage({ width: 4, height: 3, data: new Uint8ClampedArray(48) }),
 });
 
 const source = (id: string): FileSource => ({ id, name: `${id}.raw`, uri: { path: `/${id}.raw` } as never });

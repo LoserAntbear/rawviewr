@@ -4,6 +4,7 @@ import { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder/SegmentedImage';
 import { createWebviewStore } from '@WEBVIEW/features/store/createWebviewStore';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 import type { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
@@ -40,12 +41,12 @@ function ready(id = 'a'): ImageItem {
   return {
     id,
     kind: 'ready',
-    status: 'success',
+    runId: 'run-1',
     name: `${id}.raw`,
     detail: null,
     byteLength: 24,
     geometry,
-    image: { width: 4, height: 3, data },
+    image: SegmentedImage.fromDecodedImage({ width: 4, height: 3, data }),
   };
 }
 

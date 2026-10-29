@@ -4,6 +4,7 @@ import { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder/SegmentedImage';
 import { createWebviewStore } from '@WEBVIEW/features/store/createWebviewStore';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 import type { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
@@ -68,12 +69,12 @@ function show(image: ImageItem): void {
 const decoded = (bytes: number): ImageItem => ({
   id: 'a',
   kind: 'ready',
-  status: 'success',
+  runId: 'run-1',
   name: 'a.raw',
   detail: null,
   byteLength: bytes,
   geometry: geometry(bytes),
-  image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
+  image: SegmentedImage.fromDecodedImage({ width: 2, height: 2, data: new Uint8ClampedArray(16) }),
 });
 
 describe('riv-status-bar', () => {

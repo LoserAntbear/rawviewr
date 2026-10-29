@@ -2,9 +2,9 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatRegistry } from '@SHARED/features/image/format/FormatRegistry';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder';
 import { DEFAULT_DECODE_OPTIONS, HeaderPreset } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
-import { toSegmentedImage } from '@SHARED/features/image/imageDecoder/segments';
 import type { WebviewMessage } from '@SHARED/features/messaging/protocol';
 import { ViewerBackground } from '@SHARED/features/viewer/definitions';
 import { RIV_COMMAND_EVENT_ID } from '@WEBVIEW/features/commands/definitions';
@@ -383,7 +383,7 @@ describe('riv-toolbar: the dimension picker', () => {
       detail: null,
       byteLength: availableBytes,
       geometry: geometry(availableBytes),
-      image: toSegmentedImage({ width: 4, height: 3, data: new Uint8ClampedArray(48) }),
+      image: SegmentedImage.fromDecodedImage({ width: 4, height: 3, data: new Uint8ClampedArray(48) }),
     });
   };
 

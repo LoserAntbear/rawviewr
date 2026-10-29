@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder/SegmentedImage';
+
 import type { ImageItem } from '../../store/slice/ImagesSlice';
 import type { AppStore } from '../../store/types';
 
@@ -28,12 +30,12 @@ class FakeOffscreenCanvas {
 const ready = (): ImageItem => ({
   id: 'a',
   kind: 'ready',
-  status: 'success',
+  runId: 'run-1',
   name: 'frame.raw',
   detail: null,
   byteLength: 24,
   geometry: { width: 2, height: 2 } as never,
-  image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
+  image: SegmentedImage.fromDecodedImage({ width: 2, height: 2, data: new Uint8ClampedArray(16) }),
 });
 
 /** The export reads one thing: the image the store decoded for the id on screen. */

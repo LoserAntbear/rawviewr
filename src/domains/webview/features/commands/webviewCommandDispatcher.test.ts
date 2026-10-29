@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder/SegmentedImage';
 import { ViewerBackground } from '@SHARED/features/viewer/definitions';
 
 import { createWebviewStore } from '../store/createWebviewStore';
@@ -70,12 +71,12 @@ describe('WebviewCommandDispatcher: the export path, end to end', () => {
   const image: ImageItem = {
     id: 'a',
     kind: 'ready',
-    status: 'success',
+    runId: 'run-1',
     name: 'frame.raw',
     detail: null,
     byteLength: 24,
     geometry: { width: 2, height: 2 } as never,
-    image: { width: 2, height: 2, data: new Uint8ClampedArray(16) },
+    image: SegmentedImage.fromDecodedImage({ width: 2, height: 2, data: new Uint8ClampedArray(16) }),
   };
   const store = {
     selectors: { selectedId: () => image.id },
