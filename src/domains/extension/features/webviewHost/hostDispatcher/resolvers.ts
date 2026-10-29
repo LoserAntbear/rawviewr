@@ -34,10 +34,13 @@ async function startSession({ bridge, session, settings }: HostResolverContext):
 }
 
 function groupByStage(images: readonly DecodedFileSource[]): DecodeBatches {
-  const batches: DecodeBatches = { start: [], progress: [], ready: [] };
+  const batches: DecodeBatches = { reading: [], start: [], progress: [], ready: [] };
 
   for (const image of images) {
     switch (image.status) {
+      case 'reading':
+        batches.reading.push(image);
+        break;
       case 'start':
         batches.start.push(image);
         break;
