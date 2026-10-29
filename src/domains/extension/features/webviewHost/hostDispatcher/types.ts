@@ -6,7 +6,12 @@ import type { InfoMessage } from '@EXTENSION/features/infoMessage';
 import type { SettingsController } from '@EXTENSION/features/settings/SettingsController';
 import type { ContentViewSession, UriOpener } from '@EXTENSION/features/viewer';
 import type { ContextKeyController } from '@EXTENSION/features/vscode/contextKeys';
-import type { DecodedFileOutcome, DecodedFileSegment, DecodedFileStart } from '@SHARED/features/image/imageDecoder/types';
+import type {
+  DecodedFileOutcome,
+  DecodedFileReading,
+  DecodedFileSegment,
+  DecodedFileStart,
+} from '@SHARED/features/image/imageDecoder/types';
 import type { SourceLocation } from '@SHARED/features/image/sourceReader/types';
 import type { WebviewHostMessage, WebviewMessage } from '@SHARED/features/messaging/protocol';
 import type { MessageResolver, MessageResolverMap, ResolverContext } from '@SHARED/features/messaging/types';
@@ -54,10 +59,11 @@ export type ProbeRequestMessage = {
   endian: Endian;
   location: SourceLocation;
 };
-export type DecodeStage = 'start' | 'progress' | 'ready';
+export type DecodeStage = 'reading' | 'start' | 'progress' | 'ready';
 export type DecodeMessageByStage = {
   start: { type: 'images:decode:start'; images: DecodedFileStart[] };
   ready: { type: 'images:decode:ready'; images: DecodedFileOutcome[] };
+  reading: { type: 'images:decode:reading'; images: DecodedFileReading[] };
   progress: { type: 'images:decode:progress'; images: DecodedFileSegment[] };
 };
 export type DecodeBatches = {
