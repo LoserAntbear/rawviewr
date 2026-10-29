@@ -25,6 +25,7 @@ export type ReadyImageItem = DecodedImageResult & {
 export type ImageItem = { readonly id: string; } & (
   | { readonly kind: 'empty' }
   | { readonly kind: 'pending' }
+  | { readonly kind: 'reading' }
   | { readonly kind: 'failed'; readonly message: string }
 )
   | StreamingImageItem
