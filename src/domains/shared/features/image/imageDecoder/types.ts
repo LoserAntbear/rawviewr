@@ -4,11 +4,6 @@ import type { PixelFormat } from '@SHARED/features/image/format/types';
 import type { AlphaMode, HeaderPreset } from './definitions';
 import type { Geometry } from './imagePreparation/types';
 
-export type SegmentedImage = {
-  readonly width: number;
-  readonly height: number;
-  readonly segments: readonly DecodedSegment[];
-};
 export type SegmentedPixel = {
   readonly offset: number;
   readonly data: Uint8ClampedArray<ArrayBuffer>;
