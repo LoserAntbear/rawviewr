@@ -90,6 +90,8 @@ export class RIVImageView extends RIVView {
   private openRun(image: SegmentedImage, runId: string): void {
     this.prepareRun(image, runId);
 
+    this.clearStatus();
+
     this.canvas.hidden = false;
   }
 
@@ -102,8 +104,6 @@ export class RIVImageView extends RIVView {
 
     this.paintedRunId = runId;
     this.paintedSegments = 0;
-
-    this.clearStatus();
   }
 
   private drawSegment(
