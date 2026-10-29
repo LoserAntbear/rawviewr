@@ -1,5 +1,6 @@
 import type {
   DecodedFileOutcome,
+  DecodedFileReading,
   DecodedFileSegment,
   DecodedFileStart,
 } from '@SHARED/features/image/imageDecoder/types';
@@ -12,6 +13,7 @@ import { ImageItem, StreamingImageItem } from './ImageItem';
 import type { ImagesSlicePayloads, ImagesState } from './types';
 
 type IDPayload = { readonly id: string };
+type ItemPayloadTuple = [string, ImageItem];
 
 const DECODE_FLOW_END_BY_OUTCOME: FieldStrategies<
   DecodedFileOutcome,
@@ -41,8 +43,8 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
   }
 
   public put(id: string, image: ImageItem): void;
-  public put(entries: readonly [string, ImageItem][]): void;
-  public put(idOrEntries: string | readonly [string, ImageItem][], image?: ImageItem): void {
+  public put(entries: readonly ItemPayloadTuple[]): void;
+  public put(idOrEntries: string | readonly ItemPayloadTuple[], image?: ImageItem): void {
     const currentState = this.getState();
     const byId = new Map(currentState.byId);
 
@@ -57,8 +59,12 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
     this.patch({ byId });
   }
 
+  public markReading(readingRequests: readonly DecodedFileReading[]): void {
+    this.put(readingRequests.map(({ id }) => [id, { id, kind: 'reading' }] as ItemPayloadTuple));
+  }
+
   public startDecode(decodeStartRequests: readonly DecodedFileStart[]): void {
-    this.put(decodeStartRequests.map((start) => [start.id, ImageItem.toStreamingItem(start)] as [string, ImageItem]));
+    this.put(decodeStartRequests.map((start) => [start.id, ImageItem.toStreamingItem(start)] as ItemPayloadTuple));
   }
 
   public appendSegments(segments: readonly DecodedFileSegment[]): void {
@@ -128,6 +134,6 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
   }
 
   private markPending(ids: readonly string[]): void {
-    this.put(ids.map((id) => [id, { id, kind: 'pending' }] as [string, ImageItem]));
+    this.put(ids.map((id) => [id, { id, kind: 'pending' }] as ItemPayloadTuple));
   }
 }
