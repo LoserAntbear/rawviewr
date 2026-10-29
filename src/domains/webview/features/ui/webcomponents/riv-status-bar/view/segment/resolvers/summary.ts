@@ -1,9 +1,11 @@
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
+import { type Strategies, Strategy } from '@utils/strategy';
 import { StringFormat } from '@utils/string/formatters';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
-import { isReadyImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
+import { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
 
-import type { StatusBarStateContext } from '../../../state/types';
+import { IMAGE_PROGRESS_LABELS } from '../../../../definitions';
+import type { LoadingImageItem, StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry } from '../../types';
 import { byDisplayedItem, byViewMode } from '../strategies';
 import type { DisplayedItemStrategies, ModeStrategies } from '../types';
@@ -18,12 +20,18 @@ function formatDimensions({ appState }: StatusBarStateContext, geometry: Geometr
   return `${geometry.width}×${geometry.height}${guessed ? ' (guessed)' : ''}`;
 }
 
+const LOADING_SUMMARY_BY_KIND: Strategies<LoadingImageItem['kind'], [], string> = {
+  pending: () => IMAGE_PROGRESS_LABELS.queued,
+  reading: () => IMAGE_PROGRESS_LABELS.reading,
+  streaming: () => IMAGE_PROGRESS_LABELS.decoding,
+};
+
 const SUMMARY_BY_DISPLAYED_ITEM: DisplayedItemStrategies<string | null> = {
   none: () => null,
-  loading: () => 'loading…',
+  loading: ({ item }) => Strategy.byKey(LOADING_SUMMARY_BY_KIND, item.kind),
   failed: ({ message }) => `failed: ${message}`,
   resolved: ({ item }, context) => {
-    if (!isReadyImageItem(item)) {
+    if (!ImageItem.isReady(item)) {
       return null;
     }
 
@@ -47,7 +55,7 @@ const SUMMARY_BY_MODE: ModeStrategies<string | null> = {
 
     return imageItems.length === 0
       ? null
-      : `${imageItems.filter(isReadyImageItem).length} / ${sources.length} sources · ${formatName(context)}`;
+      : `${imageItems.filter(ImageItem.isReady).length} / ${sources.length} sources · ${formatName(context)}`;
   },
 };
 
