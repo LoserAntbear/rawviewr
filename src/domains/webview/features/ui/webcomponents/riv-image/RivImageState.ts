@@ -6,6 +6,8 @@ import {
   type StreamingImageItem,
 } from '@WEBVIEW/features/store/slice/ImagesSlice';
 
+import { IMAGE_PROGRESS_LABELS } from '../definitions';
+
 import { RIVImageStateKind } from './definitions';
 import type { RIVImageCaption, RIVImageState } from './types';
 
@@ -13,10 +15,11 @@ const EMPTY_IMAGE_CAPTION: RIVImageCaption = { name: '', title: '', meta: '' };
 export const INITIAL_IMAGE_STATE: RIVImageState = {
   kind: RIVImageStateKind.Loading,
   caption: EMPTY_IMAGE_CAPTION,
+  message: IMAGE_PROGRESS_LABELS.queued,
 };
 
 function resolveCaption(item: ImageItem): RIVImageCaption {
-  if (!ImageItem.isDecodedImageItem(item)) {
+  if (!ImageItem.isDecoded(item)) {
     return EMPTY_IMAGE_CAPTION;
   }
 
@@ -33,13 +36,18 @@ function resolvePaintState(
 ): RIVImageState {
   // TODO: Thinking about it, should I consider the case for empty images (e.g. bytelength 0) as well?
   return (item.image.segments.length === 0)
-    ? { kind: RIVImageStateKind.Loading, caption }
+    ? { kind: RIVImageStateKind.Loading, caption, message: IMAGE_PROGRESS_LABELS.decoding }
     : { kind: RIVImageStateKind.Paint, caption, image: item.image, runId: item.runId };
 }
 
 const STATE_BY_IMAGE: FieldStrategies<ImageItem, 'kind', [caption: RIVImageCaption], RIVImageState> = {
   empty: (_image, caption) => ({ kind: RIVImageStateKind.Empty, caption }),
-  pending: (_image, caption) => ({ kind: RIVImageStateKind.Loading, caption }),
+  pending: (_image, caption) => (
+    { kind: RIVImageStateKind.Loading, caption, message: IMAGE_PROGRESS_LABELS.queued }
+  ),
+  reading: (_image, caption) => (
+    { kind: RIVImageStateKind.Loading, caption, message: IMAGE_PROGRESS_LABELS.reading }
+  ),
   failed: ({ message }, caption) => ({ kind: RIVImageStateKind.Error, caption, message }),
   ready: (item, caption) => resolvePaintState(item, caption),
   streaming: (item, caption) => resolvePaintState(item, caption),
