@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { SegmentedImage } from '@SHARED/features/image/imageDecoder/segments';
+import type { SegmentedImage } from '@SHARED/features/image/imageDecoder';
 
 import { RIVImageView } from './RIVImageView';
 

@@ -1,7 +1,7 @@
 import { BITS_PER_BYTE } from '@SHARED/features/image/format/definitions';
 import type { Rgba } from '@SHARED/features/image/pixelProbe/types';
 import type { SourceBytes, SourceLocation } from '@SHARED/features/image/sourceReader/types';
-import { byField, type FieldStrategies } from '@utils/strategy';
+import { type FieldStrategies, Strategy } from '@utils/strategy';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 import type { PinnedProbeSample, PinnedSourceBytes, ProbeSample } from '@WEBVIEW/features/store/slice/ProbeSlice';
 
@@ -66,7 +66,7 @@ export function resolvePinnedProbe({ appState }: StatusBarStateContext): StatusB
     return null;
   }
 
-  const read = byField(PINNED_BYTES, 'kind', pinned.sourceFileBytes, pinned.location.bits);
+  const read = Strategy.byField(PINNED_BYTES, 'kind', pinned.sourceFileBytes, pinned.location.bits);
 
   return {
     sample: formatRgba(pinned.rgba),

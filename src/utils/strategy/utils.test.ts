@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FieldStrategies, Strategies } from './types';
-import { byField, byKey } from './utils';
+import { Strategy } from './utils';
 
 type Shape =
   | { kind: 'circle'; radius: number }
@@ -18,14 +18,14 @@ describe('byKey', () => {
       b: (count) => `b${count}`,
     };
 
-    expect(byKey(strategies, 'b', 2)).toBe('b2');
+    expect(Strategy.byKey(strategies, 'b', 2)).toBe('b2');
   });
 
   it('leaves the other strategies alone', () => {
     const b = vi.fn();
     const strategies: Strategies<'a' | 'b', [], string> = { a: () => 'a', b };
 
-    byKey(strategies, 'a');
+    Strategy.byKey(strategies, 'a');
 
     expect(b).not.toHaveBeenCalled();
   });
@@ -42,7 +42,7 @@ describe('byField', () => {
     [{ kind: 'circle', radius: 2 } as Shape, 13],
     [{ kind: 'rect', width: 3, height: 4 } as Shape, 12],
   ])('hands %o to the strategy for its kind', (shape, expected) => {
-    expect(byField(area, 'kind', shape)).toBe(expected);
+    expect(Strategy.byField(area, 'kind', shape)).toBe(expected);
   });
 
   it('passes the extra arguments through, after the value', () => {
@@ -51,7 +51,7 @@ describe('byField', () => {
       rect: ({ width }, scale) => width * scale,
     };
 
-    expect(byField(scaled, 'kind', { kind: 'rect', width: 3, height: 4 }, 10)).toBe(30);
+    expect(Strategy.byField(scaled, 'kind', { kind: 'rect', width: 3, height: 4 }, 10)).toBe(30);
   });
 
   /** The reason the field is a parameter: protocol unions discriminate on `status`, not `kind`. */
@@ -61,7 +61,7 @@ describe('byField', () => {
       failure: ({ message }) => `no:${message}`,
     };
 
-    expect(byField(describeOutcome, 'status', { status: 'failure', message: 'nope' })).toBe('no:nope');
+    expect(Strategy.byField(describeOutcome, 'status', { status: 'failure', message: 'nope' })).toBe('no:nope');
   });
 });
 

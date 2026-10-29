@@ -1,5 +1,5 @@
 import { FormatDecodersLibrary } from '@SHARED/features/image/format/rowDecoders';
-import { byKey } from '@utils/strategy/utils';
+import { Strategy } from '@utils/strategy/utils';
 
 import { PixelLocator } from '../pixelLocator/PixelLocator';
 
@@ -67,7 +67,7 @@ export class ImageDecoder {
         dataArray.set(sourceRow, offset * rowByteLength);
       }
 
-      yield { row, totalRows, data: byKey(ALPHA_STRATEGIES, alphaStrategy, dataArray) };
+      yield { row, totalRows, data: Strategy.byKey(ALPHA_STRATEGIES, alphaStrategy, dataArray) };
     }
   }
 

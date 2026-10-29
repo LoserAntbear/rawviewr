@@ -1,8 +1,7 @@
-import { byField, type FieldStrategies } from '@utils/strategy';
+import { type FieldStrategies, Strategy } from '@utils/strategy';
 import { StringFormat } from '@utils/string/formatters';
 import {
-  type ImageItem,
-  isDecodedImageItem,
+  ImageItem,
   type ReadyImageItem,
   type StreamingImageItem,
 } from '@WEBVIEW/features/store/slice/ImagesSlice';
@@ -17,7 +16,7 @@ export const INITIAL_IMAGE_STATE: RIVImageState = {
 };
 
 function resolveCaption(item: ImageItem): RIVImageCaption {
-  if (!isDecodedImageItem(item)) {
+  if (!ImageItem.isDecodedImageItem(item)) {
     return EMPTY_IMAGE_CAPTION;
   }
 
@@ -51,5 +50,5 @@ export function resolveImageState(
 ): RIVImageState {
   return (image === undefined)
     ? INITIAL_IMAGE_STATE
-    : byField(STATE_BY_IMAGE, 'kind', image, resolveCaption(image));
+    : Strategy.byField(STATE_BY_IMAGE, 'kind', image, resolveCaption(image));
 }

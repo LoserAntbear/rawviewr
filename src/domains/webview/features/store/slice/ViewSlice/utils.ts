@@ -1,5 +1,5 @@
 import type { ZoomDirection } from '@SHARED/features/zoom';
-import { byKey, type Strategies } from '@utils/strategy';
+import { type Strategies, Strategy } from '@utils/strategy';
 
 import { ZOOM } from './definitions';
 
@@ -10,7 +10,7 @@ const ZOOM_STEPS: Strategies<ZoomDirection, [current: number], number> = {
 };
 
 export function resolveZoom(current: number, direction: ZoomDirection): number {
-  const next = byKey(ZOOM_STEPS, direction, current);
+  const next = Strategy.byKey(ZOOM_STEPS, direction, current);
 
   return Math.min(ZOOM.max, Math.max(ZOOM.min, next));
 }

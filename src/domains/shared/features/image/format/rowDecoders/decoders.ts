@@ -1,5 +1,5 @@
 import { expandTable, readWord } from '@utils/bits';
-import { byField, type FieldStrategies } from '@utils/strategy';
+import { type FieldStrategies, Strategy } from '@utils/strategy';
 
 import { BITS_PER_BYTE, OPAQUE_VALUE, PAD_CHANNEL, RowChannel } from '../definitions';
 import type {
@@ -251,5 +251,5 @@ const ROW_DECODER_BY_SPEC: FieldStrategies<FormatSpec, 'kind', [], RowDecoder> =
 };
 
 export function buildRowDecoder(spec: FormatSpec): RowDecoder {
-  return byField(ROW_DECODER_BY_SPEC, 'kind', spec);
+  return Strategy.byField(ROW_DECODER_BY_SPEC, 'kind', spec);
 }

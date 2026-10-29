@@ -4,7 +4,7 @@
 
 import type { FieldStrategies, Strategies } from './types';
 
-export function byKey<TKey extends string, TArgs extends unknown[], TResult>(
+function byKey<TKey extends string, TArgs extends unknown[], TResult>(
   strategies: Strategies<TKey, TArgs, TResult>,
   key: TKey,
   ...args: TArgs
@@ -12,7 +12,7 @@ export function byKey<TKey extends string, TArgs extends unknown[], TResult>(
   return strategies[key](...args);
 }
 
-export function byField<
+function byField<
   TUnion extends object,
   TField extends keyof TUnion,
   TArgs extends unknown[],
@@ -28,3 +28,8 @@ export function byField<
 
   return strategy(value, ...args);
 }
+
+export const Strategy = {
+  byKey,
+  byField,
+};

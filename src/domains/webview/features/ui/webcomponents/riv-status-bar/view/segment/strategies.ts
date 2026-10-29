@@ -1,4 +1,4 @@
-import { byField, byKey } from '@utils/strategy';
+import { Strategy } from '@utils/strategy';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 
 import type { StatusBarStateContext } from '../../state/types';
@@ -6,12 +6,12 @@ import type { StatusBarStateContext } from '../../state/types';
 import type { DisplayedItemStrategies, ModeStrategies } from './types';
 
 export function byViewMode<TResult>(strategies: ModeStrategies<TResult>, context: StatusBarStateContext): TResult {
-  return byKey(strategies, context.appState[StoreSliceId.View].mode, context);
+  return Strategy.byKey(strategies, context.appState[StoreSliceId.View].mode, context);
 }
 
 export function byDisplayedItem<TResult>(
   strategies: DisplayedItemStrategies<TResult>,
   context: StatusBarStateContext,
 ): TResult {
-  return byField(strategies, 'kind', context.displayedItem, context);
+  return Strategy.byField(strategies, 'kind', context.displayedItem, context);
 }

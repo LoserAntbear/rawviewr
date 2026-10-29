@@ -1,6 +1,6 @@
 import type { ContentViewMode } from '@SHARED/features/viewer';
 import { selectUnique } from '@utils/array';
-import { byKey, type Strategies } from '@utils/strategy';
+import { type Strategies, Strategy } from '@utils/strategy';
 
 import { StoreSliceId } from '../definitions';
 import { STORE_SELECTORS } from '../selectors';
@@ -22,7 +22,7 @@ const DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE: Strategies<ContentViewMode, [App
 };
 
 function resolveDecodeTargets(store: AppStore): readonly string[] {
-  return byKey(DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE, store.get(StoreSliceId.View).mode, store);
+  return Strategy.byKey(DISPLAY_ITEM_IDS_STRATEGIES_BY_VIEW_MODE, store.get(StoreSliceId.View).mode, store);
 }
 
 /**
