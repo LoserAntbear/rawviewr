@@ -32,7 +32,7 @@ export type ImageItem = { readonly id: string; } & (
 
 // #region DECLARATIONS
 function isValidStreamingRun(item: ImageItem, runId: string): item is StreamingImageItem {
-  return isStreamingImageItem(item) && item.runId === runId;
+  return isStreaming(item) && item.runId === runId;
 }
 
 function toStreamingItem(start: DecodedFileStart): StreamingImageItem {
@@ -49,11 +49,11 @@ function toStreamingItem(start: DecodedFileStart): StreamingImageItem {
   };
 }
 
-function isReadyImageItem(item?: ImageItem): item is ReadyImageItem {
+function isReady(item?: ImageItem): item is ReadyImageItem {
   return item?.kind === 'ready';
 }
 
-function isStreamingImageItem(item?: ImageItem): item is StreamingImageItem {
+function isStreaming(item?: ImageItem): item is StreamingImageItem {
   return item?.kind === 'streaming';
 }
 
@@ -80,18 +80,18 @@ function toReadyItem(runId: string, item?: ImageItem): ReadyImageItem | null {
   return readyItem;
 }
 
-function isDecodedImageItem(
+function isDecoded(
   item: ImageItem | undefined,
 ): item is ReadyImageItem | StreamingImageItem {
-  return isReadyImageItem(item) || isStreamingImageItem(item);
+  return isReady(item) || isStreaming(item);
 }
 
 export const ImageItem = {
+  isReady,
+  isDecoded,
   toReadyItem,
+  isStreaming,
   toStreamingItem,
-  isReadyImageItem,
-  isDecodedImageItem,
-  isStreamingImageItem,
 };
 export const StreamingImageItem = {
   isValidStreamingRun,

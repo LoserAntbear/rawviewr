@@ -1,7 +1,7 @@
 import { isPresent } from '@guards/valueGuards';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
 import { StringFormat } from '@utils/string/formatters';
-import { isReadyImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice/utils';
+import { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice/ImageItem';
 
 import type { StatusBarStateContext } from '../../../state/types';
 import type { StatusBarEntry, StatusLevel } from '../../types';
@@ -32,7 +32,7 @@ const NOTES_BY_DISPLAYED_ITEM: DisplayedItemStrategies<readonly StatusBarEntry[]
   loading: () => [],
   failed: ({ message }) => [{ text: message, level: 'error' }],
   resolved: ({ item }) => {
-    if (!isReadyImageItem(item)) {
+    if (!ImageItem.isReady(item)) {
       return [];
     }
 

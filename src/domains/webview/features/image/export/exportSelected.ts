@@ -1,8 +1,7 @@
 import type { MessagePoster } from '@SHARED/features/messaging';
 import type { WebviewMessage } from '@SHARED/features/messaging/protocol';
 import { attemptAsync } from '@utils/attempt';
-import type { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice/types';
-import { isReadyImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice/utils';
+import { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
 
 import { StoreSliceId } from '../../store/definitions';
 import type { AppStore } from '../../store/types';
@@ -32,7 +31,7 @@ function requireItem(store: AppStore, id: string): ImageItem {
 }
 
 async function encodeExport(item: ImageItem): Promise<WebviewMessage> {
-  if (!isReadyImageItem(item)) {
+  if (!ImageItem.isReady(item)) {
     throw new ExportError('warn', 'Raw Image Viewer: image is not ready for export.');
   }
 
