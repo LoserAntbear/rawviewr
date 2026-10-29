@@ -258,6 +258,39 @@ describe('WebviewHost: answering the webview', () => {
     await vi.waitFor(() => expect(writtenSnapshots).toEqual([snapshot]));
   });
 
+  /**
+   * The read is the longest part of a large decode and the view has nothing else to show for
+   * it, so this stage has to survive the grouping rather than fall into the catch-all `ready`.
+   */
+  it('forwards the read announcement as its own stage', async () => {
+    const posted = vi.fn();
+    const { receive } = mount(
+      async (message) => {
+        posted(message);
+
+        return true;
+      },
+      undefined,
+      [source],
+      {
+        streamFromSource: async function* (given: FileSource, _options: unknown, runId: string) {
+          yield { status: 'reading', runId, id: given.id };
+          yield { status: 'success', runId, id: given.id };
+        },
+      },
+    );
+
+    receive({ type: 'sources:request:decode', ids: [source], options: DEFAULT_DECODE_OPTIONS });
+
+    await vi.waitFor(() => expect(postedTypes(posted)).toContain('images:decode:reading'));
+
+    const reading = posted.mock.calls
+      .map(([message]) => message)
+      .find(({ type }) => type === 'images:decode:reading');
+
+    expect(reading.images).toEqual([{ status: 'reading', runId: expect.any(String), id: source.id }]);
+  });
+
   it('decodes what the view asked for and sends the pixels back', async () => {
     const posted = vi.fn();
     const streamFromSource = vi.fn(async function* (

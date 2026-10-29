@@ -502,3 +502,82 @@ describe('riv-toolbar: preserving the options', () => {
     expect(commands).toEqual([{ type: 'decode:options:preserve', preserved: false }]);
   });
 });
+
+/**
+ * The toolbar takes one number from the images slice, and that slice now emits once per decoded
+ * band — 128 times for a large frame. Both tests here are about what must *not* move while a
+ * stream is running.
+ */
+describe('riv-toolbar: while a decode streams in', () => {
+  const GEOMETRY: Geometry = {
+    width: 4,
+    height: 3,
+    frameCount: 1,
+    bytesPerRow: 8,
+    bytesPerFrame: 24,
+    availableBytes: 24,
+    baseOffset: 0,
+    lockedByHeader: false,
+  };
+
+  const images = () => store.get(StoreSliceId.Images);
+  const offered = () => [...control<HTMLSelectElement>('dimensions').options].map(({ value }) => value);
+
+  const startDecode = () => images().startDecode([{
+    status: 'start',
+    runId: 'run-1',
+    id: 'a',
+    name: 'a.raw',
+    detail: null,
+    byteLength: 24,
+    geometry: GEOMETRY,
+  }]);
+
+  const band = (row: number) => images().appendSegments([{
+    status: 'progress',
+    runId: 'run-1',
+    id: 'a',
+    segment: { row, totalRows: 1, data: new Uint8ClampedArray(16) },
+  }]);
+
+  beforeEach(() => {
+    images().clear();
+    store.get(StoreSliceId.Sources).upsert([{ id: 'a', name: 'a.raw', uri: { path: '/a.raw' } as never }]);
+  });
+
+  it('leaves an uncommitted edit alone as the bands land', () => {
+    startDecode();
+
+    const width = control<HTMLInputElement>('width');
+
+    // Typed but not committed: a number input reports `change` on blur or Enter, so the store
+    // still holds the old value and a render would write it back over the caret.
+    width.value = '640';
+
+    band(0);
+    band(1);
+
+    expect(width.value).toBe('640');
+  });
+
+  it('offers the guesses for the whole stream, not just once it ends', () => {
+    startDecode();
+
+    // `availableBytes` counts source bytes, which `start` already carried.
+    expect(offered()).toContain('4x3');
+  });
+});
+
+/** `build` replaces the controls, so a remount has to fill them again from scratch. */
+describe('riv-toolbar: remounting', () => {
+  it('fills the rebuilt controls even though the store has not moved', () => {
+    type('width', '640');
+
+    // The same element back out and in: `connectedCallback` rebuilds the fields empty while
+    // the store holds exactly what the last render was compared against.
+    toolbar.remove();
+    document.body.replaceChildren(toolbar);
+
+    expect(control<HTMLInputElement>('width').value).toBe('640');
+  });
+});

@@ -109,12 +109,35 @@ afterEach(() => {
 describe('riv-image: a decode arriving in bands', () => {
   const images = () => store.get(StoreSliceId.Images);
 
+  const status = () => element.shadowRoot?.getElementById('status');
+
   it('shows the loading status while the facts are known but no pixels are', async () => {
     images().startDecode([start]);
     await settle();
 
     expect(putImageData).not.toHaveBeenCalled();
-    expect(element.shadowRoot?.getElementById('status')?.hidden).toBe(false);
+    expect(status()?.hidden).toBe(false);
+  });
+
+  /**
+   * The phase the user spends the longest in on a large file: the source is still being read,
+   * so nothing at all is known about it yet. Saying "queued" there is what made the wait look
+   * like nothing had started.
+   */
+  it('names the read while the host is still pulling the file off disk', async () => {
+    images().markReading([{ status: 'reading', runId: 'run-1', id: 'a' }]);
+    await settle();
+
+    expect(status()?.hidden).toBe(false);
+    expect(status()?.textContent).toBe('reading source…');
+  });
+
+  it('moves on to naming the decode once the file is open', async () => {
+    images().markReading([{ status: 'reading', runId: 'run-1', id: 'a' }]);
+    images().startDecode([start]);
+    await settle();
+
+    expect(status()?.textContent).toBe('decoding…');
   });
 
   it('puts a band on the canvas synchronously, before the call even returns', () => {

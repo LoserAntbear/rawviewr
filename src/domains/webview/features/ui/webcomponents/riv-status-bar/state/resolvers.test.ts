@@ -109,8 +109,34 @@ describe('status bar: images that cannot be summarised', () => {
   it('says so while the bytes are still coming, and asks for a spinner', () => {
     const { summary, notes } = status([{ id: 'a', kind: 'pending' }]);
 
-    expect(summary).toEqual({ text: 'loading…', level: 'info', loading: true });
+    expect(summary).toEqual({ text: 'queued…', level: 'info', loading: true });
     expect(notes).toBeNull();
+  });
+
+  /**
+   * The three waits a decode goes through are each long enough to be seen, and reading a large
+   * source is the longest. One label for all three reads as nothing happening.
+   */
+  it.each([
+    ['pending', 'queued…'],
+    ['reading', 'reading source…'],
+  ] as const)('tells %s apart from the other waits', (kind, text) => {
+    expect(status([{ id: 'a', kind }]).summary).toEqual({ text, level: 'info', loading: true });
+  });
+
+  it('keeps saying something while the bands land, rather than going blank', () => {
+    const { summary } = status([{
+      id: 'a',
+      kind: 'streaming',
+      runId: 'run-1',
+      name: 'a.raw',
+      detail: null,
+      byteLength: 24,
+      geometry: geometry(),
+      image: SegmentedImage.buildEmpty(4, 3),
+    }]);
+
+    expect(summary).toEqual({ text: 'decoding…', level: 'info', loading: true });
   });
 
   it('reports a failure as an error, in both segments', () => {
