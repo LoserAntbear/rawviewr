@@ -15,6 +15,8 @@ const NO_DISPLAYED_ITEM: DisplayedItem = { kind: 'none' };
 const PRIORITY_DISPLAYED_ITEM_RULES: readonly DisplayedItemRule[] = [
   (item) => (item.kind === 'failed' ? { kind: 'failed', message: item.message } : null),
   (item) => (item.kind === 'pending' ? { kind: 'loading', item } : null),
+  (item) => (item.kind === 'reading' ? { kind: 'loading', item } : null),
+  (item) => (item.kind === 'streaming' ? { kind: 'loading', item } : null),
   (item) => (item.kind === 'empty' ? { kind: 'failed', message: 'Item is empty' } : null),
   (item) => (item.kind === 'ready' ? { kind: 'resolved', item } : null),
 ];
