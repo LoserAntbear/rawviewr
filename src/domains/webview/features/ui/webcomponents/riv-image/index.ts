@@ -31,8 +31,8 @@ export class RIVImage extends RIVHTMLElement {
 
   private readonly probeInputHandler = new ProbeInputHandler(this);
   private readonly renderers: RIVImageRendererMap = {
-    [RIVImageStateKind.Loading]: () => this.view.showStatus('loading…'),
     [RIVImageStateKind.Empty]: () => this.view.showStatus('nothing to decode'),
+    [RIVImageStateKind.Loading]: ({ message }) => this.view.showStatus(message),
     [RIVImageStateKind.Paint]: ({ image, runId }) => this.view.paint(image, runId),
     [RIVImageStateKind.Error]: ({ message }) => this.view.showStatus(message, 'error'),
   };
