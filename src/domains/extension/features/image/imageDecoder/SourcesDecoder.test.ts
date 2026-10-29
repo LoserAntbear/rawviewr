@@ -60,9 +60,31 @@ describe('SourcesDecoder.streamFromSource', () => {
   it('opens, delivers the pixels in bands, then closes', async () => {
     const seen = await collect(decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1'));
 
-    expect(statuses(seen)[0]).toBe('start');
+    expect(statuses(seen).slice(0, 2)).toEqual(['reading', 'start']);
     expect(statuses(seen).at(-1)).toBe('success');
     expect(seen.filter(({ status }) => status === 'progress').length).toBeGreaterThan(0);
+  });
+
+  /**
+   * Reading a gigabyte off disk is the longest part of a decode and it happens before anything
+   * is known about the file, so this is the only message the view can show for that whole wait.
+   */
+  it('says it is reading before it opens the file, not after', async () => {
+    const opened: string[] = [];
+
+    vi.mocked(workspace.fs.readFile).mockImplementation(async () => {
+      opened.push('read');
+
+      return new Uint8Array(24) as never;
+    });
+
+    const stream = decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1');
+    const first = await stream.next();
+
+    expect(first.value).toEqual({ status: 'reading', runId: 'run-1', id: 'a' });
+    expect(opened).toEqual([]);
+
+    await stream.return(undefined);
   });
 
   it('carries the run id on every message, so a superseded band can be told apart', async () => {
@@ -72,10 +94,10 @@ describe('SourcesDecoder.streamFromSource', () => {
   });
 
   it('describes the file before any pixels, so the caption and canvas need not wait', async () => {
-    const [first] = await collect(decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1'));
+    const [, second] = await collect(decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1'));
 
-    expect(first?.status).toBe('start');
-    expect(first && 'geometry' in first ? first.geometry.width > 0 : false).toBe(true);
+    expect(second?.status).toBe('start');
+    expect(second && 'geometry' in second ? second.geometry.width > 0 : false).toBe(true);
   });
 
   it('covers every row exactly once, with no gap between bands', async () => {
@@ -97,7 +119,7 @@ describe('SourcesDecoder.streamFromSource', () => {
 
     const seen = await collect(decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1'));
 
-    expect(statuses(seen)).toEqual(['failure']);
+    expect(statuses(seen)).toEqual(['reading', 'failure']);
     expect(window.showErrorMessage).toHaveBeenCalled();
   });
 
@@ -110,7 +132,7 @@ describe('SourcesDecoder.streamFromSource', () => {
       decoder.streamFromSource(source('a'), DEFAULT_DECODE_OPTIONS, 'run-1', run.signal),
     );
 
-    expect(statuses(seen)).toEqual(['interruption']);
+    expect(statuses(seen)).toEqual(['reading', 'interruption']);
     expect(window.showErrorMessage).not.toHaveBeenCalled();
   });
 

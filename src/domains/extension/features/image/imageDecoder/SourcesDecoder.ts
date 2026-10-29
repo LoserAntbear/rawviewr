@@ -23,6 +23,11 @@ export class SourcesDecoder {
     signal?: AbortSignal,
   ): AsyncGenerator<DecodedFileSource> {
     try {
+      // Signal that reading of the source has started.
+      // Can appear useful during reads of huge files to indicate that the
+      // decoding process has actually started.
+      yield { status: 'reading', runId, id: source.id };
+
       const {
         bytes,
         ...sourceData
