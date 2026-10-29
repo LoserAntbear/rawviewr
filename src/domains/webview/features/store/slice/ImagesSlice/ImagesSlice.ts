@@ -1,10 +1,28 @@
-import type { DecodedFileSource } from '@SHARED/features/image/imageDecoder/types';
+import type {
+  DecodedFileOutcome,
+  DecodedFileSegment,
+  DecodedFileStart,
+} from '@SHARED/features/image/imageDecoder/types';
+import { type FieldStrategies, Strategy } from '@utils/strategy';
 
 import { StoreSliceId } from '../../definitions';
 import { StoreSlice } from '../StoreSlice';
 
-import type { ImageItem, ImagesSlicePayloads, ImagesState } from './types';
-import { toImageItem } from './utils';
+import { ImageItem, StreamingImageItem } from './ImageItem';
+import type { ImagesSlicePayloads, ImagesState } from './types';
+
+type IDPayload = { readonly id: string };
+
+const DECODE_FLOW_END_BY_OUTCOME: FieldStrategies<
+  DecodedFileOutcome,
+  'status',
+  [current: ImageItem | undefined],
+  ImageItem | null
+> = {
+  interruption: () => null,
+  failure: ({ id, message }) => ({ id, kind: 'failed', message }),
+  success: ({ runId }, current) => ImageItem.toReadyItem(runId, current),
+};
 
 /**
  * Keeps and handles the data about PROCESSED images.
@@ -39,8 +57,21 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
     this.patch({ byId });
   }
 
-  public upsert(decoded: readonly DecodedFileSource[]): void {
-    this.put(decoded.map((item) => [item.id, toImageItem(item)] as [string, ImageItem]));
+  public startDecode(decodeStartRequests: readonly DecodedFileStart[]): void {
+    this.put(decodeStartRequests.map((start) => [start.id, ImageItem.toStreamingItem(start)] as [string, ImageItem]));
+  }
+
+  public appendSegments(segments: readonly DecodedFileSegment[]): void {
+    this.putResolved(segments, (message, current) => StreamingImageItem.withAppendedSegment(message, current));
+  }
+
+  public finalizeDecode(outcomes: readonly DecodedFileOutcome[]): void {
+    this.putResolved(outcomes, (outcome, current) => Strategy.byField(
+      DECODE_FLOW_END_BY_OUTCOME,
+      'status',
+      outcome,
+      current,
+    ));
   }
 
   public queueDecode(ids: readonly string[]): void {
@@ -71,6 +102,25 @@ export class ImagesSlice extends StoreSlice<StoreSliceId.Images, ImagesState, Im
 
   public setSelected(selectedId: string | null): void {
     this.patch({ selectedId });
+  }
+
+  private putResolved<TMessage extends IDPayload>(
+    messages: readonly TMessage[],
+    resolve: (message: TMessage, current?: ImageItem) => ImageItem | null,
+  ): void {
+    const resolved = new Map<string, ImageItem>();
+
+    for (const message of messages) {
+      const next = resolve(message, resolved.get(message.id) ?? this.getImage(message.id));
+
+      if (next) {
+        resolved.set(message.id, next);
+      }
+    }
+
+    if (resolved.size > 0) {
+      this.put([...resolved]);
+    }
   }
 
   private putSingle(id: string, image: ImageItem, byId: Map<string, ImageItem>): void {
