@@ -10,8 +10,8 @@ export type RIVImageCaption = {
 
 export type RIVImageState = { caption: RIVImageCaption } & (
   | { kind: RIVImageStateKind.Empty; }
-  | { kind: RIVImageStateKind.Loading; }
   | { kind: RIVImageStateKind.Error; message: string; }
+  | { kind: RIVImageStateKind.Loading; message: string; }
   | { kind: RIVImageStateKind.Paint; image: SegmentedImage; runId: string; }
 );
 
