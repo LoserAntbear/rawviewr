@@ -41,6 +41,14 @@ export type DecodedImage = {
   data: Uint8ClampedArray<ArrayBuffer>;
 };
 
+// Actually a signal to indicate that reading of the source has started.
+export type DecodedFileReading = {
+  readonly status: 'reading';
+
+  readonly id: string;
+  readonly runId: string;
+};
+
 export type DecodedFileStart = {
   readonly status: 'start';
 
@@ -82,7 +90,11 @@ export type DecodedFileInterruption = {
   readonly runId: string;
 };
 
-export type DecodedFileSource = DecodedFileStart | DecodedFileSegment | DecodedFileOutcome;
+export type DecodedFileSource =
+  | DecodedFileReading
+  | DecodedFileStart
+  | DecodedFileSegment
+  | DecodedFileOutcome;
 export type DecodedFileOutcome = DecodedFileSuccess | DecodedFileFailure | DecodedFileInterruption;
 
 export type DecodedSegment = {
