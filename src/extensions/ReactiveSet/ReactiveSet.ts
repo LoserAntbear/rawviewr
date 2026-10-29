@@ -3,9 +3,10 @@ import type { ReactiveSetListener } from './types';
 type InferActionResult<TAction, TResult> = TAction extends 'add' ? TResult : TAction extends 'delete' ? boolean : never;
 
 enum ReactiveSetState {
-  Blocked = 'blocked',
   Free = 'free',
+  Blocked = 'blocked',
 }
+
 export class ReactiveSet<T> extends Set<T> {
   private get allowsPostChanges(): boolean {
     return this.state === ReactiveSetState.Free;

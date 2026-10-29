@@ -15,6 +15,7 @@ export class DecodeRunner {
   constructor(
     private readonly decoder: SourcesDecoder,
   ) {}
+
   public run(
     sources: readonly FileSource[],
     options: DecodeOptions,
