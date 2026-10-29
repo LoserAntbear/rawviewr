@@ -1,7 +1,7 @@
 import { isPresent } from '@guards/valueGuards';
 
 import { StoreSliceId } from './definitions';
-import type { ImageItem } from './slice/ImagesSlice/types';
+import type { ImageItem } from './slice/ImagesSlice/ImageItem';
 import type { AppStoreState, Selector, SelectorMap } from './types';
 
 const imageIds: Selector<AppStoreState, readonly string[]> = (state) => (

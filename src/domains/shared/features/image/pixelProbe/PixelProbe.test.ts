@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
-import { type SegmentedImage, toSegmentedImage } from '@SHARED/features/image/imageDecoder';
+import { SegmentedImage } from '@SHARED/features/image/imageDecoder';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
 import type { DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
@@ -35,7 +35,7 @@ function image(width = 4, height = 3): SegmentedImage {
     data.set([index, index + 100, index + 200, 255], index * 4);
   }
 
-  return toSegmentedImage({ width, height, data });
+  return SegmentedImage.fromDecodedImage({ width, height, data });
 }
 
 const options = (overrides: Partial<DecodeOptions> = {}): DecodeOptions => ({

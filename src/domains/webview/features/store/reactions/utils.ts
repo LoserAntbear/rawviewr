@@ -1,4 +1,4 @@
-import type { ImageItem } from '../slice/ImagesSlice/types';
+import type { ImageItem } from '../slice/ImagesSlice/ImageItem';
 
 export function selectUndecodedIds(
   requestedIds: ReadonlySet<string>,

@@ -1,12 +1,12 @@
 import type { Vector2 } from '@definitions/geometry';
-import { type DecodeOptions, locatePixel, type SegmentedImage } from '@SHARED/features/image/imageDecoder';
+import { type DecodeOptions, SegmentedImage } from '@SHARED/features/image/imageDecoder';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
 import { PixelLocator } from '@SHARED/features/image/pixelLocator/PixelLocator';
 
 import type { PixelSample, Rgba } from './types';
 
 function readRgba(image: SegmentedImage, position: Vector2): Rgba {
-  const locatedPixel = locatePixel(image, position);
+  const locatedPixel = SegmentedImage.locatePixel(image, position);
   const result = { r: 0, g: 0, b: 0, a: 0 };
 
   if (locatedPixel) {
