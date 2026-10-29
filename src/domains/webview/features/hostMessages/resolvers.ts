@@ -27,7 +27,7 @@ export const WEBVIEW_HOST_MESSAGE_RESOLVERS: Required<WebviewHostMessageResolver
   },
 
   'images:decode:ready': (message, { store }) => {
-    store.get(StoreSliceId.Images).closeDecode(message.images);
+    store.get(StoreSliceId.Images).finalizeDecode(message.images);
   },
 
   'probe:receive:source-bytes': ({ id, location, result }, { store }) => {
