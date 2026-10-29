@@ -1,6 +1,7 @@
 import type { Endian } from '@definitions/bits';
 import type {
   DecodedFileOutcome,
+  DecodedFileReading,
   DecodedFileSegment,
   DecodedFileStart,
   DecodeOptions,
@@ -19,6 +20,7 @@ export type WebviewHostMessage =
   | { type: 'view:config:update'; config: ViewerConfiguration; }
   | { type: 'images:decode:start'; images: DecodedFileStart[]; }
   | { type: 'images:decode:ready'; images: DecodedFileOutcome[]; }
+  | { type: 'images:decode:reading'; images: DecodedFileReading[]; }
   | { type: 'images:decode:progress'; images: DecodedFileSegment[]; }
   | { type: 'decode:options:preserved'; snapshot: ToolbarOptionsSnapshot; }
   | { type: 'probe:receive:source-bytes'; id: string; location: SourceLocation; result: SourceBytesResult; }
