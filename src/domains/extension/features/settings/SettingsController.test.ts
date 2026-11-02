@@ -208,23 +208,29 @@ describe('SettingsController.readSessionDecodeOptions', () => {
   });
 });
 
-describe('SettingsController.clearToolbarSnapshot', () => {
-  it('lets the kept toolbar go, so the next launch opens on the defaults', async () => {
-    const { settings } = controllerWith(configured);
+/**
+ * A view is resolved against whatever controller the extension host has at the time, which can
+ * be younger than the toolbar it has to restore — so the memento is the store of record and the
+ * reset command is the only thing that empties it. Keeping the snapshot in a field, or dropping
+ * it when the last view closes, both read back as "nothing was ever preserved".
+ */
+describe('SettingsController: a preserved toolbar outlives the views that set it', () => {
+  const snapshot = { preserved: true, options: toPreservedOptions(DEFAULT_DECODE_OPTIONS) };
 
-    await settings.writeToolbarSnapshot({ preserved: true, options: toPreservedOptions(DEFAULT_DECODE_OPTIONS) });
-    await settings.clearToolbarSnapshot();
+  it('is read by a controller that did not write it', async () => {
+    const first = controllerWith(configured);
 
-    expect(settings.toolbarSnapshot).toBeNull();
+    await first.settings.writeToolbarSnapshot(snapshot);
+
+    expect(controllerWith(configured, first.stored).settings.toolbarSnapshot).toEqual(snapshot);
   });
 
-  it('says nothing to anyone, since this runs when no view is left to hear it', async () => {
+  it('goes only when the reset command sweeps the prefix', async () => {
     const { settings } = controllerWith(configured);
-    const heard = vi.fn();
 
-    settings.onToolbarSnapshotChange(heard);
-    await settings.clearToolbarSnapshot();
+    await settings.writeToolbarSnapshot(snapshot);
+    await settings.resetSettings();
 
-    expect(heard).not.toHaveBeenCalled();
+    expect(settings.toolbarSnapshot).toBeNull();
   });
 });
