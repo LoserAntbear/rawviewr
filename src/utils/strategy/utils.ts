@@ -29,7 +29,25 @@ function byField<
   return strategy(value, ...args);
 }
 
+function bySelector<
+  TUnion extends object,
+  TField extends keyof TUnion,
+  TArgs extends unknown[],
+  TResult,
+>(
+  strategies: FieldStrategies<TUnion, TField, TArgs, TResult>,
+  selector: (value: TUnion) => TUnion[TField],
+  value: TUnion,
+  ...args: TArgs
+): TResult {
+  const key = selector(value) as Extract<TUnion[TField], string>;
+  const strategy = strategies[key] as (value: TUnion, ...args: TArgs) => TResult;
+
+  return strategy(value, ...args);
+}
+
 export const Strategy = {
   byKey,
   byField,
+  bySelector,
 };
