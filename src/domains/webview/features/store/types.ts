@@ -55,4 +55,6 @@ export type AppStoreState = AppState<StoreSlices>;
 export type AppBus = TypedEventTarget<StoreEventMap>;
 export type StoreReaction = (store: AppStore) => WebviewDisposable;
 
+export type StateSubscriber<TState> = (previous: TState, next: TState) => void;
+
 export type { EventMap };

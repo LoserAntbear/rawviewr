@@ -11,53 +11,9 @@ import type {
   SelectorMap,
   SliceLike,
   SliceMap,
+  StateSubscriber,
 } from './types';
-
-type StateSubscriber<TState> = (previous: TState, next: TState) => void;
-
-/**
- * Plain objects only, by prototype. A class instance carries an identity of its own and is
- * compared by it; only a record built to be read field by field takes the shallow path.
- */
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  const prototype = typeof value === 'object' && value !== null ? Object.getPrototypeOf(value) : false;
-
-  return prototype === Object.prototype || prototype === null;
-}
-
-function isSameRecord(previous: Record<string, unknown>, next: Record<string, unknown>): boolean {
-  const keys = Object.keys(previous);
-
-  return keys.length === Object.keys(next).length
-    && keys.every((key) => Object.is(previous[key], next[key]));
-}
-
-function isSameMap(previous: ReadonlyMap<unknown, unknown>, next: ReadonlyMap<unknown, unknown>): boolean {
-  return previous.size === next.size
-    // `has` as well as `get`, so an entry holding `undefined` is not read as a missing one.
-    && [...previous].every(([key, value]) => next.has(key) && Object.is(next.get(key), value));
-}
-
-function isSameSet(previous: ReadonlySet<unknown>, next: ReadonlySet<unknown>): boolean {
-  return previous.size === next.size && [...previous].every((value) => next.has(value));
-}
-
-function isSameSelection(previous: unknown, next: unknown): boolean {
-  let same = Object.is(previous, next);
-
-  if (!same) {
-
-    if (previous instanceof Map && next instanceof Map) {
-      same = isSameMap(previous, next);
-    } else if (previous instanceof Set && next instanceof Set) {
-      same = isSameSet(previous, next);
-    } else if (isPlainObject(previous) && isPlainObject(next)) {
-      same = isSameRecord(previous, next);
-    }
-  }
-
-  return same;
-}
+import { isSameSelection } from './utils';
 
 /**
  * TODO: Decouple state handling from the store.
