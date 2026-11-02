@@ -5,17 +5,19 @@ import type { WebviewHost } from '@EXTENSION/features/webviewHost/WebviewHost';
 import { ViewerRegistry } from './viewerRegistry';
 
 /**
- * The registry is what knows when nothing is open any more. What should be let go of then —
- * a preserved toolbar, say — is decided where the extension is composed.
+ * The registry holds the viewers that are open and lets each go when its panel does. A closed
+ * panel is the only lifecycle signal it acts on — nothing else hangs off a view going away, so
+ * a preserved toolbar outlives all of them.
  */
 
-function panelWith() {
+function panelWith(active = false) {
   let dispose = () => undefined as void;
 
   return {
     close: () => dispose(),
+    viewer: { dispose: vi.fn() } as unknown as WebviewHost,
     panel: {
-      active: false,
+      active,
       onDidDispose: (listen: () => void) => {
         dispose = listen;
 
@@ -25,70 +27,40 @@ function panelWith() {
   };
 }
 
-const viewer = () => ({ dispose: vi.fn() } as unknown as WebviewHost);
-
-describe('ViewerRegistry.onEmpty', () => {
-  it('says so when the last viewer closes', () => {
+describe('ViewerRegistry', () => {
+  it('disposes the viewer whose panel went away', () => {
     const registry = new ViewerRegistry();
-    const emptied = vi.fn();
     const only = panelWith();
 
-    registry.register({ panel: only.panel, viewer: viewer() });
-    registry.onEmpty(emptied);
+    registry.register(only);
     only.close();
 
-    expect(emptied).toHaveBeenCalledOnce();
+    expect(only.viewer.dispose).toHaveBeenCalledOnce();
   });
 
-  it('stays quiet while any viewer is left', () => {
+  it('stops offering a closed viewer as the active one', () => {
     const registry = new ViewerRegistry();
-    const emptied = vi.fn();
-    const first = panelWith();
-    const second = panelWith();
+    const only = panelWith(true);
 
-    registry.register({ panel: first.panel, viewer: viewer() });
-    registry.register({ panel: second.panel, viewer: viewer() });
-    registry.onEmpty(emptied);
+    registry.register(only);
+
+    expect(registry.activeViewer).toBe(only.viewer);
+
+    only.close();
+
+    expect(registry.activeViewer).toBeUndefined();
+  });
+
+  it('leaves a viewer that is still open alone', () => {
+    const registry = new ViewerRegistry();
+    const first = panelWith();
+    const second = panelWith(true);
+
+    registry.register(first);
+    registry.register(second);
     first.close();
 
-    expect(emptied).not.toHaveBeenCalled();
-  });
-
-  it('says so once the second of two closes as well', () => {
-    const registry = new ViewerRegistry();
-    const emptied = vi.fn();
-    const first = panelWith();
-    const second = panelWith();
-
-    registry.register({ panel: first.panel, viewer: viewer() });
-    registry.register({ panel: second.panel, viewer: viewer() });
-    registry.onEmpty(emptied);
-    first.close();
-    second.close();
-
-    expect(emptied).toHaveBeenCalledOnce();
-  });
-
-  it('still disposes the viewer it dropped', () => {
-    const registry = new ViewerRegistry();
-    const only = panelWith();
-    const host = viewer();
-
-    registry.register({ panel: only.panel, viewer: host });
-    only.close();
-
-    expect(host.dispose).toHaveBeenCalledOnce();
-  });
-
-  it('stops telling a listener that let go', () => {
-    const registry = new ViewerRegistry();
-    const emptied = vi.fn();
-    const only = panelWith();
-
-    registry.register({ panel: only.panel, viewer: viewer() });
-    registry.onEmpty(emptied).dispose();
-    only.close();
-
-    expect(emptied).not.toHaveBeenCalled();
+    expect(second.viewer.dispose).not.toHaveBeenCalled();
+    expect(registry.activeViewer).toBe(second.viewer);
   });
 });
