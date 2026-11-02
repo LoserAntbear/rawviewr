@@ -65,10 +65,6 @@ function control<T extends HTMLElement>(id: string): T {
   return element as T;
 }
 
-function fieldOf(id: string): HTMLElement {
-  return control(id).closest('.field') as HTMLElement;
-}
-
 /** A `change` as a browser fires it: bubbling, but not composed out of the shadow root. */
 function fireChange(element: HTMLElement): void {
   element.dispatchEvent(new Event('change', { bubbles: true }));
@@ -142,15 +138,27 @@ describe('riv-toolbar: the store writes to the controls', () => {
     expect(control<HTMLInputElement>('flipY').checked).toBe(true);
   });
 
-  it('shows the bit-order control only for formats that care about it', () => {
+  /**
+   * Two ordering axes, one question apart: which byte of a pixel comes first, and which end of a
+   * byte the first pixel sits in. No format answers both — a pixel cannot span bytes and share
+   * one — so each stands down the way everything else in this toolbar does, rather than one
+   * greying out while the other vanishes and takes its neighbours' positions with it.
+   */
+  it('stands down whichever ordering control the format has no answer for', () => {
+    const ordering = () => [
+      control<HTMLSelectElement>('endian').disabled,
+      control<HTMLSelectElement>('bitOrderMsb').disabled,
+    ];
     const subByte = formatRegistry.list().find((format) => format.bitOrderSensitive);
-    const packed = formatRegistry.list().find((format) => !format.bitOrderSensitive);
+    const multiByte = formatRegistry.list().find((format) => format.endianSensitive);
 
     pick('format', subByte!.id);
-    expect(fieldOf('bitOrderMsb').hidden).toBe(false);
 
-    pick('format', packed!.id);
-    expect(fieldOf('bitOrderMsb').hidden).toBe(true);
+    expect(ordering()).toEqual([true, false]);
+
+    pick('format', multiByte!.id);
+
+    expect(ordering()).toEqual([false, true]);
   });
 
   it('locks width and height when a header preset supplies them', () => {

@@ -10,6 +10,8 @@ import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
 import type { AppStore } from '@WEBVIEW/features/store/types';
 import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
 
+import { RIVImageView } from './RIVImageView';
+
 import { RIVImage } from './index';
 
 /**
@@ -138,6 +140,24 @@ describe('riv-image: a decode arriving in bands', () => {
     await settle();
 
     expect(status()?.textContent).toBe('decoding…');
+  });
+
+  /**
+   * A gallery mounts one of these per source off a single `images:change`, so an element that
+   * repainted for any item would do the work n times over for every band of every decode.
+   */
+  it('ignores a decode belonging to another image', () => {
+    images().startDecode([start]);
+    images().appendSegments([bandAt(0)]);
+
+    // Not the canvas: a repaint of a band already on it draws nothing, so counting draws would
+    // call the wasted render a success. The caption is written on every render there is.
+    const renderCaption = vi.spyOn(RIVImageView.prototype, 'renderCaption');
+
+    images().startDecode([{ ...start, id: 'b', name: 'b.raw' }]);
+    images().appendSegments([{ ...bandAt(0), id: 'b' }]);
+
+    expect(renderCaption).not.toHaveBeenCalled();
   });
 
   it('puts a band on the canvas synchronously, before the call even returns', () => {

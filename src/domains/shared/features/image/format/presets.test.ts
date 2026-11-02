@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { BITS_PER_BYTE } from './definitions';
 import { PixelFormatPresets } from './presets';
 import { FormatDecodersLibrary } from './rowDecoders';
 
@@ -40,5 +41,13 @@ describe('the formats, the manifest and the decoders', () => {
 
   it('gives every format a distinct id', () => {
     expect(new Set(presetIds).size).toBe(presetIds.length);
+  });
+
+  it('keeps each ordering option to the pixel widths where it means anything', () => {
+    const misfiled = PixelFormatPresets.PRESETS.filter(({ bpp, endianSensitive, bitOrderSensitive }) => (
+      (bitOrderSensitive && bpp >= BITS_PER_BYTE) || (endianSensitive && bpp <= BITS_PER_BYTE)
+    ));
+
+    expect(misfiled.map(({ id }) => id)).toEqual([]);
   });
 });
