@@ -1,8 +1,6 @@
-import type { BusEvent } from '@SHARED/features/messaging';
 import { attemptDetached } from '@utils/attempt';
 import { ProbeInputHandler } from '@WEBVIEW/features/_features/input/pointerInput/ProbeInputHandler';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
-import type { ImagesState } from '@WEBVIEW/features/store/slice/ImagesSlice';
 import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
 
 import { RIVTags } from '../definitions';
@@ -44,11 +42,12 @@ export class RIVImage extends RIVHTMLElement {
 
     const { store } = WebviewContextProvider.context;
 
-    this.observe(store.bus, 'images:change', this.handleItemsChange.bind(this));
-    this.observe(store.bus, 'decodeOptions:change', this.render.bind(this));
-
     this.observeProbeInput();
-    this.render();
+
+    this.disposableStore.add(store.subscribe(
+      (state) => state[StoreSliceId.Images].byId.get(this.itemId),
+      (item) => this.renderState(resolveImageState(item)),
+    ));
   }
 
   private observeProbeInput(): void {
@@ -61,24 +60,6 @@ export class RIVImage extends RIVHTMLElement {
     this.observe(canvas, 'pointermove', this.probeInputHandler.handlePointerMove.bind(this.probeInputHandler));
     this.observe(canvas, 'pointerleave', this.probeInputHandler.handlePointerLeave.bind(this.probeInputHandler));
     this.observe(canvas, 'click', this.probeInputHandler.handlePointerClick.bind(this.probeInputHandler));
-  }
-
-  // Currently I have to traverse the entire items state to determine if this particular image needs to re-render.
-  // FIXME: Optimize this by having the store emit more granular events or by indexing items by ID.
-  private handleItemsChange(event: Event): void {
-    const { prev, next } = (event as BusEvent<{ prev: ImagesState; next: ImagesState }>).detail;
-
-    if (prev.byId.get(this.itemId) !== next.byId.get(this.itemId)) {
-      this.render();
-    }
-  }
-
-  private render(): void {
-    const { store } = WebviewContextProvider.context;
-
-    this.renderState(resolveImageState(
-      store.get(StoreSliceId.Images).getImage(this.itemId),
-    ));
   }
 
   private renderState(state: RIVImageState): void {
