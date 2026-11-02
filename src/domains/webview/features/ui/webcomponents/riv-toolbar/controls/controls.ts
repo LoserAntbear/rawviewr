@@ -93,6 +93,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
       { value: Endian.Little, label: 'little' },
       { value: Endian.Big, label: 'big' },
     ]),
+    tooltip: 'For multi-byte pixels: which byte of the pixel comes first.',
     toValue: ({ options }) => options.endian,
     toCommand: (raw) => decodeOptionsUpdate({ endian: raw as Endian }),
   },
