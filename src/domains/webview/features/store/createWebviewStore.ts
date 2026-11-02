@@ -39,6 +39,8 @@ export function createWebviewStore(
   const disposables = new WebviewDisposableStore();
   const store: AppStore = new ReactiveStore(slices, new TypedEventTarget(), STORE_SELECTORS);
 
+  disposables.add(store);
+
   for (const reaction of reactions) {
     disposables.add(reaction(store));
   }
