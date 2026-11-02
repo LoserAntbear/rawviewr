@@ -23,7 +23,7 @@ export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): Tool
     endian: { disabled: !format.endianSensitive },
     // Disabled on extremities reach since the zoom cannot go further.
     zoomReset: { disabled: zoom === ZOOM.default },
-    bitOrderMsb: { hidden: !format.bitOrderSensitive },
+    bitOrderMsb: { disabled: !format.bitOrderSensitive },
     unpremultiply: { disabled: !format.hasAlpha || alphaMode === AlphaMode.Ignore },
   };
 }
