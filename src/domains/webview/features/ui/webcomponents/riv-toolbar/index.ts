@@ -1,6 +1,7 @@
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
-import { isReadyImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
-import type { AppStore } from '@WEBVIEW/features/store/types';
+import { STORE_SELECTORS } from '@WEBVIEW/features/store/selectors';
+import { ImageItem } from '@WEBVIEW/features/store/slice/ImagesSlice';
+import type { AppStoreState } from '@WEBVIEW/features/store/types';
 import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
 
 import { RIVTags } from '../definitions';
@@ -14,12 +15,12 @@ import template from './index.html';
 import { RIVToolbarView } from './RIVToolbarView';
 import { EMPTY_TOOLBAR_STATE, ToolbarStateTransition } from './state/definitions';
 import { TOOLBAR_STATE_HANDLERS } from './state/handlers';
-import type { ToolbarState, ToolbarTransitionPayloads } from './state/types';
+import type { ToolbarState, ToolbarSyncPayload, ToolbarTransitionPayloads } from './state/types';
 
-function resolveAvailableBytes(store: AppStore): number {
-  const item = store.selectors.displayedItem();
+function resolveAvailableBytes(state: AppStoreState): number {
+  const item = STORE_SELECTORS.displayedItem(state);
 
-  return item && isReadyImageItem(item) ? item.geometry.availableBytes : 0;
+  return ImageItem.isDecoded(item) ? item.geometry.availableBytes : 0;
 }
 
 export class RIVToolbar extends RIVHTMLElement {
@@ -38,31 +39,11 @@ export class RIVToolbar extends RIVHTMLElement {
     // Both interactions, one handler: the control table says which one each answers to.
     this.observe(this.view.rootRef, 'change', this.handleControlInteraction.bind(this));
     this.observe(this.view.rootRef, 'click', this.handleControlInteraction.bind(this));
-    // Decode options fill the fields; the view's zoom decides which zoom buttons still bite.
-    this.observe(
-      WebviewContextProvider.context.store.bus,
-      'decodeOptions:change',
-      this.sync.bind(this),
-    );
-    this.observe(
-      WebviewContextProvider.context.store.bus,
-      'view:change',
-      this.sync.bind(this),
-    );
-    // The candidates are derived from the image on show, so they move when it does.
-    this.observe(
-      WebviewContextProvider.context.store.bus,
-      'images:change',
-      this.sync.bind(this),
-    );
-    // The toggle reflects what the host keeps, which another view can have changed.
-    this.observe(
-      WebviewContextProvider.context.store.bus,
-      'config:change',
-      this.sync.bind(this),
-    );
 
-    this.sync();
+    this.disposableStore.add(WebviewContextProvider.context.store.subscribe(
+      this.readSync.bind(this),
+      this.render.bind(this),
+    ));
   }
 
   private handleControlInteraction(event: Event): void {
@@ -78,17 +59,17 @@ export class RIVToolbar extends RIVHTMLElement {
     ));
   }
 
-  private sync(): void {
-    const { store } = WebviewContextProvider.context;
+  private readSync(state: AppStoreState): ToolbarSyncPayload {
+    return {
+      zoom: state[StoreSliceId.View].zoom,
+      options: state[StoreSliceId.DecodeOptions],
+      availableBytes: resolveAvailableBytes(state),
+      background: state[StoreSliceId.View].background,
+      preserveOptions: state[StoreSliceId.Config].preserveOptionsForAllWindows,
+    };
+  }
 
-    this.view.render(
-      this.viewState.updateState(ToolbarStateTransition.Synced, {
-        zoom: store.get(StoreSliceId.View).zoom,
-        availableBytes: resolveAvailableBytes(store),
-        preserveOptions: store.get(StoreSliceId.Config).preserveOptionsForAllWindows,
-        background: store.get(StoreSliceId.View).background,
-        options: store.get(StoreSliceId.DecodeOptions).options,
-      }),
-    );
+  private render(sync: ToolbarSyncPayload): void {
+    this.view.render(this.viewState.updateState(ToolbarStateTransition.Synced, sync));
   }
 }
