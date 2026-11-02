@@ -13,7 +13,6 @@ import { VSCodeWorkspaceConfigurationController } from '@EXTENSION/features/sett
 import { ViewerRegistry } from '@EXTENSION/features/viewer/registry/viewerRegistry';
 import { VIEW_INTENT_RESOLVERS, VIEWER_INTENT_RESOLVERS } from '@EXTENSION/features/viewer/resolvers';
 import { ViewerWindowController } from '@EXTENSION/features/viewer/windowController/ViewerWindowController';
-import { attemptDetached } from '@utils/attempt';
 
 export function activate(context: vscode.ExtensionContext): void {
   // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
@@ -55,11 +54,6 @@ export function activate(context: vscode.ExtensionContext): void {
     ...VIEWER_INTENT_RESOLVERS(windowController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
-
-  context.subscriptions.push(viewerRegistry.onEmpty(() => attemptDetached(
-    () => settingsController.clearToolbarSnapshot(),
-    (error) => console.error('Failed to release the preserved toolbar:', error),
-  )));
 
   const host = new ExtensionHost(context, rawEditorProvider, dispatcher);
 
