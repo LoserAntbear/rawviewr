@@ -239,7 +239,8 @@
             "gray16",
             "gray4",
             "gray2",
-            "gray1"
+            "gray1",
+            "imag"
           ],
           "description": "Pixel format used when a buffer is opened for the first time.",
           "enumDescriptions": [
@@ -279,7 +280,8 @@
             "GRAY16 \u2014 16-bit luminance (high byte shown)",
             "GRAY4 \u2014 4-bit, 2 px/byte",
             "GRAY2 \u2014 2-bit, 4 px/byte",
-            "GRAY1 \u2014 1-bit mono, 8 px/byte"
+            "GRAY1 \u2014 1-bit mono, 8 px/byte",
+            "IMAG \u2014 LZ77-compressed ARGB4444 sprite, sized by its own header"
           ]
         },
         "rawImageViewer.defaultWidth": {
