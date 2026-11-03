@@ -20,22 +20,30 @@ function toChoiceSignature(groups: readonly ToolbarChoiceGroup[]): string {
     .join('|');
 }
 
-const ORDERED_TOOLBAR_GROUPS: readonly ToolbarGroup[] = [
-  ToolbarGroup.Format,
-  ToolbarGroup.Geometry,
-  ToolbarGroup.Layout,
-  ToolbarGroup.Alpha,
-  ToolbarGroup.Header,
-  ToolbarGroup.View,
-  ToolbarGroup.Actions,
-];
+type Section = 'options' | 'actions';
+const ORDERED_TOOLBAR_GROUPS: Record<Section, readonly ToolbarGroup[]> = {
+  options: [
+    ToolbarGroup.Format,
+    ToolbarGroup.Geometry,
+    ToolbarGroup.Layout,
+    ToolbarGroup.Alpha,
+    ToolbarGroup.Header,
+    ToolbarGroup.View,
+  ],
+  actions: [
+    ToolbarGroup.Actions,
+  ],
+};
 
-function groupControls(controls: readonly ToolbarControl[]): [ToolbarGroup, ToolbarControl[]][] {
+function groupControls(
+  groups: readonly ToolbarGroup[],
+  controls: readonly ToolbarControl[],
+): [ToolbarGroup, ToolbarControl[]][] {
   const groupedControls: [ToolbarGroup, ToolbarControl[]][] = [];
 
   for (const control of controls) {
     const group = control.group;
-    const groupIndex = ORDERED_TOOLBAR_GROUPS.findIndex((g) => g === group);
+    const groupIndex = groups.findIndex((g) => g === group);
 
     // Skip controls that do not belong to any of the ordered toolbar groups.
     if (groupIndex === -1) {
@@ -70,15 +78,28 @@ export class RIVToolbarView extends RIVView {
 
     // Mirrors `replaceChildren`: the map describes the DOM that is there now.
     this.controlFields.clear();
+    const actionsGroup = this.ref('toolbar-actions');
+    const optionsGroup = this.ref('toolbar-options');
 
-    root.replaceChildren(...this.buildControls());
+    root.replaceChildren(
+      this.assignControls(this.buildControls('options'), optionsGroup),
+      this.assignControls(this.buildControls('actions'), actionsGroup),
+    );
   }
 
-  private buildControls(): HTMLElement[] {
-    const groups = ORDERED_TOOLBAR_GROUPS
+  private assignControls(controls: HTMLElement[], groupRef: HTMLElement | null): HTMLElement | string {
+    for (const control of controls) {
+      groupRef?.appendChild(control);
+    }
+
+    return groupRef ?? '';
+  }
+
+  private buildControls(section: Section): HTMLElement[] {
+    const groups = ORDERED_TOOLBAR_GROUPS[section]
       .map((group) => ElementBuilder.buildControlsGroup(group))
       .filter(isHTMLElement);
-    const groupedControls = groupControls(TOOLBAR_CONTROLS);
+    const groupedControls = groupControls(ORDERED_TOOLBAR_GROUPS[section], TOOLBAR_CONTROLS);
 
     for (const [group, controls] of groupedControls) {
       const groupElement = groups.find((g) => g?.dataset.group === group);

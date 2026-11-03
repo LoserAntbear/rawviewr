@@ -172,6 +172,21 @@ describe('riv-toolbar: the store writes to the controls', () => {
     expect(control<HTMLInputElement>('width').disabled).toBe(false);
     expect(control<HTMLInputElement>('width').placeholder).toBe('auto');
   });
+
+  /** A compressed file sizes itself and has no rows until decompressed: nothing to lay out. */
+  it('stands the layout controls down while a compressed format sizes the image itself', () => {
+    const layout = () => ['width', 'height', 'dimensions', 'offset', 'bytesPerRow', 'headerPreset']
+      .map((id) => control<HTMLInputElement>(id).disabled);
+
+    pick('format', 'imag');
+
+    expect(layout()).toEqual([true, true, true, true, true, true]);
+    expect(control<HTMLInputElement>('width').placeholder).toBe('header');
+
+    pick('format', 'rgba4444');
+
+    expect(layout()).toEqual([false, false, false, false, false, false]);
+  });
 });
 
 describe('riv-toolbar: the zoom dial', () => {
