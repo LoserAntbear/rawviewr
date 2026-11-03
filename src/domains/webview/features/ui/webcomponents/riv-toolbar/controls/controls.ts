@@ -171,7 +171,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
   {
     id: 'zoomOut',
     label: '−',
-    group: ToolbarGroup.View,
+    group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
     tooltip: 'Zoom out',
     toCommand: () => ({ type: 'view:zoom', direction: 'out' }),
@@ -179,7 +179,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
   {
     id: 'zoomReset',
     label: '1:1',
-    group: ToolbarGroup.View,
+    group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
     tooltip: 'Back to one screen pixel per image pixel.',
     toCommand: () => ({ type: 'view:zoom', direction: 'reset' }),
@@ -187,7 +187,7 @@ export const TOOLBAR_CONTROLS: readonly ToolbarControl[] = [
   {
     id: 'zoomIn',
     label: '+',
-    group: ToolbarGroup.View,
+    group: ToolbarGroup.Actions,
     tag: TAG_DESCRIPTORS.BUTTON_FIELD,
     tooltip: 'Zoom in',
     toCommand: () => ({ type: 'view:zoom', direction: 'in' }),
