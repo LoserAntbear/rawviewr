@@ -39,6 +39,14 @@ describe('the formats, the manifest and the decoders', () => {
     expect(() => FormatDecodersLibrary.getRowDecoder(id)).not.toThrow();
   });
 
+  /** A compressed format with no decompressor would hand the row decoders the raw stream. */
+  it('has a decompressor for exactly the formats marked compressed', () => {
+    const compressed = PixelFormatPresets.PRESETS.filter(({ compressed }) => compressed).map(({ id }) => id);
+
+    expect([...FormatDecodersLibrary.DECOMPRESSORS.keys()]).toEqual(compressed);
+    expect(compressed).toContain('imag');
+  });
+
   it('gives every format a distinct id', () => {
     expect(new Set(presetIds).size).toBe(presetIds.length);
   });
