@@ -34,35 +34,6 @@ implementation or work parked mid-port (see [Shipping a first version](#shipping
 
 ## Next steps
 
-### Improvements
-
-- Move covered file extensions to a vscode configuration menu of the extension, so that users can add their own file extensions to be covered by the extension. If it is possible.
-- Add support for custom parsers for specific file types.
-- Add support for merging multiple files into a single view, with ability to specify offsets and sizes for each file.
-- Improve UI separation in a toolbar by groups:
-
-  - Size: width, height
-    - Add more default pressets, eg.: 16x16, 32x32, 64x64, 96x64
-  - Format: color format, pixel format,
-  - Header: offset, size, etc.
-  - Export: export to PNG, export to other formats (if possible)
-
-- Add RMB action on gallery item to show the selected image in explorer view.
-- Add memo of the selected toolbar options, so that user does not have to reselect them every time.
-- Add custom header presets support with related config/parser
-- Add script builders in a webview worker gated on Workspace Trust
-- Add serialization of the webview with `WebviewPanelSerializer`.
-- Add offload testing on webview activity state change: 'visible', 'background'. However, for now I've set `retainContextWhenHidden` to true, so that the webview is not disposed when hidden.
-- Add image lazy load on open, if needed, to improve performance on large files.
-  - However gallery view is expected to load all the selected images 1 by 1, as it does now already.
-  - `BufferItem.fromFileSource` currently reads every file eagerly; gallery entries should stay stubs until opened.
-- Add image source streaming support for large files.
-  - Intended route: stop transferring bytes over `postMessage` entirely and serve them via `webview.asWebviewUri(source.uri)` + `fetch` in the webview, which gives ranged reads, laziness and caching for free. Friction is `localResourceRoots` (must contain the file's directory) and non-`file:` schemes, which will not work at all.
-- Handle canvas dimension limits (~16384px per side plus a total-area cap) for large sensor dumps — long term this means drawing only the visible region via `ctx.setTransform` rather than sizing a canvas to the image. Ties into the existing frame-tiles option.
-- Add toolbar or the whole UI caching to avoid redundant recalculations and avoid flickering during switching views.
-- Add tests
-- Add YUV format support
-
 ### General refactor
 
 Since the code here is merely POC, it is not well structured and needs a general refactor to improve maintainability and readability.
@@ -386,6 +357,11 @@ Each item names what it depends on. Nothing below is started.
    The earlier attempt remembered options *per buffer*; this one is one toolbar for the
    window, which is what makes the next dump read the way the last one did.
 
+   **It outlives every view.** The memento is the store of record, not a field on a controller
+   that each view is resolved against, and nothing is keyed off the last view closing — so the
+   usual flow of one view at a time keeps the toolbar it was given. `Reset Remembered Decode
+   Settings` is the only thing that empties it.
+
    **Geometry does not travel.** Format, endian, bit order, flip, alpha and header preset
    are carried; width, height, offset, stride and frame describe one buffer and stay with it,
    so each file is still guessed or given on its own terms. The kept toolbar is laid over the
@@ -419,12 +395,20 @@ It became sticky through the preserved toolbar: the window was closed with `Pres
 a header preset was selected, so every launch afterwards opened every file with a header it
 did not have.
 
-**Two fixes.** `ImageDecoder.decode` refuses any frame past `MAX_DECODED_PIXELS` (64 MP, 256 MB
-of RGBA) before allocating anything, whatever produced the numbers — a header, a typed width,
-or a carried toolbar. The refusal is a `DecodedSizeExceededError`, which the per-file decode
-path already turns into a readable message. And the preserved toolbar is let go when the last
-viewer closes: `ViewerRegistry` says when nothing is open, and the extension clears the
-snapshot, so a bad toolbar cannot greet the next launch.
+**Two fixes, of which one stayed.** `ImageDecoder.decode` refuses any frame past
+`MAX_DECODED_PIXELS` (64 MP, 256 MB of RGBA) before allocating anything, whatever produced the
+numbers — a header, a typed width, or a carried toolbar. The refusal is a
+`DecodedSizeExceededError`, which the per-file decode path already turns into a readable
+message.
+
+The second fix let the preserved toolbar go when the last viewer closed, so a bad toolbar could
+not greet the next launch. **That one is gone**, because it also made the feature it was
+guarding useless: it dropped the `Preserve` toggle along with the options, and the registry
+empties on far more than a user closing up — a replaced preview tab, a reloaded window — so
+anyone viewing one dump at a time got the defaults back every time. The ceiling above is the
+guard that matters, and it bounds exactly the 65535×65535 frame that caused this; a sticky
+header now opens on a message rather than a crash, and `Reset Remembered Decode Settings` works
+from the palette with no view open.
 
 **Since closed by virtualisation.** A *gallery* of legitimately-sized images was not bounded by
 that ceiling: the whole of `samples/raw` — 4757 files, 149 MB — decoded to 297 MB of RGBA and
