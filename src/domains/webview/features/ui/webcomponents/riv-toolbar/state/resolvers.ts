@@ -8,22 +8,24 @@ import type { ToolbarAvailability, ToolbarState, ToolbarSyncPayload } from './ty
 
 export function resolveAvailability({ options, zoom }: ToolbarSyncPayload): ToolbarAvailability {
   const { format, alphaMode, headerPreset } = options;
-  const geometryLocked = headerPreset !== HeaderPreset.None;
+  // A compressed file carries its own size header, and has no rows until it is decompressed:
+  const geometryLocked = headerPreset !== HeaderPreset.None || format.compressed;
   const dimension = { disabled: geometryLocked, placeholder: geometryLocked ? 'header' : 'auto' };
 
   return {
     width: dimension,
     height: dimension,
-    offset: { placeholder: '0' },
-    bytesPerRow: { placeholder: 'packed' },
     zoomIn: { disabled: zoom >= ZOOM.max },
     zoomOut: { disabled: zoom <= ZOOM.min },
     dimensions: { disabled: geometryLocked },
     alphaMode: { disabled: !format.hasAlpha },
+    headerPreset: { disabled: format.compressed },
     endian: { disabled: !format.endianSensitive },
     // Disabled on extremities reach since the zoom cannot go further.
     zoomReset: { disabled: zoom === ZOOM.default },
     bitOrderMsb: { disabled: !format.bitOrderSensitive },
+    offset: { placeholder: '0', disabled: format.compressed },
+    bytesPerRow: { placeholder: 'packed', disabled: format.compressed },
     unpremultiply: { disabled: !format.hasAlpha || alphaMode === AlphaMode.Ignore },
   };
 }
