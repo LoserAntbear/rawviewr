@@ -28,7 +28,7 @@ export type Geometry = Dimension & {
   bytesPerRow: number;
   bytesPerFrame: number;
   availableBytes: number;
-  lockedByHeader: boolean; /** --- Set when the header preset dictated the geometry. */
+  lockedByHeader: boolean; /** --- Set when a header dictated the geometry: a preset's, or a compressed format's own. */
 };
 
 export type Dimension = {

@@ -97,7 +97,7 @@ async function decode(
 }
 
 async function readSourceBytes(
-  { id, location, endian }: ProbeRequestMessage,
+  { id, location, endian, format }: ProbeRequestMessage,
   { bridge, session, reader }: HostResolverContext,
 ): Promise<void> {
   const source = session.sourceFor(id);
@@ -109,7 +109,7 @@ async function readSourceBytes(
       type: 'probe:receive:source-bytes',
       // A failed read is an answer too: without one the view waits on a reply never coming.
       result: await attemptAsync<SourceBytesResult>(
-        async () => ({ kind: 'received', bytes: await reader.readFromFileSource(source, location, endian) }),
+        async () => ({ kind: 'received', bytes: await reader.readFromFileSource(source, location, endian, format) }),
         (error) => ({ kind: 'failed', message: error instanceof Error ? error.message : String(error) }),
       ),
     });

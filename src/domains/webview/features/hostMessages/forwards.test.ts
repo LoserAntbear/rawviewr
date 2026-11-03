@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Endian } from '@definitions/bits';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
+import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { FileSource } from '@SHARED/features/viewer';
 import { createWebviewStore } from '@WEBVIEW/features/store/createWebviewStore';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
@@ -62,7 +63,15 @@ describe('STORE_EVENT_FORWARDS: probe:receive:source-bytes:requested', () => {
       location,
       type: 'probe:request',
       endian: Endian.Big,
+      format: DEFAULT_DECODE_OPTIONS.format,
     });
+  });
+
+  /** A compressed file's offsets count into what it decompresses to; the host must know to. */
+  it('carries the format, so the host reads the buffer the location counts into', () => {
+    store.get(StoreSliceId.DecodeOptions).setOptions({ format: PixelFormatPresets.getPreset('imag') });
+
+    expect(forwardProbe()).toMatchObject({ format: { id: 'imag', compressed: true } });
   });
 
   it('carries the endian of the moment, not the one the pin was made under', () => {

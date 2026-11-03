@@ -6,6 +6,7 @@ import type { InfoMessage } from '@EXTENSION/features/infoMessage';
 import type { SettingsController } from '@EXTENSION/features/settings/SettingsController';
 import type { ContentViewSession, UriOpener } from '@EXTENSION/features/viewer';
 import type { ContextKeyController } from '@EXTENSION/features/vscode/contextKeys';
+import type { PixelFormat } from '@SHARED/features/image/format/types';
 import type {
   DecodedFileOutcome,
   DecodedFileReading,
@@ -57,6 +58,7 @@ export type HostMessageResolver<K extends WebviewMessage['type'] = WebviewMessag
 export type ProbeRequestMessage = {
   id: string;
   endian: Endian;
+  format: PixelFormat;
   location: SourceLocation;
 };
 export type DecodeStage = 'reading' | 'start' | 'progress' | 'ready';

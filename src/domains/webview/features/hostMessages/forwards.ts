@@ -12,6 +12,7 @@ export const STORE_EVENT_FORWARDS: MessageForwardMap<WebviewMessage, StoreEventM
     location,
     type: 'probe:request',
     endian: store.get(StoreSliceId.DecodeOptions).options.endian,
+    format: store.get(StoreSliceId.DecodeOptions).options.format,
   }),
 
   'decodeOptions:snapshot:requested': ({ options }, { store }) => ({

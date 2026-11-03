@@ -1,4 +1,5 @@
 import type { Endian } from '@definitions/bits';
+import type { PixelFormat } from '@SHARED/features/image/format/types';
 import type {
   DecodedFileOutcome,
   DecodedFileReading,
@@ -40,4 +41,4 @@ export type WebviewMessage =
   | { type: 'decode:options:snapshot'; snapshot: ToolbarOptionsSnapshot }
   | { type: 'app:status'; level: 'info' | 'warn' | 'error'; message: string }
   | { type: 'sources:request:decode'; ids: FileSource[]; options: DecodeOptions }
-  | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian };
+  | { type: 'probe:request'; id: string; location: SourceLocation; endian: Endian; format: PixelFormat };
