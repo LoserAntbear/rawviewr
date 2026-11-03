@@ -4,12 +4,12 @@ A VS Code extension for looking at image data that has no container around it �
 framebuffer dumps, texture blobs, sprite payloads, `bytearray`s pulled out of a
 debugger. You tell it how the bytes are laid out; it draws them.
 
-![formats](https://img.shields.io/badge/formats-31-blue) ![no deps](https://img.shields.io/badge/runtime%20deps-none-green)
+![formats](https://img.shields.io/badge/formats-38-blue) ![no deps](https://img.shields.io/badge/runtime%20deps-none-green)
 
 ## What it does
 
-- **31 pixel formats** across 16-bit packed, 32-bit, 24-bit, 8-bit packed,
-  grayscale and sub-byte layouts — switchable from a dropdown without reloading.
+- **38 pixel formats** across 16-bit packed, 32-bit, 24-bit, 8-bit packed, YUV,
+  grayscale, sub-byte and compressed layouts — switchable from a dropdown without reloading.
 - **Manual geometry**: width, height, byte offset and row stride, all
   overridable. Leave a field empty and it is derived from the buffer.
 - **Dimension guessing** for buffers where you have no idea: ranked candidates
@@ -68,8 +68,15 @@ entry.
 | 32-bit | RGBA8888, ARGB8888, ABGR8888, BGRA8888, RGBX8888, XRGB8888, BGRX8888, XBGR8888 |
 | 24-bit | RGB888, BGR888 |
 | 8-bit packed | RGB332, BGR233 |
+| YUV 4:2:2 | YUYV / YUY2, UYVY, YVYU, VYUY |
+| YUV 4:4:4 | YUV444, VUY444 |
 | Grayscale | GRAY8, A8, GRAY16 |
 | Sub-byte | GRAY4 (2 px/byte), GRAY2 (4 px/byte), GRAY1 (8 px/byte) |
+| Compressed | IMAG (LZ77-compressed ARGB4444 sprites) |
+
+A compressed format is a small file format rather than a raw layout: its header gives the size, so
+width, height, offset, stride and the header preset stand down while it is selected. The pixel
+probe's byte offsets then count into the decompressed pixels, not the file.
 
 The 32-bit and 24-bit names describe **byte order on disk**, which is how
 everyone names those. The 16-bit names describe **bit fields in the word**, so
