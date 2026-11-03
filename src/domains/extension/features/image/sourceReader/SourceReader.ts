@@ -1,6 +1,9 @@
 import type { Endian } from '@definitions/bits';
 import { BufferItem } from '@EXTENSION/features/buffer/BufferItem';
 import { BITS_PER_BYTE } from '@SHARED/features/image/format/definitions';
+import type { PixelFormat } from '@SHARED/features/image/format/types';
+import { resolveEndian } from '@SHARED/features/image/format/utils';
+import { preparePixelBuffer } from '@SHARED/features/image/imageDecoder/imagePreparation/pixelBuffer';
 import type { SourceBytes, SourceLocation } from '@SHARED/features/image/sourceReader/types';
 import type { FileSource } from '@SHARED/features/viewer/types';
 import { readWord } from '@utils/bits';
@@ -11,22 +14,30 @@ function nothingToRead(): SourceBytes {
 }
 
 export class SourceReader {
-  public read(source: Uint8Array, location: SourceLocation, endian: Endian): SourceBytes {
+  // Non-endian sesitive are resolved to LE by default.
+  public read(
+    source: Uint8Array,
+    location: SourceLocation,
+    endian: Endian,
+    format: PixelFormat,
+  ): SourceBytes {
+    const pixels = preparePixelBuffer(source, format);
     const { bits, byteOffset, bitOffset } = location;
 
     return bits < BITS_PER_BYTE
-      ? this.readWithinByte(source, byteOffset, bitOffset, bits)
-      : this.readWholeBytes(source, byteOffset, bits / BITS_PER_BYTE, endian);
+      ? this.readWithinByte(pixels, byteOffset, bitOffset, bits)
+      : this.readWholeBytes(pixels, byteOffset, bits / BITS_PER_BYTE, resolveEndian(format, endian));
   }
 
   public async readFromFileSource(
     source: FileSource,
     location: SourceLocation,
     endian: Endian,
+    format: PixelFormat,
   ): Promise<SourceBytes> {
     const item = await BufferItem.fromFileSource(source);
 
-    return this.read(new Uint8Array(item.data), location, endian);
+    return this.read(new Uint8Array(item.data), location, endian, format);
   }
 
   /** Sub-byte formats share a byte between pixels, so only some bits are ours. */
