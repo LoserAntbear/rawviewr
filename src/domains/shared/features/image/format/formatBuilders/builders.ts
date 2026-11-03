@@ -27,6 +27,7 @@ export function buildPackedFormat(
     label: label ?? buildLabel(id),
     group: PACKED_GROUPS[bits],
     hasAlpha: !!spec.a,
+    compressed: false,
     endianSensitive: byteCount > 1,
     bitOrderSensitive: false,
   };
@@ -48,6 +49,7 @@ export function buildByteOrderedFormat(
     label: label ?? buildLabel(id, `bytes ${layout}`),
     group: byteCount === 3 ? FormatGroup.Packed24 : FormatGroup.Packed32,
     hasAlpha: order.includes(RowChannel.Alpha),
+    compressed: false,
     endianSensitive: false,
     bitOrderSensitive: false,
   };
@@ -62,6 +64,7 @@ export function buildSubByteGrayFormat(id: string, bits: SubBits, label?: string
     label: label ?? buildLabel(id, `${bits}-bit, ${pixelsPerByte} px/byte`),
     group: FormatGroup.SubByte,
     hasAlpha: false,
+    compressed: false,
     endianSensitive: false,
     bitOrderSensitive: true,
   };
@@ -83,6 +86,7 @@ export function buildGrayFormat(id: string, bits: GrayBits, label?: string): Pix
     label: label ?? buildLabel(id, detail),
     group: FormatGroup.Grayscale,
     hasAlpha: false,
+    compressed: false,
     endianSensitive: byteCount > 1,
     bitOrderSensitive: false,
   };
@@ -96,6 +100,7 @@ export function buildAlphaFormat(id: string, label?: string): PixelFormat {
     label: label ?? buildLabel(id, '8-bit alpha only'),
     group: FormatGroup.Grayscale,
     hasAlpha: true,
+    compressed: false,
     endianSensitive: false,
     bitOrderSensitive: false,
   };
@@ -113,6 +118,7 @@ export function buildYuv422Format(id: string, label?: string): PixelFormat {
     label: label ?? buildLabel(id, '4:2:2'),
     group: FormatGroup.Yuv422,
     hasAlpha: false,
+    compressed: false,
     endianSensitive: false,
     bitOrderSensitive: false,
   };
@@ -127,6 +133,24 @@ export function buildYuv444Format(id: string, label?: string): PixelFormat {
     label: label ?? buildLabel(id, '4:4:4'),
     group: FormatGroup.Yuv444,
     hasAlpha: false,
+    compressed: false,
+    endianSensitive: false,
+    bitOrderSensitive: false,
+  };
+}
+
+/**
+ * Sixteen bits a pixel once decompressed: ARGB4444 words, always little-endian, so the
+ * byte-order toggle has nothing to say.
+ */
+export function buildImagFormat(id: string, label?: string): PixelFormat {
+  return {
+    id,
+    bpp: 16,
+    label: label ?? buildLabel(id, 'LZ77-compressed ARGB4444 sprite'),
+    group: FormatGroup.Compressed,
+    hasAlpha: true,
+    compressed: true,
     endianSensitive: false,
     bitOrderSensitive: false,
   };
@@ -154,5 +178,8 @@ export function buildFormat({ id, spec, label }: FormatDefinition): PixelFormat 
 
     case FormatKind.Alpha:
       return buildAlphaFormat(id, label);
+
+    case FormatKind.Imag:
+      return buildImagFormat(id, label);
   }
 }
