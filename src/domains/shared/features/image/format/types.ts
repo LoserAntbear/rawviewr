@@ -13,6 +13,7 @@ export type PixelFormat = {
   label: string;
   group: FormatGroup;
   hasAlpha: boolean;
+  compressed: boolean;
   endianSensitive: boolean;
   bitOrderSensitive: boolean;
 }
@@ -78,6 +79,7 @@ export enum FormatKind {
   SubByteGray = 'sub-byte-gray',
   PackedYuv422 = 'packed-yuv-422',
   PackedYuv444 = 'packed-yuv-444',
+  Imag = 'imag',
 }
 
 export type FormatSpec =
@@ -87,7 +89,8 @@ export type FormatSpec =
   | { kind: FormatKind.PackedYuv422; order: Yuv422Order }
   | { kind: FormatKind.PackedYuv444; order: Yuv444Order }
   | { kind: FormatKind.ByteOrdered; order: readonly ByteOrderEntry[] }
-  | { kind: FormatKind.Packed; bits: PackedWordBits; channels: PackedChannels };
+  | { kind: FormatKind.Packed; bits: PackedWordBits; channels: PackedChannels }
+  | { kind: FormatKind.Imag };
 
 export type FormatDefinition = {
   id: string;
@@ -97,6 +100,12 @@ export type FormatDefinition = {
 };
 
 export type FormatBuilder = (definition: FormatDefinition) => PixelFormat;
+
+/** Turns a compressed file into the plain pixel buffer its rows are read from. */
+export type Decompressor = {
+  readSize: (source: Uint8Array) => { width: number; height: number }; /** --- Header only. */
+  decompress: (source: Uint8Array) => Uint8Array;
+};
 
 export type ChannelReader = {
   mask: number;
