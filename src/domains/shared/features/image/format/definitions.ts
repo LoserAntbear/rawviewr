@@ -10,6 +10,7 @@ export enum FormatGroup {
   Packed16 = '16-bit packed',
   Packed24 = '24-bit packed',
   Packed32 = '32-bit packed',
+  Compressed = 'compressed',
 }
 
 export enum RowChannel {
@@ -269,6 +270,10 @@ export const FORMAT_DEFINITIONS: readonly FormatDefinition[] = [
     label: 'GRAY1 — 1-bit mono, 8 px/byte',
     spec: { kind: FormatKind.SubByteGray, bits: 1 },
   },
+
+  // ---- compressed ----------------------------------------------------------
+  /** LZ77-compressed ARGB4444 sprites, sized by their own header. */
+  { id: 'imag', spec: { kind: FormatKind.Imag } },
 ];
 
 /** Used when a buffer has no remembered format, and when a remembered id is unknown. */
