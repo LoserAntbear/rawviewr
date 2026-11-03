@@ -1,6 +1,7 @@
 import type { Vector2 } from '@definitions/geometry';
 import { BITS_PER_BYTE } from '@SHARED/features/image/format/definitions';
 import type { Bits, RowOptions } from '@SHARED/features/image/format/types';
+import { resolveEndian } from '@SHARED/features/image/format/utils';
 import type { Geometry } from '@SHARED/features/image/imageDecoder/imagePreparation/types';
 import type { DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
 import type { SourceLocation } from '@SHARED/features/image/sourceReader/types';
@@ -20,7 +21,10 @@ export class PixelLocator {
     const frame = clamp(Math.floor(options.frame), 0, geometry.frameCount - 1);
 
     this.bpp = bpp;
-    this.rowOptions = { endian: options.endian, bitOrderMsb: options.bitOrderMsb };
+    this.rowOptions = {
+      bitOrderMsb: options.bitOrderMsb,
+      endian: resolveEndian(options.format, options.endian),
+    };
 
     this.flipY = options.flipY;
     this.width = geometry.width;
