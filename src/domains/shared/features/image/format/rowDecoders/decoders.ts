@@ -1,6 +1,7 @@
 import { expandTable, readWord } from '@utils/bits';
 import { type FieldStrategies, Strategy } from '@utils/strategy';
 
+import { IMAG_CHANNELS } from '../decompressors/imag';
 import { BITS_PER_BYTE, OPAQUE_VALUE, PAD_CHANNEL, RowChannel } from '../definitions';
 import type {
   ByteOrderEntry,
@@ -243,6 +244,7 @@ function buildYuv444RowDecoder(order: Yuv444Order): RowDecoder {
 const ROW_DECODER_BY_SPEC: FieldStrategies<FormatSpec, 'kind', [], RowDecoder> = {
   [FormatKind.Alpha]: () => buildAlphaRowDecoder(),
   [FormatKind.Gray]: ({ bits }) => buildGrayRowDecoder(bits),
+  [FormatKind.Imag]: () => buildPackedRowDecoder(16, IMAG_CHANNELS),
   [FormatKind.PackedYuv422]: ({ order }) => buildYuv422RowDecoder(order),
   [FormatKind.PackedYuv444]: ({ order }) => buildYuv444RowDecoder(order),
   [FormatKind.SubByteGray]: ({ bits }) => buildSubByteGrayRowDecoder(bits),
