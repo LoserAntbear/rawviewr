@@ -7,6 +7,7 @@ import { ALPHA_STRATEGIES, resolveAlphaStrategy } from './alphaModeResolution';
 import { DecodedSizeExceededError } from './decodeErrors';
 import { DEFAULT_ROWS_PER_SEGMENT, MAX_DECODED_PIXELS } from './definitions';
 import { GeometryResolver } from './imagePreparation/GeometryResolver';
+import { preparePixelBuffer } from './imagePreparation/pixelBuffer';
 import type { Geometry } from './imagePreparation/types';
 import type { DecodedSegment, DecodeOptions, DecodeResult } from './types';
 
@@ -46,6 +47,10 @@ export class ImageDecoder {
   ): Generator<DecodedSegment> {
     this.assertDecodableSize(geometry);
 
+    /**
+     * For decompression support we allocate the entire pixel buffer up front and decode it row by row.
+     */
+    const pixels = preparePixelBuffer(source, options.format);
     const rowDecoder = FormatDecodersLibrary.getRowDecoder(options.format.id);
     const locator = new PixelLocator(geometry, options, options.format.bpp);
     const alphaStrategy = resolveAlphaStrategy(options);
@@ -58,7 +63,7 @@ export class ImageDecoder {
 
       for (let offset = 0; offset < totalRows; offset++) {
         const sourceRow = rowDecoder(
-          source,
+          pixels,
           locator.locateRow(row + offset),
           geometry.width,
           locator.rowOptions,
