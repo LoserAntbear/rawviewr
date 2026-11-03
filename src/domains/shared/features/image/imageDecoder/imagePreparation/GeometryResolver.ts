@@ -1,3 +1,5 @@
+import { FormatDecodersLibrary } from '@SHARED/features/image/format/rowDecoders';
+import type { PixelFormat } from '@SHARED/features/image/format/types';
 import { clamp } from '@utils/math';
 
 import { HeaderPreset, MAX_FILE_DIMENSION_PX } from '../definitions';
@@ -32,6 +34,12 @@ function resolveDimension(
 export class GeometryResolver {
   // TODO: Add exception handling for invalid header presets, formats, etc.
   public resolveGeometry(data: Uint8Array, options: DecodeOptions): Geometry {
+    return options.format.compressed
+      ? this.resolveCompressedGeometry(data, options.format)
+      : this.resolveRawGeometry(data, options);
+  }
+
+  private resolveRawGeometry(data: Uint8Array, options: DecodeOptions): Geometry {
     const source = this.resolveDimensionSource(data, options);
     const formatDescriptor = options.format;
 
@@ -62,6 +70,22 @@ export class GeometryResolver {
       availableBytes,
       baseOffset: offset,
       lockedByHeader: source.lockedByHeader,
+    };
+  }
+  private resolveCompressedGeometry(data: Uint8Array, format: PixelFormat): Geometry {
+    const { width, height } = FormatDecodersLibrary.getDecompressor(format.id).readSize(data);
+    const bytesPerRow = getMinBytesPerRow(format.bpp, width);
+    const bytesPerFrame = bytesPerRow * height;
+
+    return {
+      width,
+      height,
+      bytesPerRow,
+      bytesPerFrame,
+      frameCount: 1,
+      baseOffset: 0,
+      lockedByHeader: true,
+      availableBytes: bytesPerFrame,
     };
   }
 
