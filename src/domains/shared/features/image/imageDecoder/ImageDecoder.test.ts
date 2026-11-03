@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { Endian } from '@definitions/bits';
+import { copy, imagFile, literal } from '@root/test/fixtures/imag';
+import { ImagFormatError } from '@SHARED/features/image/format/decompressors';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 
 import { DecodedSizeExceededError } from './decodeErrors';
@@ -237,5 +240,63 @@ describe('ImageDecoder.decodeSegments', () => {
       .filter((_, index) => index % 4 === 3);
 
     expect(alphas).toEqual(Array.from({ length: 21 }, () => 255));
+  });
+});
+
+/**
+ * A compressed file goes through the same row decoders as any other once it is decompressed,
+ * so what is tested here is the seam: the size comes from the file, the rows come from the
+ * decompressed words, and the options that only make sense for a raw layout are not read.
+ *
+ * ARGB4444 words: 0xFF00 is opaque red, 0x80F0 is green at alpha 8 (136 once expanded).
+ */
+describe('ImageDecoder: a compressed format', () => {
+  const imag = (overrides: Partial<DecodeOptions> = {}): DecodeOptions => options({
+    format: PixelFormatPresets.getPreset('imag'),
+    ...overrides,
+  });
+
+  // 2×2: red, green; then the row repeated by one copy two pixels back.
+  const FILE = imagFile(2, 2, literal(0xff00, 0x80f0), copy(2, 2));
+  const RED = [255, 0, 0, 255];
+  const GREEN = [0, 255, 0, 136];
+
+  const decoded = (overrides: Partial<DecodeOptions> = {}): number[] =>
+    [...decoder.decode(FILE, imag(overrides)).image.data];
+
+  it('decodes the decompressed words at the size the file gives', () => {
+    const { image } = decoder.decode(FILE, imag());
+
+    expect([image.width, image.height]).toEqual([2, 2]);
+    expect([...image.data]).toEqual([...RED, ...GREEN, ...RED, ...GREEN]);
+  });
+
+  it('reads the words little-endian, whatever the disabled byte-order toggle kept', () => {
+    expect(decoded({ endian: Endian.Big })).toEqual(decoded({ endian: Endian.Little }));
+  });
+
+  it('is not moved by a size, offset, stride or header preset meant for raw buffers', () => {
+    expect(decoded({ width: 1, height: 4, offset: 6, bytesPerRow: 64 })).toEqual(decoded());
+  });
+
+  it('still flips, since that is about the picture rather than the file', () => {
+    const flipped = imagFile(2, 2, literal(0xff00, 0xff00, 0x80f0, 0x80f0));
+
+    expect([...decoder.decode(flipped, imag({ flipY: true })).image.data])
+      .toEqual([...GREEN, ...GREEN, ...RED, ...RED]);
+  });
+
+  it('reports a broken stream as a broken .imag', () => {
+    expect(() => decoder.decode(imagFile(2, 2, literal(0, 1)), imag())).toThrow(ImagFormatError);
+  });
+
+  /**
+   * Decompressing allocates the whole frame, so the budget has to be asked first. Asked of
+   * `decodeSequential`, the path the host streams through: `decode` checks on its own way in.
+   */
+  it('refuses an oversized header before decompressing anything', () => {
+    const segments = decoder.decodeSequential(imagFile(65535, 65535), imag());
+
+    expect(() => segments.next()).toThrow(DecodedSizeExceededError);
   });
 });
