@@ -1,4 +1,5 @@
 import { BufferItem } from '@EXTENSION/features/buffer/BufferItem';
+import { FileValidator } from '@EXTENSION/features/file/FileValidator';
 import { InfoMessageController } from '@EXTENSION/features/infoMessage/InfoMessageController';
 import { ImageDecoder } from '@SHARED/features/image/imageDecoder/ImageDecoder';
 import type {
@@ -65,11 +66,9 @@ export class SourcesDecoder {
       () => BufferItem.fromFileSource(source),
     );
 
-    // TEMPORARY, for testing the 1 GiB sample. Restore before release — and restore the
-    // `FileValidator` import with it, which had to go for the build to stay clean.
-    // if (!FileValidator.isValidFileSize(bufferItem.data.byteLength)) {
-    //   throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
-    // }
+    if (!FileValidator.isValidFileSize(bufferItem.data.byteLength)) {
+      throw new Error(`File size exceeds the maximum allowed size of ${FileValidator.maxFileSizeMB} MB.`);
+    }
 
     const bytes = new Uint8Array(bufferItem.data);
 

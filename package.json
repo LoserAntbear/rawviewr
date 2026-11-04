@@ -361,7 +361,7 @@
         },
         "rawImageViewer.maxFileSizeMB": {
           "type": "number",
-          "default": 64,
+          "default": 512,
           "minimum": 1,
           "description": "Refuse to load buffers larger than this, to keep the webview responsive."
         },
