@@ -109,7 +109,7 @@ describe('the gallery context menu', () => {
   });
 
   it('tests for the section the gallery actually writes', () => {
-    expect(entry?.when).toContain(`webviewSection == '${VSCodeWebviewContextActionTarget.GalleryItem}'`);
+    expect(entry?.when).toContain(`actionTarget == '${VSCodeWebviewContextActionTarget.GalleryItem}'`);
   });
 
   /** It needs a right-clicked item to mean anything, and the palette never has one. */
@@ -122,7 +122,7 @@ describe('the gallery context menu', () => {
 
 describe('the reveal parser', () => {
   it('takes the id out of the context the menu hands over', () => {
-    expect(parseRevealItem({ webviewSection: 'galleryItem', itemId: 'file:///a.raw' }))
+    expect(parseRevealItem({ actionTarget: 'galleryItem', itemId: 'file:///a.raw' }))
       .toEqual({ kind: IntentKind.viewRevealItem, itemId: 'file:///a.raw' });
   });
 
@@ -130,7 +130,7 @@ describe('the reveal parser', () => {
   it.each([
     ['nothing at all', undefined],
     ['a bare string', 'file:///a.raw'],
-    ['a context naming no item', { webviewSection: 'galleryItem' }],
+    ['a context naming no item', { actionTarget: 'galleryItem' }],
     ['an id that is not a string', { itemId: 42 }],
     ['an empty id', { itemId: '' }],
   ])('refuses %s', (_case, argument) => {

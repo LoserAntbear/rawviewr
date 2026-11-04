@@ -223,7 +223,7 @@ describe('riv-gallery: the context the native menu reads', () => {
 
     expect(JSON.parse(host.dataset.vscodeContext ?? 'null')).toEqual({
       itemId: 'b',
-      webviewSection: 'galleryItem',
+      actionTarget: 'galleryItem',
       preventDefaultContextMenuItems: true,
     });
   });

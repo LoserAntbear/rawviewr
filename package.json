@@ -185,7 +185,7 @@
       "webview/context": [
         {
           "command": "rawImageViewer.revealItem",
-          "when": "webviewId == 'rawImageViewer.gallery' && webviewSection == 'galleryItem'"
+          "when": "webviewId == 'rawImageViewer.gallery' && actionTarget == 'galleryItem'"
         }
       ]
     },
