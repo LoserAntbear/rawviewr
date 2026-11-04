@@ -4,6 +4,7 @@ export enum IntentKind {
   viewerOpenFolderGallery = 'viewer/openFolderGallery',
 
   viewZoom = 'view/zoom',
+  viewRevealItem = 'view/revealItem',
 
   settingsReset = 'settings/reset',
 
