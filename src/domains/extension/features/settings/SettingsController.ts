@@ -7,13 +7,11 @@ import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 import { DEFAULT_DECODE_OPTIONS } from '@SHARED/features/image/imageDecoder/definitions';
 import type { DecodeOptions } from '@SHARED/features/image/imageDecoder/types';
 import { ConfigChangeKind } from '@SHARED/features/settings/configuration/definitions';
-import type { ViewerConfiguration } from '@SHARED/features/settings/configuration/types';
+import type { ConfigReader, ViewerConfiguration } from '@SHARED/features/settings/configuration/types';
 import type { ToolbarOptionsSnapshot } from '@SHARED/features/settings/snapshot';
 import type { ViewerBackground } from '@SHARED/features/viewer/definitions';
 import { DEFAULT_VIEWER_BACKGROUND, DEFAULT_VIEWER_CONFIGURATION } from '@SHARED/features/viewer/definitions';
 import { attempt } from '@utils/attempt';
-
-import type { VSCodeWorkspaceConfigurationController } from './VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
 
 const VSCODE_MEMENTO_SETTINGS_PREFIX = 'rawImageViewer.settings:';
 const TOOLBAR_SNAPSHOT_KEY = `${VSCODE_MEMENTO_SETTINGS_PREFIX}toolbarSnapshot`;
@@ -31,7 +29,7 @@ export class SettingsController extends DisposableStore {
 
   constructor(
     private readonly workspaceState: vscode.Memento,
-    private readonly configController: VSCodeWorkspaceConfigurationController,
+    private readonly configController: ConfigReader,
     private readonly snapshotEmitter: vscode.EventEmitter<ToolbarOptionsSnapshot> =
     new vscode.EventEmitter<ToolbarOptionsSnapshot>(),
   ) {
@@ -44,10 +42,6 @@ export class SettingsController extends DisposableStore {
     await this.workspaceState.update(TOOLBAR_SNAPSHOT_KEY, snapshot);
 
     this.snapshotEmitter.fire(snapshot);
-  }
-
-  public async clearToolbarSnapshot(): Promise<void> {
-    await this.workspaceState.update(TOOLBAR_SNAPSHOT_KEY, undefined);
   }
 
   public onToolbarSnapshotChange(listen: (snapshot: ToolbarOptionsSnapshot) => void): vscode.Disposable {
