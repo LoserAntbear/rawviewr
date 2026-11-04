@@ -4,6 +4,7 @@ import type { IntentResolverMap } from '@EXTENSION/features/intent/types';
 import { findGalleryTargets, folderTitle, selectionTitle } from '@EXTENSION/features/viewer/gallery/galleryTargets';
 import type { ViewerRegistry } from '@EXTENSION/features/viewer/registry/viewerRegistry';
 import type { ViewerWindowController } from '@EXTENSION/features/viewer/windowController/ViewerWindowController';
+import { revealInExplorer } from '@EXTENSION/features/vscode/explorer';
 import { resolveFolder, resolveUriTargets } from '@EXTENSION/features/vscode/utils/uri';
 
 type ViewerIntentKind =
@@ -55,15 +56,35 @@ export const VIEWER_INTENT_RESOLVERS = (
   },
 });
 
+type ViewIntentKind =
+  | IntentKind.viewZoom
+  | IntentKind.viewRevealItem;
+
 export const VIEW_INTENT_RESOLVERS = (
   viewerRegistry: ViewerRegistry,
-): Pick<IntentResolverMap, IntentKind.viewZoom> => ({
+): Pick<IntentResolverMap, ViewIntentKind> => ({
   [IntentKind.viewZoom]: async ({ direction }) => {
     try {
       await viewerRegistry.activeViewer?.postToWebview({ type: 'view:zoom', direction });
     } catch (error) {
       InfoMessageController.showError(
         `Failed to zoom the view: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  },
+
+  [IntentKind.viewRevealItem]: async ({ itemId }) => {
+    try {
+      const source = viewerRegistry.activeViewer?.sourceFor(itemId);
+
+      if (!source) {
+        throw new Error('that item is no longer open');
+      }
+
+      await revealInExplorer(source.uri);
+    } catch (error) {
+      InfoMessageController.showError(
+        `Failed to reveal the item: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   },
