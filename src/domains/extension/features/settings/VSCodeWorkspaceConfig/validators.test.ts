@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CaptureOutputType, CaptureFinishSignal } from '@definitions/capture';
+import { CaptureFinishSignal, CaptureOutputType } from '@definitions/capture';
 import type { ConfigKey } from '@SHARED/features/settings/configuration/types';
 
 import { asStringArray, CONFIG_VALIDATORS } from './validators';
@@ -48,13 +48,13 @@ describe('the capture validators', () => {
   const validate = <K extends ConfigKey>(key: K, raw: unknown) => CONFIG_VALIDATORS[key](raw);
 
   it.each([
-    ['capture.output', CaptureOutputType.File],
+    ['capture.outputType', CaptureOutputType.File],
     ['capture.stopWith', CaptureFinishSignal.StdinQ],
   ] as const)('%s takes a member of its own enum', (key, member) => {
     expect(validate(key, member)).toBe(member);
   });
 
-  it.each(['capture.output', 'capture.stopWith'] as const)('%s refuses a word it does not know', (key) => {
+  it.each(['capture.outputType', 'capture.stopWith'] as const)('%s refuses a word it does not know', (key) => {
     expect(validate(key, 'sighup')).toBeNull();
   });
 
