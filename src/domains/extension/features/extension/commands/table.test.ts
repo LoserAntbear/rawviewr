@@ -4,9 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 import { CommandNames } from '@definitions/commands';
 import { IntentKind } from '@definitions/intent';
+import { ViewType } from '@definitions/viewTypes';
+import { VSCodeWebviewContextActionTarget } from '@definitions/vscode';
 import { ContextKeys, EXTENSION_CONTEXT_PREFIX } from '@EXTENSION/features/vscode/contextKeys/definitions';
 
-import { parseZoomIn, parseZoomOut, parseZoomReset } from './parsers';
+import { parseRevealItem, parseZoomIn, parseZoomOut, parseZoomReset } from './parsers';
 import { COMMANDS } from './table';
 
 /**
@@ -21,7 +23,10 @@ type Manifest = {
   contributes: {
     commands: readonly { command: string; title: string }[];
     keybindings: readonly { key: string; command: string; when: string }[];
-    menus: { commandPalette: readonly { command: string; when: string }[] };
+    menus: {
+      commandPalette: readonly { command: string; when: string }[];
+      'webview/context': readonly { command: string; when: string }[];
+    };
   };
 };
 
@@ -84,6 +89,52 @@ describe('the zoom keybindings', () => {
 
     expect(entry?.when).not.toContain('fieldFocus');
     expect(entry?.when).toContain('activeCustomEditorId');
+  });
+});
+
+/**
+ * A webview context menu is two halves that cannot see each other: the `when` clause here, and
+ * the `data-vscode-context` the gallery writes at the moment of the click. Neither name is
+ * typed, and a mismatch in either is silent — the right-click simply offers nothing.
+ */
+describe('the gallery context menu', () => {
+  const entry = menus['webview/context'].find(({ command }) => command === CommandNames.revealItem);
+
+  it('offers the reveal on a right-clicked item', () => {
+    expect(entry).toBeDefined();
+  });
+
+  it('is scoped to the gallery, which is the only view with items to name', () => {
+    expect(entry?.when).toContain(`webviewId == '${ViewType.Gallery}'`);
+  });
+
+  it('tests for the section the gallery actually writes', () => {
+    expect(entry?.when).toContain(`webviewSection == '${VSCodeWebviewContextActionTarget.GalleryItem}'`);
+  });
+
+  /** It needs a right-clicked item to mean anything, and the palette never has one. */
+  it('stays out of the palette, where it would resolve to nothing', () => {
+    const palette = menus.commandPalette.find(({ command }) => command === CommandNames.revealItem);
+
+    expect(palette?.when).toBe('false');
+  });
+});
+
+describe('the reveal parser', () => {
+  it('takes the id out of the context the menu hands over', () => {
+    expect(parseRevealItem({ webviewSection: 'galleryItem', itemId: 'file:///a.raw' }))
+      .toEqual({ kind: IntentKind.viewRevealItem, itemId: 'file:///a.raw' });
+  });
+
+  /** A refused parse is reported and dropped, so none of these reach a resolver. */
+  it.each([
+    ['nothing at all', undefined],
+    ['a bare string', 'file:///a.raw'],
+    ['a context naming no item', { webviewSection: 'galleryItem' }],
+    ['an id that is not a string', { itemId: 42 }],
+    ['an empty id', { itemId: '' }],
+  ])('refuses %s', (_case, argument) => {
+    expect(parseRevealItem(argument)).toBeNull();
   });
 });
 
