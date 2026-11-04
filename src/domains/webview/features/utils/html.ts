@@ -9,6 +9,18 @@ export function getFocusElementDeep(root: Document | ShadowRoot = document): Ele
   return active?.shadowRoot ? getFocusElementDeep(active.shadowRoot) : active;
 }
 
+export function findShadowHostForElement(element: HTMLElement): HTMLElement {
+  let host = element;
+  let root = host.getRootNode();
+
+  while (root instanceof ShadowRoot && isHTMLElement(root.host)) {
+    host = root.host;
+    root = host.getRootNode();
+  }
+
+  return host;
+}
+
 export function isFormControlElement(element: Element | null): boolean {
   return element instanceof HTMLInputElement
     || element instanceof HTMLSelectElement

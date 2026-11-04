@@ -1,7 +1,7 @@
 import { VSCodeWebviewContextActionTarget } from '@definitions/vscode';
 import { ListVirtualizationObserver } from '@WEBVIEW/features/_features/listVirtualization/ListVirtualizationObserver';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
-import { hostInDocument } from '@WEBVIEW/features/utils/html';
+import { findShadowHostForElement } from '@WEBVIEW/features/utils/html';
 import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
 
 import { RIVTags } from '../definitions';
@@ -57,7 +57,7 @@ export class RIVGallery extends RIVHTMLElement {
 
   private handleContextMenu(event: Event): void {
     const itemId = this.view.entryIdFor(event.target);
-    const host = hostInDocument(this);
+    const host = findShadowHostForElement(this);
 
     if (itemId === undefined) {
       delete host.dataset.vscodeContext;
