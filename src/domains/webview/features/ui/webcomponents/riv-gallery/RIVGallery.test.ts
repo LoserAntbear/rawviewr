@@ -167,6 +167,88 @@ describe('riv-gallery: the observed window', () => {
 });
 
 /**
+ * VS Code builds the native menu from `data-vscode-context`, read off the element the click
+ * reached in the light DOM — this one. Every entry lives in the shadow root below it, which
+ * that walk never enters, so the gallery has to carry the entry's id up here itself.
+ *
+ * The retargeting that makes it necessary is the browser's own and happy-dom does not model
+ * it, so what these pin is the carrying, not the walk.
+ */
+describe('riv-gallery: the context the native menu reads', () => {
+  let host: HTMLElement;
+  let nested: RIVGallery;
+
+  /**
+   * Mounted the way the app mounts it: `riv-app` holds `riv-main-view` holds the gallery, each
+   * its own shadow root, so only the outermost element is in the document at all. Mounting it
+   * at the document root instead — as the rest of this file does — makes the gallery its own
+   * outermost host, and then these pass however the context is written.
+   */
+  beforeEach(() => {
+    host = document.createElement('div');
+
+    const outerRoot = host.attachShadow({ mode: 'open' });
+    const middle = document.createElement('div');
+    const middleRoot = middle.attachShadow({ mode: 'open' });
+
+    nested = document.createElement(RIVGallery.tagName) as RIVGallery;
+
+    middleRoot.appendChild(nested);
+    outerRoot.appendChild(middle);
+    document.body.replaceChildren(host);
+  });
+
+  const rightClick = (target: EventTarget): MouseEvent => {
+    const event = new MouseEvent('contextmenu', { bubbles: true, composed: true, cancelable: true });
+
+    target.dispatchEvent(event);
+
+    return event;
+  };
+
+  const within = (selector: string): EventTarget => {
+    const found = nested.shadowRoot?.querySelector(selector);
+
+    if (!found) {
+      throw new Error(`the gallery has no ${selector}`);
+    }
+
+    return found;
+  };
+
+  const entry = (id: string) => within(`li[data-item-id="${id}"]`);
+
+  it('names the entry that was right-clicked', () => {
+    rightClick(entry('b'));
+
+    expect(JSON.parse(host.dataset.vscodeContext ?? 'null')).toEqual({
+      itemId: 'b',
+      webviewSection: 'galleryItem',
+      preventDefaultContextMenuItems: true,
+    });
+  });
+
+  /** Anything written on the gallery is two shadow roots deep, where that walk never goes. */
+  it('writes it where the document can reach it, not on itself', () => {
+    rightClick(entry('b'));
+
+    expect(nested.dataset.vscodeContext).toBeUndefined();
+  });
+
+  /** VS Code reads a prevented default as "the extension handled it" and opens no menu. */
+  it('leaves the event to carry on to VS Code', () => {
+    expect(rightClick(entry('a')).defaultPrevented).toBe(false);
+  });
+
+  it('offers nothing once a click has missed every entry', () => {
+    rightClick(entry('a'));
+    rightClick(within('ul'));
+
+    expect(host.dataset.vscodeContext).toBeUndefined();
+  });
+});
+
+/**
  * The question this answers: a tile that flashes past during a fling is on screen, briefly, and
  * decoding it is work nobody ever sees. "I don't see it in the window" is not the same as "it
  * was never asked for" — so these watch the far end of the chain instead, the message that
