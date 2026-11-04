@@ -1,6 +1,7 @@
 export enum VSCodeCommands {
   SetContext = 'setContext',
   OpenWith = 'vscode.openWith',
+  RevealInExplorer = 'revealInExplorer',
 }
 
 /** Document Schemes we are willing to read buffers from. */
