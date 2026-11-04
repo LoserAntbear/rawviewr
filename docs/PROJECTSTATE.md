@@ -158,16 +158,9 @@ Since the code here is merely POC, it is not well structured and needs a general
 - decode still runs on the webview main thread. `WebviewImageDecoder` is the only file a
   worker move would touch — callers already await and the abort signal already threads
   through — but the move has not been made.
-- `AppContext.workspaceConfig` is typed as the concrete controller, so every consumer can
-  reach `dispose()` on it. Wants a narrow `ConfigReader` (`read` + `onDidChange`).
-- `VSCodeWorkspaceConfigurationController` never exposes its emitter, so config change
-  events fire into nothing and nobody can subscribe. Needs a public `onDidChange` before
-  the context can narrow.
 - settings sync between host and webview is not built. Decide up front whether messages
   carry an origin tag or the webview simply never re-posts what it received — the echo
   loop is cheap to design out and miserable to debug.
-- no test harness. Behaviour is currently verified by bundling throwaway scripts with
-  esbuild and running them under node, which works but is not checked in.
 - `main.refactor.ts` remains the reference for the unported interactive features and does
   not compile. It goes when the list below is empty.
 
@@ -187,6 +180,13 @@ stop lying.
 - **fixed: only checkboxes updated decode options.** `readElementValue` guarded on
   `Object.hasOwn(element, 'value')`, but `value` is a WebIDL accessor on the prototype, so
   the check was false for every real input and select and they all read as `''`
+- the app context carries a `ConfigReader` (`read` + `onDidChange`) rather than the
+  concrete controller, so nothing reachable from the context can dispose the host's only
+  settings reader. The controller's `onDidChange` is public and subscribed to, which the
+  narrowing needed first
+- framebuffer capture, phase 0: the seven `rawImageViewer.capture.*` settings are
+  contributed, every one `scope: "machine"` so no repository can name the program we run,
+  validated on read, and held by a manifest test. Nothing executes anything yet
 
 ### Scope, in dependency order
 
