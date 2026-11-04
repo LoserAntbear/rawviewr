@@ -24,6 +24,11 @@
   ],
   "main": "./dist/extension.js",
   "activationEvents": [],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
   "contributes": {
     "customEditors": [
       {
@@ -364,6 +369,73 @@
           "type": "string",
           "default": "**/*.{raw,imag,bin,dat,data,dump,fb,rgb,rgba,bgra,argb,565,4444,gray,pix,tex,img,yuv,yv12,yuv444}",
           "description": "Glob used by \"Open Folder as Raw Image Gallery\" to collect files."
+        },
+        "rawImageViewer.capture.command": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Program run to grab a framebuffer. Executed directly, not through a shell, so it needs an absolute path unless it is on the PATH that VS Code itself was launched with. For a pipeline, set this to \"sh\" and put the pipeline in Args."
+        },
+        "rawImageViewer.capture.args": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "machine",
+          "description": "Arguments for the capture command, one per element rather than one string. Any element containing ${output} has it replaced with the path to write to."
+        },
+        "rawImageViewer.capture.outputType": {
+          "type": "string",
+          "default": "stdout",
+          "enum": [
+            "stdout",
+            "file"
+          ],
+          "enumDescriptions": [
+            "Output is captured from the tool's standard output.",
+            "Output is written to a file by the tool itself."
+          ],
+          "scope": "machine",
+          "description": "The type of output for the capture."
+        },
+        "rawImageViewer.capture.stopWith": {
+          "type": "string",
+          "default": "sigint",
+          "enum": [
+            "sigint",
+            "sigterm",
+            "stdin-q"
+          ],
+          "enumDescriptions": [
+            "Send SIGINT. POSIX only.",
+            "Send SIGTERM. POSIX only.",
+            "Write \"q\" to the tool's standard input. The only graceful stop that works on Windows."
+          ],
+          "scope": "machine",
+          "description": "How a recording is ended gracefully, so the tool gets to finalise its output."
+        },
+        "rawImageViewer.capture.timeoutSeconds": {
+          "type": "number",
+          "default": 60,
+          "minimum": 1,
+          "maximum": 3600,
+          "scope": "machine",
+          "description": "Hang deadline."
+        },
+        "rawImageViewer.capture.maxOutputMB": {
+          "type": "number",
+          "default": 256,
+          "minimum": 1,
+          "maximum": 4096,
+          "scope": "machine",
+          "description": "Memory limit for the capture output in megabytes."
+        },
+        "rawImageViewer.capture.saveFolder": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "The folder address where you want to save the capture output."
         }
       }
     }
