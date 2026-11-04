@@ -30,3 +30,4 @@
   Will require new row decoders, bpp and probe for planes, not packed pixels.
 
 - Add match-gussing support for file extensions/types. E.g for `imag` open the viewer with `imag` filetype preset.
+- Add `...` button to the toolbar with the quick menu and option to open extension settings.
