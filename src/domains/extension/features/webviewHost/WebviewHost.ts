@@ -10,7 +10,7 @@ import type { SettingsController } from '@EXTENSION/features/settings/SettingsCo
 import type { ContentViewSession } from '@EXTENSION/features/viewer/contentViewSession';
 import { ContextKeyController } from '@EXTENSION/features/vscode/contextKeys';
 import type { WebviewHostMessage } from '@SHARED/features/messaging/protocol';
-import type { UriOpener } from '@SHARED/features/viewer/types';
+import type { FileSource, UriOpener } from '@SHARED/features/viewer/types';
 import { attemptDetached } from '@utils/attempt';
 
 import { WebviewAppRenderShell } from './appShell';
@@ -23,7 +23,9 @@ export class WebviewHost extends DisposableStore {
   constructor(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
-    session: ContentViewSession,
+    // I do not like making the host to do more than it needs, but it works for now.
+    // TODO: Consider separation, or check out call site for other ways to pass the source. `
+    private readonly session: ContentViewSession,
     settingsController: SettingsController,
     sourcesDecoder: SourcesDecoder,
     uriOpener?: UriOpener,
@@ -75,5 +77,9 @@ export class WebviewHost extends DisposableStore {
 
   public postToWebview(message: WebviewHostMessage): Promise<void> {
     return this.bridge.post(message);
+  }
+
+  public sourceFor(id: string): FileSource | undefined {
+    return this.session.sourceFor(id);
   }
 }
