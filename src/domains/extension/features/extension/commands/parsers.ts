@@ -3,6 +3,7 @@ import type * as vscode from 'vscode';
 import { IntentKind } from '@definitions/intent';
 import type { IntentParser } from '@EXTENSION/features/intent/types';
 import { asLocalAllowedUri, asLocalUris, dedupeUris } from '@EXTENSION/features/vscode/guards/uri';
+import { isPlainObject, isValidString } from '@guards/index';
 import type { ZoomDirection } from '@SHARED/features/zoom';
 
 function parseTargets(args: readonly unknown[]): readonly vscode.Uri[] {
@@ -28,6 +29,14 @@ export const parseOpenFolderGallery: IntentParser = (...args) => ({
 });
 
 export const parseResetSettings: IntentParser = () => ({ kind: IntentKind.settingsReset });
+
+export const parseRevealItem: IntentParser = (context) => {
+  const itemId = isPlainObject(context) ? context.itemId : undefined;
+
+  return isValidString(itemId)
+    ? { kind: IntentKind.viewRevealItem, itemId }
+    : null;
+};
 
 const parseZoom = (direction: ZoomDirection): IntentParser => () => ({
   direction,
