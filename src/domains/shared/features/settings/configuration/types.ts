@@ -1,3 +1,5 @@
+import type * as vscode from 'vscode';
+
 import type { CaptureFinishSignal, CaptureOutputType } from '@definitions/capture';
 import type { AlphaMode } from '@SHARED/features/image/imageDecoder/definitions';
 import type {
@@ -6,6 +8,12 @@ import type {
   VIEWER_CONFIG_KEYS,
 } from '@SHARED/features/settings/configuration/definitions';
 import type { ViewerBackground } from '@SHARED/features/viewer/definitions';
+
+export interface ConfigReader {
+  readonly onDidChange: vscode.Event<ConfigChangePayload>;
+
+  read<K extends ConfigKey>(key: K): ViewerConfigSchema[K];
+}
 
 /**
  * Inline `import()` on purpose: a top-level import would pull package.json into the program,
