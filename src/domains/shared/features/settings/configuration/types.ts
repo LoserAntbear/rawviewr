@@ -1,3 +1,4 @@
+import type { CaptureOutput, CaptureStopWith } from '@definitions/capture';
 import type { AlphaMode } from '@SHARED/features/image/imageDecoder/definitions';
 import type {
   ConfigChangeKind,
@@ -35,6 +36,14 @@ export type ViewerConfigSchema = {
   defaultAlphaMode: AlphaMode;
   defaultLittleEndian: boolean;
   defaultBackground: ViewerBackground;
+  
+  'capture.command': string;
+  'capture.saveFolder': string;
+  'capture.maxOutputMB': number;
+  'capture.output': CaptureOutput;
+  'capture.timeoutSeconds': number;
+  'capture.args': readonly string[];
+  'capture.stopWith': CaptureStopWith;
 }
 
 export type ConfigValidator<K extends ConfigKey> = (raw: unknown) => ViewerConfigSchema[K] | null;
