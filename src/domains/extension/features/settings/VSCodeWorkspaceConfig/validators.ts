@@ -1,9 +1,12 @@
 
 import type { NumericRange } from '@app-types/math';
+import { CaptureFinishSignal, CaptureOutputType } from '@definitions/capture';
 import { PixelFormatPresets } from '@SHARED/features/image/format/presets';
 import { AlphaMode } from '@SHARED/features/image/imageDecoder/definitions';
 import {
   BYTE_OFFSET_LIMITS,
+  CAPTURE_OUTPUT_LIMITS_MB,
+  CAPTURE_TIMEOUT_LIMITS_S,
   DIMENSION_LIMITS_PX,
   FILE_SIZE_LIMITS_MB,
   TILE_SIZE_LIMITS_PX,
@@ -35,6 +38,11 @@ export function asFormatId(raw: unknown, formats: ReadonlySet<string> = PixelFor
   return typeof raw === 'string' && formats.has(raw) ? raw : null;
 }
 
+// Returns a copy, not mutating the original array.
+export function asStringArray(raw: unknown): readonly string[] | null {
+  return Array.isArray(raw) && raw.every((item) => typeof item === 'string') ? [...raw] : null;
+}
+
 export const CONFIG_VALIDATORS: ConfigValidatorsMap = {
   defaultFormat: asFormatId,
   galleryIncludeGlob: asString,
@@ -46,4 +54,11 @@ export const CONFIG_VALIDATORS: ConfigValidatorsMap = {
   maxFileSizeMB: asClampedInt.bind(null, FILE_SIZE_LIMITS_MB),
   defaultAlphaMode: asEnumMember.bind(null, AlphaMode) as (raw: unknown) => AlphaMode | null,
   defaultBackground: asEnumMember.bind(null, ViewerBackground) as (raw: unknown) => ViewerBackground | null,
+  'capture.command': asString,
+  'capture.args': asStringArray,
+  'capture.saveFolder': asString,
+  'capture.maxOutputMB': asClampedInt.bind(null, CAPTURE_OUTPUT_LIMITS_MB),
+  'capture.timeoutSeconds': asClampedInt.bind(null, CAPTURE_TIMEOUT_LIMITS_S),
+  'capture.outputType': asEnumMember.bind(null, CaptureOutputType) as (raw: unknown) => CaptureOutputType | null,
+  'capture.stopWith': asEnumMember.bind(null, CaptureFinishSignal) as (raw: unknown) => CaptureFinishSignal | null,
 };
