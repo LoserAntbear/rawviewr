@@ -3,7 +3,15 @@
 - Move covered file extensions to a vscode configuration menu of the extension, so that users can add their own file extensions to be covered by the extension. If it is possible.
 - Add support for custom parsers for specific file types.
 - Add support for merging multiple files into a single view, with ability to specify offsets and sizes for each file.
-- Add RMB action on gallery item to show the selected image in explorer view.
+- ~~Add RMB action on gallery item to show the selected image in explorer view.~~ **Landed as a
+  native menu.** The entry is contributed under `webview/context`, so it is VS Code's own menu
+  rather than one of ours to draw. The catch is that the context it reads, `data-vscode-context`,
+  is collected from the clicked element upwards through the document tree only. Every gallery
+  entry sits three shadow roots in, and by the time the event reaches the window its target has
+  been retargeted all the way out to `riv-app-component` — so `RIVGallery` writes the
+  right-clicked entry's id onto *that* element, via `hostInDocument`, and leaves the event
+  unprevented. Writing it on the gallery reaches nothing; reaching for `preventDefault` stops
+  the menu opening at all.
 - Add custom header presets support with related config/parser
 - Add script builders in a webview worker gated on Workspace Trust
 - Add serialization of the webview with `WebviewPanelSerializer`.
