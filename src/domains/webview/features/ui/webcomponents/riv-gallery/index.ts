@@ -1,5 +1,7 @@
+import { VSCodeWebviewContextActionTarget } from '@definitions/vscode';
 import { ListVirtualizationObserver } from '@WEBVIEW/features/_features/listVirtualization/ListVirtualizationObserver';
 import { StoreSliceId } from '@WEBVIEW/features/store/definitions';
+import { hostInDocument } from '@WEBVIEW/features/utils/html';
 import { WebviewContextProvider } from '@WEBVIEW/features/webviewContext/WebviewContextProvider';
 
 import { RIVTags } from '../definitions';
@@ -29,6 +31,8 @@ export class RIVGallery extends RIVHTMLElement {
 
     this.observe(this.view.rootRef, 'click', this.handleClick.bind(this));
     this.observe(this.view.rootRef, 'dblclick', this.handleDoubleClick.bind(this));
+    this.observe(this.view.rootRef, 'contextmenu', this.handleContextMenu.bind(this));
+
     this.disposableStore.add(this.virtualizationObserver);
 
     // Items may already be in the store by now — paint from current state, don't just listen.
@@ -48,6 +52,21 @@ export class RIVGallery extends RIVHTMLElement {
 
     if (id !== undefined) {
       this.emitCommand({ type: 'gallery:openItem', id });
+    }
+  }
+
+  private handleContextMenu(event: Event): void {
+    const itemId = this.view.entryIdFor(event.target);
+    const host = hostInDocument(this);
+
+    if (itemId === undefined) {
+      delete host.dataset.vscodeContext;
+    } else {
+      host.dataset.vscodeContext = JSON.stringify({
+        itemId,
+        preventDefaultContextMenuItems: true,
+        actionTarget: VSCodeWebviewContextActionTarget.GalleryItem,
+      });
     }
   }
 
