@@ -28,3 +28,5 @@
 - ~~Add YUV format support~~ **Landed for the packed families.**
   yuv420 is planar. I don't have support for it yet.
   Will require new row decoders, bpp and probe for planes, not packed pixels.
+
+- Add match-gussing support for file extensions/types. E.g for `imag` open the viewer with `imag` filetype preset.
