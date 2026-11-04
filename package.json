@@ -139,6 +139,11 @@
         "command": "rawImageViewer.resetSettings",
         "title": "Reset Remembered Decode Settings",
         "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.revealItem",
+        "title": "Reveal in Explorer View",
+        "category": "Raw Image"
       }
     ],
     "menus": {
@@ -171,6 +176,16 @@
         {
           "command": "rawImageViewer.zoomReset",
           "when": "activeCustomEditorId =~ /^rawImageViewer\\.editor/ || activeWebviewPanelId == 'rawImageViewer.gallery'"
+        },
+        {
+          "command": "rawImageViewer.revealItem",
+          "when": "false"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "rawImageViewer.revealItem",
+          "when": "webviewId == 'rawImageViewer.gallery' && webviewSection == 'galleryItem'"
         }
       ]
     },
