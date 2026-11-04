@@ -9,6 +9,7 @@ import {
 import type {
   ConfigChangePayload,
   ConfigKey,
+  ConfigReader,
   ViewerConfigKeySet,
   ViewerConfigSchema,
 } from '@SHARED/features/settings/configuration/types';
@@ -18,7 +19,7 @@ import { CONFIG_VALIDATORS } from './validators';
 
 type ConfigChangeDetectedPayload = Record<ConfigChangeKind, ConfigKey[]>;
 
-export class VSCodeWorkspaceConfigurationController extends DisposableStore {
+export class VSCodeWorkspaceConfigurationController extends DisposableStore implements ConfigReader {
   private get configuration(): vscode.WorkspaceConfiguration {
     return vscode.workspace.getConfiguration(this.extensionConfigKey);
   }
