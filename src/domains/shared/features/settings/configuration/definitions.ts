@@ -11,6 +11,9 @@ export const BYTE_OFFSET_LIMITS = { min: 0, max: Number.MAX_SAFE_INTEGER } as co
 export const TILE_SIZE_LIMITS_PX = { min: 48, max: 512 } as const;
 /** --- Just a sanity check rather than a strict limit. 4GB is an image huge enough */
 export const FILE_SIZE_LIMITS_MB = { min: 1, max: 4096 } as const;
+/** An hour is already far past what a raw recording can fit on a disk. */
+export const CAPTURE_TIMEOUT_LIMITS_S = { min: 1, max: 3600 } as const;
+export const CAPTURE_OUTPUT_LIMITS_MB = { min: 1, max: 4096 } as const;
 
 export const VIEWER_CONFIG_DEFAULT_KEYS = [
   'defaultFormat',
