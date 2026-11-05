@@ -35,3 +35,15 @@ declare type UnionToIntersection<TUnion> = (
 ) extends (member: infer TIntersection) => void
   ? TIntersection
   : never;
+
+declare type OS = 'darwin' | 'win32' | 'linux' | 'android';
+declare type CurrentOS<TPlatform extends NodeJS.Platform = NodeJS.Platform> =
+  TPlatform extends 'darwin'
+    ? 'darwin'
+  : TPlatform extends 'win32'
+    ? 'win32'
+  : TPlatform extends 'linux' | 'freebsd' | 'sunos' | 'aix' | 'openbsd' | 'netbsd'
+    ? 'linux'
+  : TPlatform extends 'android'
+    ? 'android'
+  : never;
