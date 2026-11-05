@@ -7,5 +7,6 @@ export enum CommandNames {
   revealItem = 'rawImageViewer.revealItem',
   openGallery = 'rawImageViewer.openGallery',
   resetSettings = 'rawImageViewer.resetSettings',
+  captureGpuTrace = 'rawImageViewer.captureGpuTrace',
   openFolderGallery = 'rawImageViewer.openFolderGallery',
 }
