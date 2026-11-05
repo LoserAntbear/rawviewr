@@ -3,5 +3,6 @@ dist
 *.vsix
 .DS_Store
 /samples/raw
-/samples/big
-/samples/extract
+samples/big
+samples/extract
+samples/metal-spin
