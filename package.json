@@ -23,7 +23,9 @@
     "image"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": false
@@ -148,6 +150,11 @@
       {
         "command": "rawImageViewer.revealItem",
         "title": "Reveal in Explorer View",
+        "category": "Raw Image"
+      },
+      {
+        "command": "rawImageViewer.captureGpuTrace",
+        "title": "Capture GPU Trace",
         "category": "Raw Image"
       }
     ],
@@ -372,22 +379,28 @@
         },
         "rawImageViewer.capture.command": {
           "type": "string",
-          "default": "",
+          "default": "gpucapture",
           "scope": "machine",
-          "description": "Program run to grab a framebuffer. Executed directly, not through a shell, so it needs an absolute path unless it is on the PATH that VS Code itself was launched with. For a pipeline, set this to \"sh\" and put the pipeline in Args."
+          "description": "Program run to capture. Executed directly, not through a shell, so it needs an absolute path unless it is on the PATH that VS Code itself was launched with. For a pipeline, set this to \"sh\" and put the pipeline in Args. The default is Xcode 26's /usr/bin/gpucapture."
         },
         "rawImageViewer.capture.args": {
           "type": "array",
-          "default": [],
+          "default": [
+            "start",
+            "-p",
+            "${pid}",
+            "-o",
+            "${output}"
+          ],
           "items": {
             "type": "string"
           },
           "scope": "machine",
-          "description": "Arguments for the capture command, one per element rather than one string. Any element containing ${output} has it replaced with the path to write to."
+          "description": "Arguments for the capture command, one per element rather than one string. ${output} is replaced with the path to write to, ${pid} with a capturable process you are asked to pick, and ${workspaceFolder} with the first open folder. ${config:...} is not supported, on purpose: it would let a workspace inject settings into the argv of a program we run."
         },
         "rawImageViewer.capture.outputType": {
           "type": "string",
-          "default": "stdout",
+          "default": "file",
           "enum": [
             "stdout",
             "file"
