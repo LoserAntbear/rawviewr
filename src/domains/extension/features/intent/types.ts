@@ -11,6 +11,7 @@ export type IntentResolverMap = { readonly [K in IntentKind]: IntentResolver<K> 
 
 export type Intent =
   | { readonly kind: IntentKind.settingsReset }
+  | { readonly kind: IntentKind.captureGpuTrace }
   | { readonly kind: IntentKind.viewZoom; readonly direction: ZoomDirection }
   | { readonly kind: IntentKind.viewRevealItem; readonly itemId: string }
   | { readonly kind: IntentKind.viewerOpenSingle; readonly targets: readonly vscode.Uri[] }
