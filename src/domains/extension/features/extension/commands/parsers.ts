@@ -30,6 +30,9 @@ export const parseOpenFolderGallery: IntentParser = (...args) => ({
 
 export const parseResetSettings: IntentParser = () => ({ kind: IntentKind.settingsReset });
 
+// Noop, hence no parser.
+export const parseCaptureGpuTrace: IntentParser = () => ({ kind: IntentKind.captureGpuTrace });
+
 export const parseRevealItem: IntentParser = (context) => {
   const itemId = isPlainObject(context) ? context.itemId : undefined;
 
