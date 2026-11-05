@@ -29,3 +29,29 @@ describe('StringFormat.bytes', () => {
     expect(StringFormat.bytes(Number.NaN)).toBe('-/-');
   });
 });
+
+describe('StringFormat.kebab', () => {
+  it.each([
+    ['colorTarget', 'color-target'],
+    ['ColorTarget', 'color-target'],
+    ['parseHTMLString', 'parse-html-string'],
+    ['main color_target.v2', 'main-color-target-v2'],
+    ['  --Main  (RGBA8)--  ', 'main-rgba8'],
+    ['rgba8', 'rgba8'],
+    ['ÜberTarget straße', 'über-target-straße'],
+    ['', ''],
+    ['-:.', ''],
+  ])('"%s" reads "%s"', (input, text) => {
+    expect(StringFormat.kebab(input)).toBe(text);
+  });
+
+  it('upper-cases every word when asked', () => {
+    expect(StringFormat.kebab('colorTarget rgba8', 'upper')).toBe('COLOR-TARGET-RGBA8');
+  });
+
+  it('keeps an ISO timestamp in one piece per field', () => {
+    // A digit before a capital is not a word boundary, so the `T` stays glued to its neighbours.
+    expect(StringFormat.kebab('2026-01-02T03:04:05.006', 'upper')).toBe('2026-01-02T03-04-05-006');
+    expect(StringFormat.kebab('2026-01-02T03:04:05.006')).toBe('2026-01-02t03-04-05-006');
+  });
+});

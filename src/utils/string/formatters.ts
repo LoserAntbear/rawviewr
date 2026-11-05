@@ -39,6 +39,29 @@ function formatBytes(bytes: number): string {
   return render(renderValue, bytes);
 }
 
+const kebabConfig = {
+  SEPARATORS: /[^\p{L}\p{N}]+/u,
+  WORD_HUMP: /(\p{Ll})(\p{Lu})/gu,
+  ACRONYM_HUMP: /(\p{Lu}+)(\p{Lu}\p{Ll})/gu,
+};
+type KebabConfig = typeof kebabConfig;
+
+function formatKebab(
+  input: string,
+  letterCase: 'lower' | 'upper' = 'lower',
+  config: KebabConfig = kebabConfig,
+): string {
+  const kebab = input
+    .replace(config.WORD_HUMP, '$1-$2')
+    .replace(config.ACRONYM_HUMP, '$1-$2')
+    .split(config.SEPARATORS)
+    .filter(Boolean)
+    .join('-');
+
+  return letterCase === 'upper' ? kebab.toUpperCase() : kebab.toLowerCase();
+}
+
 export const StringFormat = {
   bytes: formatBytes,
+  kebab: formatKebab,
 };
