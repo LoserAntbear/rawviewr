@@ -1,6 +1,7 @@
 import { CommandNames } from '@definitions/commands';
 
 import {
+  parseCaptureGpuTrace,
   parseOpen,
   parseOpenFolderGallery,
   parseOpenGallery,
@@ -20,5 +21,6 @@ export const COMMANDS: readonly IntentCommand[] = [
   { name: CommandNames.revealItem, parseToIntent: parseRevealItem },
   { name: CommandNames.openGallery, parseToIntent: parseOpenGallery },
   { name: CommandNames.resetSettings, parseToIntent: parseResetSettings },
+  { name: CommandNames.captureGpuTrace, parseToIntent: parseCaptureGpuTrace },
   { name: CommandNames.openFolderGallery, parseToIntent: parseOpenFolderGallery },
 ];
