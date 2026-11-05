@@ -1,6 +1,7 @@
 export enum VSCodeCommands {
   SetContext = 'setContext',
   OpenWith = 'vscode.openWith',
+  RevealFileInOS = 'revealFileInOS',
   RevealInExplorer = 'revealInExplorer',
 }
 
