@@ -8,4 +8,5 @@ export enum IntentKind {
 
   settingsReset = 'settings/reset',
 
+  captureGpuTrace = 'capture/gpuTrace',
 }
