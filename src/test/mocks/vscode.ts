@@ -17,9 +17,23 @@ export const window = {
 };
 
 export const workspace = {
-  fs: { writeFile: vi.fn(), readFile: vi.fn() },
+  fs: {
+    writeFile: vi.fn(),
+    readFile: vi.fn(),
+    readDirectory: vi.fn(),
+    createDirectory: vi.fn(),
+  },
   asRelativePath: vi.fn((target: { path: string }) => target.path),
+  workspaceFolders: undefined as readonly { uri: { fsPath: string } }[] | undefined,
 };
+
+/** Mirrors `vscode.FileType`, which `readDirectory` entries are compared against. */
+export const FileType = {
+  Unknown: 0,
+  File: 1,
+  Directory: 2,
+  SymbolicLink: 64,
+} as const;
 
 export const commands = {
   executeCommand: vi.fn(),
@@ -31,6 +45,11 @@ export class Uri {
     public readonly scheme: string,
     public readonly path: string,
   ) {}
+
+  /** The same thing as `path` on POSIX, which is what these tests assert against. */
+  public get fsPath(): string {
+    return this.path;
+  }
 
   public static file(path: string): Uri {
     return new Uri('file', path);
