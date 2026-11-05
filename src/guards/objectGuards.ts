@@ -1,7 +1,7 @@
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   const prototype = typeof value === 'object' && value !== null ? Object.getPrototypeOf(value) : false;
 
-  return prototype === Object.prototype || prototype === null;
+  return prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null;
 }
 
 export function isSameRecord(previous: Record<string, unknown>, next: Record<string, unknown>): boolean {
