@@ -28,7 +28,7 @@ export class CaptureToolProvider {
       command,
       args: this.config.read('capture.args'),
       workspaceFolder: this.workspaceFolder(),
-      listTargets: this.currentPlatformBuiltInTool?.listTargets ?? null,
+      listTargets: this.currentPlatformBuiltInTool?.getTargets ?? null,
     });
   }
 

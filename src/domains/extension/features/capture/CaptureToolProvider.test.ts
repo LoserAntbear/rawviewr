@@ -51,7 +51,7 @@ describe('choosing which tool a capture runs with', () => {
   it.runIf(ON_DARWIN)('uses the platform tool when nothing is configured', () => {
     const tool = new CaptureToolProvider(reader('')).getActiveTool();
 
-    expect(tool?.container).toBe('.gputrace');
+    expect(tool?.containerFormat).toBe('.gputrace');
     expect(tool).not.toBeInstanceOf(ConfiguredCaptureTool);
   });
 
@@ -84,10 +84,10 @@ describe('choosing which tool a capture runs with', () => {
   it('lends a configured tool the platform tool\'s process list, where there is one', () => {
     const tool = new CaptureToolProvider(reader('gpucapture', ['-p', '${pid}'])).getActiveTool();
 
-    expect(typeof tool?.listTargets === 'function').toBe(ON_DARWIN);
+    expect(typeof tool?.getTargets === 'function').toBe(ON_DARWIN);
   });
 
   it('writes a raw buffer for a configured tool, since that is what the viewer opens', () => {
-    expect(new CaptureToolProvider(reader('ffmpeg')).getActiveTool()?.container).toBe('.raw');
+    expect(new CaptureToolProvider(reader('ffmpeg')).getActiveTool()?.containerFormat).toBe('.raw');
   });
 });
