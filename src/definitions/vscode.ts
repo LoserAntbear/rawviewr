@@ -3,6 +3,7 @@ export enum VSCodeCommands {
   OpenWith = 'vscode.openWith',
   RevealFileInOS = 'revealFileInOS',
   RevealInExplorer = 'revealInExplorer',
+  OpenSettings = 'workbench.action.openSettings',
 }
 
 /** Document Schemes we are willing to read buffers from. */
