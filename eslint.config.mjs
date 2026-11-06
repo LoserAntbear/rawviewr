@@ -196,6 +196,29 @@ export default defineConfig({
     }],
   },
 }, {
+  /**
+   * Capture tools and target resolvers must not import the VS Code API. They operate purely on
+   * the data provided in `CaptureRequest` and produce results in `CaptureOutcome`.
+   * They must be presumed as isolated
+   */
+  files: [
+    'src/domains/extension/features/capture/CaptureTargetResolver.ts',
+    'src/domains/extension/features/capture/CaptureTool.ts',
+    'src/domains/extension/features/capture/runProcess.ts',
+    'src/domains/extension/features/capture/types.ts',
+    'src/domains/extension/features/capture/platforms/**/*.ts',
+  ],
+  rules: {
+    '@typescript-eslint/no-restricted-imports': ['error', {
+      paths: [
+        {
+          name: 'vscode',
+          message: 'Report it in the CaptureOutcome and let the controller decide. Tools do not touch the editor.',
+        },
+      ],
+    }],
+  },
+}, {
   files: [
     'src/domains/extension/features/disposable/DisposableStore.ts',
     'src/domains/shared/features/disposable/WebviewDisposableStore.ts',
