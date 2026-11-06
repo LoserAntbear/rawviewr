@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 
 import { AppContextProvider } from '@EXTENSION/features/appContext/AppContextProvider';
+import { CaptureController } from '@EXTENSION/features/capture/CaptureController';
+import { CaptureToolProvider } from '@EXTENSION/features/capture/CaptureToolProvider';
+import { CAPTURE_INTENT_RESOLVERS } from '@EXTENSION/features/capture/resolvers';
 import { DisposableRegistry } from '@EXTENSION/features/disposable/DisposableRegistry';
 import { DisposableStore } from '@EXTENSION/features/disposable/DisposableStore';
 import { RawEditorProvider } from '@EXTENSION/features/editor/RawEditorProvider';
@@ -14,6 +17,7 @@ import { ViewerRegistry } from '@EXTENSION/features/viewer/registry/viewerRegist
 import { VIEW_INTENT_RESOLVERS, VIEWER_INTENT_RESOLVERS } from '@EXTENSION/features/viewer/resolvers';
 import { ViewerWindowController } from '@EXTENSION/features/viewer/windowController/ViewerWindowController';
 
+// TODO: Add status bar icon instantiation
 export function activate(context: vscode.ExtensionContext): void {
   // DISCLAIMER: Must be created before any DisposableStore, so that the latter can self-register into it.
   const disposableRegistry = new DisposableRegistry();
@@ -49,9 +53,17 @@ export function activate(context: vscode.ExtensionContext): void {
     workspaceConfig: configController,
   });
 
+  const captureController = new CaptureController(
+    context,
+    configController,
+    windowController,
+    new CaptureToolProvider(configController),
+  );
+
   const dispatcher = new IntentDispatcher({
     ...VIEW_INTENT_RESOLVERS(viewerRegistry),
     ...VIEWER_INTENT_RESOLVERS(windowController),
+    ...CAPTURE_INTENT_RESOLVERS(captureController),
     ...SETTINGS_INTENT_RESOLVERS(settingsController),
   });
 
