@@ -1,76 +1,100 @@
-import { spawn } from 'node:child_process';
+import { MS_PER_SECOND } from '@definitions/time';
 
-export type ToolRun = {
-  readonly stdout: string;
-  readonly stderr: string;
-  readonly timedOut: boolean;
-  readonly code: number | null;
-};
+import type { ProcessResult, ProcessRunOptions } from './runProcess';
+import { runProcess } from './runProcess';
+import type { CaptureData, CaptureLog, CaptureOutcome, CaptureRequest } from './types';
 
-export type ToolRunOptions = {
-  readonly timeoutMs: number;
+function parseResultData({ stdout }: ProcessResult, outputPath?: string): CaptureData {
+  return outputPath === undefined
+    ? { kind: 'bytes', bytes: stdout }
+    : { kind: 'container', path: outputPath };
+}
 
-  readonly cwd?: string;
-  /** Called with every chunk as it arrives, so a slow tool is not silent until it exits. */
-  readonly onOutput?: (chunk: string) => void;
-};
+function logFor(
+  invocation: readonly string[],
+  { stdout, stderr }: ProcessResult,
+  stdoutIsPayload: boolean,
+): CaptureLog {
+  const nativeOutput = stdoutIsPayload ? stderr : `${stdout.toString()}\n${stderr}`;
+  const lines = nativeOutput
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => line.length > 0);
 
-export abstract class CaptureTool<TCaptureOutput = unknown> {
-  public abstract run(): Promise<TCaptureOutput>;
+  return [`$ ${invocation.join(' ')}`, ...lines];
+}
+
+function parseResultFailure({ stderr }: ProcessResult): string {
+  return stderr.trim().length > 0 ? stderr.trim() : 'See the Raw Image Viewer output.';
+}
+
+/**
+ * **The tool must validate its request before it does anything.**
+ * E.G. You can return `missingTarget` outcome, if the capture request is missing one.
+ */
+export abstract class CaptureTool {
+  public abstract readonly label: string;
 
   /**
-   * `shell: false` so the argv executed is exactly the argv visible in settings,
-   *
-   * Resolves on `close` rather than `exit`
-   * `close` fires once stdio has closed
-   * this weay we can finish collecting the output before resolving.
+   * With `.ext` for the container format, e.g. `.gpucapture`
    */
-  protected async runInNode(
+  public abstract readonly containerFormat: string | null;
+
+  public abstract capture(request: CaptureRequest): Promise<CaptureOutcome>;
+
+  /**
+   * Resolves with true if can be run.
+   * Throws with the message if not.
+   * Simple.
+   */
+  public checkAvailability(): Promise<true> {
+    return Promise.resolve(true);
+  }
+
+  protected runInNode(
     command: string,
     args: readonly string[],
-    { cwd, timeoutMs, onOutput }: ToolRunOptions,
-  ): Promise<ToolRun>  {
-    return new Promise<ToolRun>((resolve, reject) => {
-      const child = spawn(command, [...args], {
-        cwd,
-        shell: false,
-        detached: false,
-        windowsHide: true,
-      });
+    options: ProcessRunOptions,
+  ): Promise<ProcessResult> {
+    return runProcess(command, args, options);
+  }
 
-      let stdout = '';
-      let stderr = '';
-      let timedOut = false;
+  // These multiple returns are so MEH
+  // FIXME: Refactor to a proper mapping
+  protected resultOf(
+    invocation: readonly string[],
+    run: ProcessResult,
+    outputPath: string | undefined,
+  ): CaptureOutcome {
+    const { outcome } = run;
+    const hasOutputContainer = outputPath !== undefined;
+    const log = logFor(invocation, run, !hasOutputContainer);
 
-      const deadline = setTimeout(() => {
-        timedOut = true;
-        child.kill('SIGKILL');
-      }, timeoutMs);
+    if (outcome.kind === 'timeout') {
+      return {
+        kind: 'failed',
+        log,
+        // FIXME: Add time converter
+        reason: `${this.label} did not finish within ${outcome.afterMs / MS_PER_SECOND}s and was killed.`,
+      };
+    }
 
-      child.stdout.on('data', (chunk: Buffer) => {
-        stdout += chunk.toString();
-        onOutput?.(chunk.toString());
-      });
+    if (outcome.kind === 'killed') {
+      return { kind: 'failed', log, reason: `${this.label} was killed by ${outcome.signal}.` };
+    }
 
-      child.stderr.on('data', (chunk: Buffer) => {
-        stderr += chunk.toString();
-        onOutput?.(chunk.toString());
-      });
+    if (outcome.code !== 0) {
+      return { kind: 'failed', log, reason: `${this.label} exited with ${outcome.code}. ${parseResultFailure(run)}` };
+    }
 
-      /**
-       * Mandatory: an `error` event with no listener is thrown out of the emitter. It is also the
-       * likeliest real failure — a GUI-launched VS Code on macOS does not inherit the login
-       * shell's PATH, so a tool installed by Homebrew is routinely not found.
-       */
-      child.on('error', (error) => {
-        clearTimeout(deadline);
-        reject(error);
-      });
+    if (!hasOutputContainer && run.stdout.byteLength === 0) {
+      return {
+        kind: 'failed',
+        log,
+        reason: `${this.label} exited cleanly but wrote nothing. ${parseResultFailure(run)}`,
+      };
+    }
 
-      child.on('close', (code) => {
-        clearTimeout(deadline);
-        resolve({ code, stdout, stderr, timedOut });
-      });
-    });
+    return { kind: 'captured', log, data: parseResultData(run, outputPath) };
   }
 }
