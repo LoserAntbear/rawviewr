@@ -379,24 +379,18 @@
         },
         "rawImageViewer.capture.command": {
           "type": "string",
-          "default": "gpucapture",
+          "default": "",
           "scope": "machine",
-          "description": "Program run to capture. Executed directly, not through a shell, so it needs an absolute path unless it is on the PATH that VS Code itself was launched with. For a pipeline, set this to \"sh\" and put the pipeline in Args. The default is Xcode 26's /usr/bin/gpucapture."
+          "description": "Program run to capture a frame. Leave this empty to use the tool built in for your platform \u2014 on macOS that is Xcode's /usr/bin/gpucapture, which needs no configuration at all. Set it to take over instead: it is executed directly rather than through a shell, so it needs an absolute path unless it is on the PATH that VS Code itself was launched with, and a pipeline means setting this to \"sh\" and putting the pipeline in Args. Your own tool is assumed to write a raw buffer, so the path it is handed ends in .raw."
         },
         "rawImageViewer.capture.args": {
           "type": "array",
-          "default": [
-            "start",
-            "-p",
-            "${pid}",
-            "-o",
-            "${output}"
-          ],
+          "default": [],
           "items": {
             "type": "string"
           },
           "scope": "machine",
-          "description": "Arguments for the capture command, one per element rather than one string. ${output} is replaced with the path to write to, ${pid} with a capturable process you are asked to pick, and ${workspaceFolder} with the first open folder. ${config:...} is not supported, on purpose: it would let a workspace inject settings into the argv of a program we run."
+          "description": "Arguments for your own capture command, one per element rather than one string. Ignored while Command is empty, because a built-in tool owns its command line and has nothing to substitute into. ${output} is replaced with the path to write to, ${pid} with a capturable process you are asked to pick, and ${workspaceFolder} with the first open folder. ${config:...} is not supported, on purpose: it would let a workspace inject settings into the argv of a program we run."
         },
         "rawImageViewer.capture.outputType": {
           "type": "string",
@@ -406,11 +400,11 @@
             "file"
           ],
           "enumDescriptions": [
-            "Output is captured from the tool's standard output.",
-            "Output is written to a file by the tool itself."
+            "The tool streams the frame to its standard output, and we save it.",
+            "The tool writes the frame itself, at the path substituted into ${output}."
           ],
           "scope": "machine",
-          "description": "The type of output for the capture."
+          "description": "How your own capture command hands over the frame. \"file\" means it writes the path given to it as ${output}; \"stdout\" means it streams the bytes out instead and needs no path. Ignored while Command is empty, because a built-in tool knows how it reports its own output."
         },
         "rawImageViewer.capture.stopWith": {
           "type": "string",
