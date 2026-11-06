@@ -20,20 +20,11 @@ export const workspace = {
   fs: {
     writeFile: vi.fn(),
     readFile: vi.fn(),
-    readDirectory: vi.fn(),
     createDirectory: vi.fn(),
   },
   asRelativePath: vi.fn((target: { path: string }) => target.path),
   workspaceFolders: undefined as readonly { uri: { fsPath: string } }[] | undefined,
 };
-
-/** Mirrors `vscode.FileType`, which `readDirectory` entries are compared against. */
-export const FileType = {
-  Unknown: 0,
-  File: 1,
-  Directory: 2,
-  SymbolicLink: 64,
-} as const;
 
 export const commands = {
   executeCommand: vi.fn(),
