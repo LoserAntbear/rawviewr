@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { CaptureOutputType } from '@definitions/capture';
 import type { ConfigKey, ConfigReader, ViewerConfigSchema } from '@SHARED/features/settings/configuration/types';
 
 import { CaptureToolProvider } from './CaptureToolProvider';
@@ -9,15 +10,22 @@ import { ConfiguredCaptureTool } from './platforms/configured/ConfiguredCaptureT
 
 const ON_DARWIN = process.platform === 'darwin';
 
+type CaptureSettings = {
+  readonly command: string;
+  readonly args?: readonly string[];
+  readonly outputType?: CaptureOutputType;
+};
+
 /**
- * A reader that holds only the two keys the provider is entitled to. Reaching for a third
+ * A reader that holds only the three keys the provider is entitled to. Reaching for a fourth
  * throws rather than returning undefined, so the provider growing a dependency on some other
  * setting shows up here as a failure instead of as a silent default.
  */
-function reader(command: string, args: readonly string[] = []): ConfigReader {
+function reader({ command, args = [], outputType = CaptureOutputType.File }: CaptureSettings): ConfigReader {
   const values: Partial<Record<ConfigKey, unknown>> = {
     'capture.command': command,
     'capture.args': args,
+    'capture.outputType': outputType,
   };
 
   return {
@@ -31,6 +39,10 @@ function reader(command: string, args: readonly string[] = []): ConfigReader {
     },
   };
 }
+
+const provider = (settings: CaptureSettings): CaptureToolProvider => (
+  new CaptureToolProvider(reader(settings))
+);
 
 /** `workspaceFolders` is readonly in the real API, so the mock's copy is set through a cast. */
 function openFolder(fsPath: string | null): void {
@@ -49,7 +61,7 @@ describe('choosing which tool a capture runs with', () => {
    * fresh install has to do something without a trip through settings first.
    */
   it.runIf(ON_DARWIN)('uses the platform tool when nothing is configured', () => {
-    const tool = new CaptureToolProvider(reader('')).getActiveTool();
+    const tool = provider({ command: '' }).getActiveTool();
 
     expect(tool?.containerFormat).toBe('.gputrace');
     expect(tool).not.toBeInstanceOf(ConfiguredCaptureTool);
@@ -60,11 +72,11 @@ describe('choosing which tool a capture runs with', () => {
    * name that reads as a configured tool right up to the ENOENT.
    */
   it.skipIf(ON_DARWIN)('has nothing to offer on a platform we do not ship a tool for', () => {
-    expect(new CaptureToolProvider(reader('')).getActiveTool()).toBeNull();
+    expect(provider({ command: '' }).getActiveTool()).toBeNull();
   });
 
   it('hands over to a configured command as soon as there is one', () => {
-    const tool = new CaptureToolProvider(reader('ffmpeg', ['-f', 'x11grab'])).getActiveTool();
+    const tool = provider({ command: 'ffmpeg', args: ['-f', 'x11grab'] }).getActiveTool();
 
     expect(tool).toBeInstanceOf(ConfiguredCaptureTool);
     expect(tool?.label).toBe('ffmpeg');
@@ -72,22 +84,37 @@ describe('choosing which tool a capture runs with', () => {
 
   /** Whitespace is nothing configured — otherwise a stray space disables the built-in tool. */
   it.runIf(ON_DARWIN)('reads a command of spaces as nothing configured', () => {
-    expect(new CaptureToolProvider(reader('   ')).getActiveTool())
-      .not.toBeInstanceOf(ConfiguredCaptureTool);
+    expect(provider({ command: '   ' }).getActiveTool()).not.toBeInstanceOf(ConfiguredCaptureTool);
+  });
+});
+
+describe('what a configured tool is told to produce', () => {
+  it('writes a raw buffer under outputType file, since that is what the viewer opens', () => {
+    const tool = provider({ command: 'ffmpeg', outputType: CaptureOutputType.File }).getActiveTool();
+
+    expect(tool?.containerFormat).toBe('.raw');
   });
 
+  /** No container means no path: such a tool streams the frame and is given nowhere to write. */
+  it('declares no container under outputType stdout', () => {
+    const tool = provider({ command: 'ffmpeg', outputType: CaptureOutputType.Stdout }).getActiveTool();
+
+    expect(tool?.containerFormat).toBeNull();
+  });
+});
+
+describe('finding out what can be captured', () => {
   /**
-   * Settings cannot know what is running, so a configured argv asking for `${pid}` is filled
-   * from the platform tool's own listing. Where there is no platform tool there is nothing to
-   * borrow, and the configured tool says that rather than substituting something.
+   * Keyed by platform and never by settings: what is capturable depends on the machine, not on
+   * whose tool is doing the capturing, so a configured tool asking for `${pid}` gets exactly the
+   * answer the built-in one would.
    */
-  it('lends a configured tool the platform tool\'s process list, where there is one', () => {
-    const tool = new CaptureToolProvider(reader('gpucapture', ['-p', '${pid}'])).getActiveTool();
-
-    expect(typeof tool?.getTargets === 'function').toBe(ON_DARWIN);
+  it.runIf(ON_DARWIN)('has a resolver on macOS, whichever tool is active', () => {
+    expect(provider({ command: '' }).currentPlatformTargetResolver).not.toBeNull();
+    expect(provider({ command: 'ffmpeg' }).currentPlatformTargetResolver).not.toBeNull();
   });
 
-  it('writes a raw buffer for a configured tool, since that is what the viewer opens', () => {
-    expect(new CaptureToolProvider(reader('ffmpeg')).getActiveTool()?.containerFormat).toBe('.raw');
+  it.skipIf(ON_DARWIN)('has none on a platform without one', () => {
+    expect(provider({ command: '' }).currentPlatformTargetResolver).toBeNull();
   });
 });

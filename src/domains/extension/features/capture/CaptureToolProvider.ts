@@ -2,19 +2,37 @@ import * as vscode from 'vscode';
 
 import type { ConfigReader } from '@SHARED/features/settings/configuration/types';
 
+import type { CaptureTargetResolver } from './CaptureTargetResolver';
 import type { CaptureTool } from './CaptureTool';
 import { ConfiguredCaptureTool } from './platforms/configured/ConfiguredCaptureTool';
+import { MetalCaptureTargetResolver } from './platforms/darwin/MetalCaptureTargetResolver';
 import { MetalTraceCaptureTool } from './platforms/darwin/MetalTraceCaptureTool';
 
+export type CaptureTools = Pick<CaptureToolProvider, 'getActiveTool' | 'currentPlatformTargetResolver'>;
+
+/**
+ * Only macOS for now. Will add more when have more willpower for it.
+ */
 const BUILT_IN_TOOLS: Partial<Record<NodeJS.Platform, () => CaptureTool>> = {
   darwin: () => new MetalTraceCaptureTool(),
+};
+/**
+ * Each platform can have their own way of resolving capture targets.
+ * E.g. parsing process ids, or some specific tools for that platform can ask for specific params – you get it.
+ */
+const TARGET_RESOLVERS: Partial<Record<NodeJS.Platform, () => CaptureTargetResolver>> = {
+  darwin: () => new MetalCaptureTargetResolver(),
 };
 
 /**
  * Provinding each tool per request, rather than pre-instantiating it.
- * This wey the user can change the capture command in settings and have it take effect immediately.
+ * This way the user can change the capture command in settings and have it take effect immediately.
  */
 export class CaptureToolProvider {
+  public get currentPlatformTargetResolver(): CaptureTargetResolver | null {
+    return TARGET_RESOLVERS[process.platform]?.() ?? null;
+  }
+
   private get currentPlatformBuiltInTool(): CaptureTool | null {
     return BUILT_IN_TOOLS[process.platform]?.() ?? null;
   }
@@ -28,7 +46,7 @@ export class CaptureToolProvider {
       command,
       args: this.config.read('capture.args'),
       workspaceFolder: this.workspaceFolder(),
-      listTargets: this.currentPlatformBuiltInTool?.getTargets ?? null,
+      outputType: this.config.read('capture.outputType'),
     });
   }
 
