@@ -18,9 +18,7 @@ export const CAPTURE_CONFIG_PLACEHOLDERS = {
 } as const;
 
 export const CAPTURE_BUFFER_CONTAINER = '.raw' as const;
-
 export const CAPTURE_STORAGE_FOLDER = 'capture' as const;
-export const CAPTURE_OUTPUT_CHANNEL = 'Raw Image Viewer' as const;
-
+export const CAPTURE_SETTINGS_QUERY = 'rawImageViewer.capture' as const;
 export const CAPTURE_STATUS_BAR_PRIORITY = 100 as const;
 export const CAPTURE_STATUS_BAR_ID = 'rawImageViewer.capture' as const;
