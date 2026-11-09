@@ -2,9 +2,9 @@ import { MS_PER_SECOND } from '@definitions/time';
 
 import type { ProcessResult, ProcessRunOptions } from './runProcess';
 import { runProcess } from './runProcess';
-import type { CaptureData, CaptureLog, CaptureOutcome, CaptureRequest } from './types';
+import type { CaptureLog, CaptureOutcome, CaptureOutputData, CaptureRequest } from './types';
 
-function parseResultData({ stdout }: ProcessResult, outputPath?: string): CaptureData {
+function parseResultData({ stdout }: ProcessResult, outputPath?: string): CaptureOutputData {
   return outputPath === undefined
     ? { kind: 'bytes', bytes: stdout }
     : { kind: 'container', path: outputPath };
