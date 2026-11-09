@@ -2,14 +2,15 @@ import * as vscode from 'vscode';
 
 import { DisposableStore } from '@EXTENSION/features/disposable/DisposableStore';
 import { InfoMessageController } from '@EXTENSION/features/infoMessage/InfoMessageController';
+import type { CommonReporter } from '@SHARED/types';
 
-import type { Remedy, Report } from './types';
-
-// A basic output into VS Code's output channel with error reporting.
-export class Reporter extends DisposableStore implements Report {
+/**
+ * A basic output into VS Code's output channel with error reporting.
+ */
+export class Reporter extends DisposableStore implements CommonReporter {
   constructor(
-    private readonly name: string,
-    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel(name),
+    private readonly prefix: string,
+    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel(prefix),
   ) {
     super();
 
@@ -31,17 +32,8 @@ export class Reporter extends DisposableStore implements Report {
 
     InfoMessageController.showError(this.formatMessage(reason));
   }
-  public async unavailable(message: string, remedy: Remedy): Promise<void> {
-    this.log(`unavailable: ${message}`);
-
-    const chosen = await vscode.window.showErrorMessage(this.formatMessage(message), remedy.label);
-
-    if (chosen === remedy.label) {
-      await remedy.apply();
-    }
-  }
 
   private formatMessage(message: string): string {
-    return `${this.name}: ${message}`;
+    return `${this.prefix}: ${message}`;
   }
 }
