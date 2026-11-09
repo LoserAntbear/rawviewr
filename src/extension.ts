@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { EXTENSION_DISPLAY_NAME } from '@definitions/extension';
 import { AppContextProvider } from '@EXTENSION/features/appContext/AppContextProvider';
 import { CaptureController } from '@EXTENSION/features/capture/CaptureController';
 import { CaptureToolProvider } from '@EXTENSION/features/capture/CaptureToolProvider';
@@ -10,6 +11,7 @@ import { RawEditorProvider } from '@EXTENSION/features/editor/RawEditorProvider'
 import { ExtensionHost } from '@EXTENSION/features/extension/ExtensionHost';
 import { SourcesDecoder } from '@EXTENSION/features/image/imageDecoder/SourcesDecoder';
 import { IntentDispatcher } from '@EXTENSION/features/intent/IntentDispatcher';
+import { Reporter } from '@EXTENSION/features/report';
 import { SETTINGS_INTENT_RESOLVERS } from '@EXTENSION/features/settings/resolvers';
 import { SettingsController } from '@EXTENSION/features/settings/SettingsController';
 import { VSCodeWorkspaceConfigurationController } from '@EXTENSION/features/settings/VSCodeWorkspaceConfig/VScodeWorkspaceConfigurationController';
@@ -58,6 +60,7 @@ export function activate(context: vscode.ExtensionContext): void {
     configController,
     windowController,
     new CaptureToolProvider(configController),
+    new Reporter(EXTENSION_DISPLAY_NAME),
   );
 
   const dispatcher = new IntentDispatcher({
