@@ -7,8 +7,7 @@ import type { CaptureTool } from './CaptureTool';
 import { ConfiguredCaptureTool } from './platforms/configured/ConfiguredCaptureTool';
 import { MetalCaptureTargetResolver } from './platforms/darwin/MetalCaptureTargetResolver';
 import { MetalTraceCaptureTool } from './platforms/darwin/MetalTraceCaptureTool';
-
-export type CaptureTools = Pick<CaptureToolProvider, 'getActiveTool' | 'currentPlatformTargetResolver'>;
+import type { CaptureTools } from './types';
 
 /**
  * Only macOS for now. Will add more when have more willpower for it.
@@ -24,11 +23,9 @@ const TARGET_RESOLVERS: Partial<Record<NodeJS.Platform, () => CaptureTargetResol
   darwin: () => new MetalCaptureTargetResolver(),
 };
 
-/**
- * Provinding each tool per request, rather than pre-instantiating it.
- * This way the user can change the capture command in settings and have it take effect immediately.
- */
-export class CaptureToolProvider {
+// I provide each tool per request, rather than pre-instantiating it.
+// So the new tool is created on each request rather than reusing an old instance.
+export class CaptureToolProvider implements CaptureTools {
   public get currentPlatformTargetResolver(): CaptureTargetResolver | null {
     return TARGET_RESOLVERS[process.platform]?.() ?? null;
   }
