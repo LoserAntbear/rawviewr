@@ -1,6 +1,6 @@
-export interface Reporter {
-  log(message: string): void;
-  show(message: string): void;
+// Mostly used for reporters with vscode output bridge
+export interface CommonReporter {
+  show(): void;
   failed(reason: string): void;
-  unavailable(reason: string): void | Promise<void>;
+  log(...lines: readonly string[]): void;
 }
