@@ -1,1 +1,1 @@
-export * from './revealInExplorer';
+export * from './reveal';
