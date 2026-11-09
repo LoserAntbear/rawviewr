@@ -8,7 +8,6 @@ import { DisposableRegistry } from '@EXTENSION/features/disposable/DisposableReg
 import { DisposableStore } from '@EXTENSION/features/disposable/DisposableStore';
 
 import { Reporter } from './Reporter';
-import type { Remedy } from './types';
 
 const NAME = 'Test Extension';
 
@@ -39,20 +38,6 @@ function fakeChannel(): Channel {
         disposals += 1;
       },
     } as unknown as vscode.OutputChannel,
-  };
-}
-
-function remedy(): Remedy & { readonly applied: () => number } {
-  let applications = 0;
-
-  return {
-    label: 'Do The Thing',
-    applied: () => applications,
-    apply: () => {
-      applications += 1;
-
-      return Promise.resolve();
-    },
   };
 }
 
@@ -110,53 +95,25 @@ describe('the running log', () => {
   });
 });
 
-describe('bad news with nothing to be done', () => {
-  it('logs the reason and shows it with no action to take', () => {
+describe('bad news', () => {
+  it('logs the reason and shows it to the user', () => {
     const { channel, lines } = fakeChannel();
 
     new Reporter(NAME, channel).failed('gpucapture exited with 1.');
 
     expect(lines).toEqual(['failed: gpucapture exited with 1.']);
-    // Exactly one argument: a message carrying a button is the other method's job.
     expect(vscode.window.showErrorMessage)
       .toHaveBeenCalledWith('Test Extension: gpucapture exited with 1.');
   });
-});
 
-describe('bad news something can be done about', () => {
-  it('logs the message and offers the remedy by its own label', async () => {
-    const { channel, lines } = fakeChannel();
+  /**
+   * Exactly one argument. A reporter reports; a message carrying buttons is a question, and
+   * asking one belongs to `offerOptions` and to whoever knows what the buttons do.
+   */
+  it('offers nothing to do about it', () => {
+    new Reporter(NAME, fakeChannel().channel).failed('gpucapture exited with 1.');
 
-    await new Reporter(NAME, channel).unavailable('Install Xcode 26 or newer.', remedy());
-
-    expect(lines).toEqual(['unavailable: Install Xcode 26 or newer.']);
-    expect(vscode.window.showErrorMessage)
-      .toHaveBeenCalledWith('Test Extension: Install Xcode 26 or newer.', 'Do The Thing');
-  });
-
-  /** The reporter presses the button and knows nothing else about it. */
-  it('applies the remedy when its button is chosen', async () => {
-    /**
-     * Cast because `vi.mocked` resolves the overload set to the `MessageItem` one, while the
-     * overload actually called here takes and returns plain strings.
-     */
-    vi.mocked(vscode.window.showErrorMessage)
-      .mockResolvedValue('Do The Thing' as unknown as vscode.MessageItem);
-
-    const fix = remedy();
-
-    await new Reporter(NAME, fakeChannel().channel).unavailable('No tool for sunos yet.', fix);
-
-    expect(fix.applied()).toBe(1);
-  });
-
-  /** Dismissing the notification is an answer, and the answer was no. */
-  it('leaves the remedy alone when the notification is dismissed', async () => {
-    const fix = remedy();
-
-    await new Reporter(NAME, fakeChannel().channel).unavailable('No tool for sunos yet.', fix);
-
-    expect(fix.applied()).toBe(0);
+    expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(expect.any(String));
   });
 });
 
